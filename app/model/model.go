@@ -1,33 +1,56 @@
 package model
 
-type Fields []string
+import (
+	"log"
+	"fmt"
+)
+
+var supportedTypes map[string]bool
+
+func init() {
+	supportedTypes = map[string]bool{
+		"string": true,
+	}
+}
+
+type Fields map[string]string
 type Attributes map[string]interface{}
 
 type AttributeOwner struct {
-	hasField map[string]bool
+	typeFor Fields
 	attributes Attributes
 }
 
-func normalizeAttributes(hasField map[string]bool, attributes *Attributes) *Attributes {
-	normalized := make(Attributes, len(*attributes))
-	for key, value := range *attributes {
-		if hasField[key] {
+func normalizeAttributes(fields Fields, attributes Attributes) *Attributes {
+	normalized := make(Attributes, len(attributes))
+	for key, value := range attributes {
+		if _, found := fields[key]; found {
 			normalized[key] = value
 		}
 	}
 	return &normalized
 }
 
-func NewAttributeOwner(fields *Fields, attributes *Attributes) *AttributeOwner {
-	hasField := make(map[string]bool, len(*fields))
-	for _, name := range *fields {
-		hasField[name] = true
+func checkFields(fields Fields) {
+	for _, fieldType := range fields {
+		if !supportedTypes[fieldType] {
+			log.Fatal(fmt.Errorf("checkFields(): field type %q is not supported", fieldType))
+		}
 	}
-	attributes = normalizeAttributes(hasField, attributes)
-	return &AttributeOwner{hasField, *attributes}
+}
+
+func NewAttributeOwner(fields Fields, attributes Attributes) *AttributeOwner {
+	normalized := normalizeAttributes(fields, attributes)
+	checkFields(fields)
+	return &AttributeOwner{fields, *normalized}
 }
 
 func (owner *AttributeOwner) Get(key string) (value interface{}, found bool) {
-	value, found = owner.attributes[key]
+	if _, typeFound := owner.typeFor[key]; typeFound {
+		value, found = owner.attributes[key]
+
+	} else {
+		found = false
+	}
 	return value, found
 }

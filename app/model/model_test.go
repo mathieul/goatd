@@ -13,8 +13,11 @@ type Person struct {
 }
 
 func NewPerson(attributes model.Attributes) (*Person) {
-	fields := model.Fields{"firstName", "lastName"}
-	owner := model.NewAttributeOwner(&fields, &attributes)
+	fields := model.Fields{
+		"firstName": "string",
+		"lastName": "string",
+	}
+	owner := model.NewAttributeOwner(fields, attributes)
 	return &Person{*owner}
 }
 
