@@ -33,7 +33,7 @@ func (storage Storage) Uid() string {
 	return storage.uid
 }
 
-func (storage *Storage) SetPersisted(value bool) {
+func (storage *Storage) Save(value bool) {
 	storage.persisted = value
 }
 

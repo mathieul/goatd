@@ -16,7 +16,7 @@ func NewTeam(attributes Attrs) (team *Team) {
 
 func CreateTeam(attributes Attrs) (team *Team) {
 	team = NewTeam(attributes)
-	team.SetPersisted(true)
+	team.Save(true)
 	return team
 }
 
