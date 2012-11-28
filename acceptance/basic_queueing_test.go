@@ -26,9 +26,9 @@ type State struct {
 var _ = Suite(&AcceptanceS{})
 
 func (s *ModelSuite) SetUpTest(c *C) {
-	s.team = models.CreateTeam([]string{"Name", "Wedding"})
-	s.mate = s.team.Teammates.Create([]string{"Name", "Bride"})
-	s.queue = s.team.Queues.Create([]string{"Name", "Thank you notes"})
+	s.team = models.CreateTeam(models.Attrs{"Name": "Wedding"})
+	s.mate = s.team.Teammates.Create(models.Attrs{"Name": "Bride"})
+	s.queue = s.team.Queues.Create(models.Attrs{"Name": "Thank you notes"})
 }
 
 func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
@@ -58,7 +58,7 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
 	s.mate.signIn()
 	c.Assert(models.StatusOnBreak, Equals, s.mate.Status())
 
-	task := models.NewTask([]string{"Title", "thank Jones family"})
+	task := models.NewTask(models.Attrs{"Title": "thank Jones family"})
 	c.Assert("created", Equals, task.Status())
 	distributor.EnqueueTask(s.queue, task, distribution.PriorityMedium)
 	c.Assert("queued", Equals, task.Status())
