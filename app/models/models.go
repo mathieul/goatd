@@ -33,8 +33,8 @@ func (storage Storage) Uid() string {
 	return storage.uid
 }
 
-func (storage *Storage) Save(value bool) {
-	storage.persisted = value
+func (storage *Storage) Save() {
+	storage.persisted = true
 }
 
 func setAttributeValue(destination interface{}, name string, value interface{}) {
@@ -62,4 +62,32 @@ func generateUid() string {
 		randomizer.Read(data)
 	}
 	return fmt.Sprintf("%x-%x", data[0:4], data[4:])
+}
+
+func newModel(model interface{}, attributes *Attrs) interface{} {
+	value := reflect.ValueOf(model)
+	kind := value.Elem().Type().Kind()
+	if kind != reflect.Struct {
+		log.Fatal(fmt.Errorf("newModel(): model must be a Struct, and it is a %q", kind))
+	}
+	method := value.MethodByName("Init")
+	if !method.IsValid() {
+		log.Fatal(fmt.Errorf("newModel(): model must have a Storage field"))
+	}
+	method.Call([]reflect.Value{})
+    for name, value := range *attributes {
+	    setAttributeValue(model, name, value)
+    }
+	return model
+}
+
+func createModel(model interface{}, attributes *Attrs) interface{} {
+	model = newModel(model, attributes)
+	value := reflect.ValueOf(model)
+	method := value.MethodByName("Save")
+	if !method.IsValid() {
+		log.Fatal(fmt.Errorf("createModel(): model must have a Storage field"))
+	}
+	method.Call([]reflect.Value{})
+	return model
 }

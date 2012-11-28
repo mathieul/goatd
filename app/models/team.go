@@ -5,19 +5,12 @@ type Team struct {
     AttrName string
 }
 
-func NewTeam(attributes Attrs) (team *Team) {
-    team = new(Team)
-    team.Init()
-    for name, value := range attributes {
-	    setAttributeValue(team, name, value)
-    }
-    return team
+func NewTeam(attributes Attrs) *Team {
+	return newModel(&Team{}, &attributes).(*Team)
 }
 
 func CreateTeam(attributes Attrs) (team *Team) {
-	team = NewTeam(attributes)
-	team.Save(true)
-	return team
+	return createModel(&Team{}, &attributes).(*Team)
 }
 
 func (team *Team) Name() string {
