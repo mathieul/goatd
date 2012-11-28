@@ -8,7 +8,7 @@ type Team struct {
 
 func NewTeam(attributes Attrs) (team *Team) {
 	team = newModel(&Team{}, &attributes).(*Team)
-	team.SetOwner("Team", team.Uid())
+	team.Teammates.SetOwner("Team", team.Uid())
 	return team
 }
 
