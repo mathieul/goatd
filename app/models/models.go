@@ -10,7 +10,8 @@ import (
 type Attrs map[string]interface{}
 
 type Storage struct {
-	Persisted bool
+	persisted bool
+	uid string
 }
 
 const (
@@ -18,12 +19,22 @@ const (
 	randomDevice = "/dev/urandom"
 )
 
-func (storage Storage) IsPersisted() bool {
-	return storage.Persisted
+func (storage *Storage) Init() {
+	if storage.uid == "" {
+		storage.uid = generateUid()
+	}
+}
+
+func (storage Storage) Persisted() bool {
+	return storage.persisted
+}
+
+func (storage Storage) Uid() string {
+	return storage.uid
 }
 
 func (storage *Storage) SetPersisted(value bool) {
-	storage.Persisted = value
+	storage.persisted = value
 }
 
 func setAttributeValue(destination interface{}, name string, value interface{}) {
