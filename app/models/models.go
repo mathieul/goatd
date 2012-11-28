@@ -80,14 +80,3 @@ func newModel(model interface{}, attributes *Attrs) interface{} {
     }
 	return model
 }
-
-func createModel(model interface{}, attributes *Attrs) interface{} {
-	model = newModel(model, attributes)
-	value := reflect.ValueOf(model)
-	method := value.MethodByName("Save")
-	if !method.IsValid() {
-		log.Fatal(fmt.Errorf("createModel(): model must have a Storage field"))
-	}
-	method.Call([]reflect.Value{})
-	return model
-}
