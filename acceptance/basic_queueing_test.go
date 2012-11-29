@@ -49,7 +49,7 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
 	}()
 
 	distributor.AddToQueue(s.queue, s.mate, "level", "high", "enabled", true)
-	c.Assert([]models.Queue{s.queue}, DeepEquals, s.mate.Queues().Slice())
+	c.Assert(s.mate.Queues().Slice(), DeepEquals, []models.Queue{s.queue})
 
 	c.Assert(models.StatusSignedOut, Equals, s.mate.Status())
 	s.mate.signIn()
