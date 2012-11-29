@@ -7,36 +7,20 @@ import (
 	"os"
 )
 
-type Attrs map[string]interface{}
-
-type Storage struct {
-	persisted bool
-	uid string
-}
-
 const (
 	attributePrefix = "Attr"
 	randomDevice = "/dev/urandom"
 )
 
-func (storage *Storage) Init() {
-	if storage.uid == "" {
-		storage.uid = generateUid()
-	}
-}
+/*
+ * Basic types
+ */
+type Attrs map[string]interface{}
 
-func (storage Storage) Persisted() bool {
-	return storage.persisted
-}
 
-func (storage Storage) Uid() string {
-	return storage.uid
-}
-
-func (storage *Storage) Save() {
-	storage.persisted = true
-}
-
+/*
+ * Helpers
+ */
 func setAttributeValue(destination interface{}, name string, value interface{}) {
 	destValue := reflect.ValueOf(destination).Elem()
 	if destValue.Type().Kind() != reflect.Struct {
@@ -79,4 +63,50 @@ func newModel(model interface{}, attributes *Attrs) interface{} {
 	    setAttributeValue(model, name, value)
     }
 	return model
+}
+
+
+/*
+ * Storage
+ */
+type Storage struct {
+	persisted bool
+	uid string
+}
+
+func (storage *Storage) Init() {
+	if storage.uid == "" {
+		storage.uid = generateUid()
+	}
+}
+
+func (storage Storage) Persisted() bool {
+	return storage.persisted
+}
+
+func (storage Storage) Uid() string {
+	return storage.uid
+}
+
+func (storage *Storage) Save() {
+	storage.persisted = true
+}
+
+
+/*
+ * Owner
+ */
+type Owner struct {
+	uid string
+	name string
+}
+
+func (owner *Owner) SetOwner(name, uid string) {
+	owner.name = name
+	owner.uid = uid
+}
+
+func (owner Owner) AddOwnerToAttributes(attributes Attrs) Attrs {
+	attributes[owner.name + "Uid"] = owner.uid
+	return attributes
 }

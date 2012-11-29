@@ -41,3 +41,10 @@ func (s *TeamSuite) TestCreateTeammate(c *C) {
     c.Assert(teammate.TeamUid(), Equals, s.team.Uid())
     c.Assert(teammate.Persisted(), Equals, true)
 }
+
+func (s *TeamSuite) TestCreateQueue(c *C) {
+    queue := s.team.Queues.Create(models.Attrs{"Name": "Support"})
+    c.Assert(queue.Name(), Equals, "Support")
+    c.Assert(queue.TeamUid(), Equals, s.team.Uid())
+    c.Assert(queue.Persisted(), Equals, true)
+}

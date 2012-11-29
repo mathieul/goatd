@@ -23,21 +23,3 @@ func (team *Teammate) Name() string {
 func (team *Teammate) TeamUid() string {
     return team.AttrTeamUid
 }
-
-type Teammates struct {
-	items []*Teammate
-	ownerUid string
-	ownerName string
-}
-
-func (teammates *Teammates) Create(attributes Attrs) (teammate *Teammate) {
-	attributes[teammates.ownerName + "Uid"] = teammates.ownerUid
-	teammate = CreateTeammate(attributes)
-	teammates.items = append(teammates.items, teammate)
-	return teammate
-}
-
-func (teammates *Teammates) SetOwner(name, uid string) {
-	teammates.ownerName = name
-	teammates.ownerUid = uid
-}
