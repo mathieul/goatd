@@ -20,15 +20,15 @@ func (s *QueueSuite) TearDownTest(c *C) {
 }
 
 func (s *QueueSuite) TestNewQueueWithNameAndTeamUid(c *C) {
-    teammate := models.NewQueue(models.Attrs{"Name": "Sales", "TeamUid": "inc"})
-    c.Assert(teammate.Name(), Equals, "Sales")
-    c.Assert(teammate.TeamUid(), Equals, "inc")
-    c.Assert(teammate.Persisted(), Equals, false)
+    queue := models.NewQueue(models.Attrs{"Name": "Sales", "TeamUid": "inc"})
+    c.Assert(queue.Name(), Equals, "Sales")
+    c.Assert(queue.TeamUid(), Equals, "inc")
+    c.Assert(queue.Persisted(), Equals, false)
 }
 
 func (s *QueueSuite) TestCreateQueueWithNameAndTeamUid(c *C) {
-    teammate := models.CreateQueue(models.Attrs{"Name": "Support", "TeamUid": "inc"})
-    c.Assert(teammate.Name(), Equals, "Support")
-    c.Assert(teammate.TeamUid(), Equals, "inc")
-    c.Assert(teammate.Persisted(), Equals, true)
+    queue := models.CreateQueue(models.Attrs{"Name": "Support", "TeamUid": "inc"})
+    c.Assert(queue.Name(), Equals, "Support")
+    c.Assert(queue.TeamUid(), Equals, "inc")
+    c.Assert(queue.Persisted(), Equals, true)
 }

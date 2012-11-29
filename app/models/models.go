@@ -12,10 +12,29 @@ const (
 	randomDevice = "/dev/urandom"
 )
 
+const (
+	EventOfferTask Event = 1
+	EventAssignTask
+	EventCompleteTask
+)
+
+const (
+	StatusSignedOut Status = 1
+	StatusOnBreak
+	StatusOffered
+	StatusBusy
+	StatusAssigned
+	StatusWrappingUp
+	StatusCompleted
+	StatusOtherWork
+)
+
 /*
  * Basic types
  */
 type Attrs map[string]interface{}
+type Event int
+type Status int
 
 
 /*

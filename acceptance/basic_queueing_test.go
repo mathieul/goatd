@@ -11,9 +11,9 @@ import (
 func Test(t *testing.T) { TestingT(t) }
 
 type AcceptanceS struct{
-	team models.Team
-	mate models.Teammate
-	queue models.Queue
+	team  *models.Team
+	mate  *models.Teammate
+	queue *models.Queue
 }
 
 type State struct {
@@ -25,7 +25,7 @@ type State struct {
 
 var _ = Suite(&AcceptanceS{})
 
-func (s *ModelSuite) SetUpTest(c *C) {
+func (s *AcceptanceS) SetUpTest(c *C) {
 	s.team = models.CreateTeam(models.Attrs{"Name": "Wedding"})
 	s.mate = s.team.Teammates.Create(models.Attrs{"Name": "Bride"})
 	s.queue = s.team.Queues.Create(models.Attrs{"Name": "Thank you notes"})
@@ -66,7 +66,7 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
 
 	s.mate.makeAvailable()
 	time.Sleep(aLittleBit)
-	c.Assert(models.StatusTaskOffered, Equals, s.mate.Status())
+	c.Assert(models.StatusOffered, Equals, s.mate.Status())
 	c.Assert(task, DeepEquals, s.mate.CurrentTask())
 	c.Assert(models.StatusOffered, Equals, task.Status())
 
