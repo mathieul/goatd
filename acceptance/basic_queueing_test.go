@@ -17,10 +17,10 @@ type AcceptanceS struct{
 }
 
 type State struct {
-	event models.Event
-	mate models.Teammate
-	queue models.Queue
-	task models.Task
+	event distribution.Event
+	mate  *models.Teammate
+	queue *models.Queue
+	task  *models.Task
 }
 
 var _ = Suite(&AcceptanceS{})
@@ -36,19 +36,16 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
 	distributor := distribution.NewDistributor(s.team)
 
 	var state State
+	callback := func (event distribution.Event, p []interface{}) {
+		state.event = event
+		state.queue = p[0].(*models.Queue)
+		state.mate  = p[1].(*models.Teammate)
+		state.task  = p[2].(*models.Task)
+	}
 	go func() {
-		distributor.On(models.EventOfferTask, func (queue, mate, task) {
-			state.event = models.EventOfferTask
-			state.queue = queue; state.mate = mate; state.task = task
-		})
-		distributor.On(models.EventAssignTask, func (queue, mate, task) {
-			state.event = models.EventAssignTask
-			state.queue = queue; state.mate = mate; state.task = task
-		})
-		distributor.On(models.EventCompleteTask, func (queue, mate, task) {
-			state.event = models.EventCompleteTask
-			state.queue = queue; state.mate = mate; state.task = task
-		})
+		distributor.On(distribution.EventOfferTask, callback)
+		distributor.On(distribution.EventAssignTask, callback)
+		distributor.On(distribution.EventCompleteTask, callback)
 	}()
 
 	distributor.AddToQueue(s.queue, s.mate, "level", "high", "enabled", true)
@@ -70,7 +67,7 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
 	c.Assert(task, DeepEquals, s.mate.CurrentTask())
 	c.Assert(models.StatusOffered, Equals, task.Status())
 
-	c.Assert(models.EventOfferTask, Equals, state.event)
+	c.Assert(distribution.EventOfferTask, Equals, state.event)
 	c.Assert(s.queue, Equals, state.queue)
 	c.Assert(s.mate, Equals, state.mate)
 	c.Assert(task, Equals, state.task)
@@ -82,7 +79,7 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
 	c.Assert(models.StatusAssigned, Equals, task.Status())
 	c.Assert([]models.Task{task}, DeepEquals, s.queue.Tasks().Slice())
 
-	c.Assert(models.EventAssignTask, Equals, state.event)
+	c.Assert(distribution.EventAssignTask, Equals, state.event)
 	c.Assert(s.queue, Equals, state.queue)
 	c.Assert(s.mate, Equals, state.mate)
 	c.Assert(task, Equals, state.task)

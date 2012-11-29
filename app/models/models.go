@@ -13,12 +13,6 @@ const (
 )
 
 const (
-	EventOfferTask Event = 1
-	EventAssignTask
-	EventCompleteTask
-)
-
-const (
 	StatusSignedOut Status = 1
 	StatusOnBreak
 	StatusOffered
@@ -33,7 +27,6 @@ const (
  * Basic types
  */
 type Attrs map[string]interface{}
-type Event int
 type Status int
 
 
