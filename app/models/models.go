@@ -13,7 +13,7 @@ const (
 )
 
 const (
-	StatusSignedOut Status = 1
+	StatusSignedOut Status = iota
 	StatusOnBreak
 	StatusOffered
 	StatusBusy
@@ -23,12 +23,17 @@ const (
 	StatusOtherWork
 )
 
+const (
+	LevelLow int = iota
+	LevelMedium
+	LevelHigh
+)
+
 /*
  * Basic types
  */
 type Attrs map[string]interface{}
 type Status int
-
 
 /*
  * Helpers
@@ -44,7 +49,9 @@ func setAttributeValue(destination interface{}, name string, value interface{}) 
 		case reflect.String:
 			field.SetString(value.(string))
 		case reflect.Int:
-			field.SetInt(value.(int64))
+			field.SetInt(int64(value.(int)))
+		case reflect.Bool:
+			field.SetBool(value.(bool))
 		}
 	}
 }

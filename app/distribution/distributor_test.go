@@ -44,3 +44,21 @@ func (s *DistributorSuite) TestBindingEvents(c *C) {
     c.Assert(mockMate, Equals, "the teammate")
     c.Assert(mockTask, Equals, "the task")
 }
+
+func (s *DistributorSuite) TestAddTeammateToQueue(c *C) {
+    team := models.NewTeam(models.Attrs{"Name": "The Team"})
+    teammate := s.team.Teammates.Create(models.Attrs{"Name": "The Mate"})
+    queue := s.team.Queues.Create(models.Attrs{"Name": "The Queue"})
+
+    distributor := distribution.NewDistributor(team)
+    distributor.AddTeammateToQueue(queue, teammate, models.LevelLow)
+    c.Assert(queue.Teammates().Slice(), DeepEquals, []models.Teammate{teammate})
+    c.Assert(teammate.Queues().Slice(), DeepEquals, []models.Queue{queue})
+    query := models.Attrs{"TeammateUid": teammate.Uid(), "QueueUid": queue.Uid()}
+    skills := team.Skills().Select(query)
+    c.Assert(len(skills), Equals, 1)
+    c.Assert(skills[0].QueueUid(), Equals, queue.Uid())
+    c.Assert(skills[0].TeammateUid(), Equals, teammate.Uid())
+    c.Assert(skills[0].Level(), Equals, models.LevelLow)
+    c.Assert(skills[0].Enabled(), Equals, true)
+}

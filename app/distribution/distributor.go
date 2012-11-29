@@ -5,7 +5,7 @@ import (
 )
 
 const (
-    EventOfferTask Event = 1
+    EventOfferTask Event = iota
     EventAssignTask
     EventCompleteTask
 )

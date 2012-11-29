@@ -48,7 +48,7 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
 		distributor.On(distribution.EventCompleteTask, callback)
 	}()
 
-	distributor.AddToQueue(s.queue, s.mate, "level", "high", "enabled", true)
+	distributor.AddTeammateToQueue(s.queue, s.mate, models.LevelHigh)
 	c.Assert(s.mate.Queues().Slice(), DeepEquals, []models.Queue{s.queue})
 
 	c.Assert(models.StatusSignedOut, Equals, s.mate.Status())
