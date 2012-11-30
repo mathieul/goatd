@@ -4,6 +4,7 @@ import (
     . "launchpad.net/gocheck"
     "testing"
     "goatd/app/event"
+    "time"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -16,22 +17,26 @@ type EventSuite struct{
 var _ = Suite(&EventSuite{})
 
 func (s *EventSuite) SetUpTest(c *C) {
-    s.manager.Start()
-    s.identity = event.NewIdentity("Team", "qazwsx098")
+    // s.manager.Start()
+    // s.identity = event.NewIdentity("Team", "qazwsx098")
 }
 
 func (s *EventSuite) TearDownTest(c *C) {
-    s.manager.Stop()
+    // s.manager.Stop()
 }
 
 func (s *EventSuite) TestPublishEvent(c *C) {
-    done := make(chan bool)
-    var one, two string
-    go func () {
-        // TODO: register and listen
-        done <- true
+    manager := new(event.BusManager)
+    manager.Start()
+
+    var received event.Event
+    go func() {
+        outgoing := manager.SubscribeToAllEvents()
+        received = <- outgoing
     }()
-    s.manager.PublishEvent(event.OfferTask, s.identity, []string{"Forty Two", "twelve"})
-    <- done
-    s.Assert()
+    manager.PublishEvent(event.OfferTask)
+    time.Sleep(200 * time.Millisecond)
+    c.Assert(received.Kind, Equals, event.OfferTask)
+
+    manager.Stop()
 }

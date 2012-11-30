@@ -6,34 +6,61 @@ const (
     CompleteTask
 )
 
-
 /*
  * Basic types
  */
 type Kind int
 type Event struct {
-    kind Kind
-    identity *Identity
-    data []string
+    Kind
+    // identity *Identity
+    // data []string
 }
-type Bus chan Event
+type EventBus chan *Event
 
 
 /*
  * BusManager
  */
 type BusManager struct {
-    bus Bus
+    incoming chan Event
+    outgoings []chan Event
+    done chan bool
 }
 
-func (manager BusManager) Start() {
-    manager.bus = make(Bus, 5)
+func (busManager *BusManager) Start() {
+    busManager.incoming = make(chan Event, 0)
+    busManager.done = make(chan bool, 0)
+    busManager.outgoings = []chan Event{}
+    go func() {
+        for {
+            select {
+            case event := <- busManager.incoming:
+                for _, outgoing := range busManager.outgoings {
+                    outgoing <- event
+                }
+            case <- busManager.done:
+                break
+            }
+        }
+    }()
 }
 
-func (manager BusManager) Stop() {}
+func (busManager *BusManager) Stop() {
+    busManager.done <- true
+    busManager.incoming = nil
+    busManager.outgoings = nil
+    busManager.done = nil
+}
 
-func (manager BusManager) PublishEvent(kind Kind, identity *Identity, data []string) {
-    manager.bus <- Event{kind, identity, data}
+func (busManager *BusManager) PublishEvent(kind Kind) {
+    event := Event{kind}
+    busManager.incoming <- event
+}
+
+func (busManager *BusManager) SubscribeToAllEvents() (<-chan Event) {
+    outgoing := make(chan Event, 0)
+    busManager.outgoings = append(busManager.outgoings, outgoing)
+    return outgoing
 }
 
 /*
