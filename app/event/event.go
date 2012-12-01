@@ -12,7 +12,7 @@ const (
 type Kind int
 type Event struct {
     Kind
-    // identity *Identity
+    Identity
     // data []string
 }
 type EventBus chan *Event
@@ -52,8 +52,8 @@ func (busManager *BusManager) Stop() {
     busManager.done = nil
 }
 
-func (busManager *BusManager) PublishEvent(kind Kind) {
-    event := Event{kind}
+func (busManager *BusManager) PublishEvent(kind Kind, identity Identity) {
+    event := Event{kind, identity}
     busManager.incoming <- event
 }
 
@@ -73,4 +73,17 @@ type Identity struct {
 
 func NewIdentity(kind, uid string) *Identity {
     return &Identity{kind, uid}
+}
+
+func (identity *Identity) Set(kind, uid string) {
+    identity.kind = kind
+    identity.uid = uid
+}
+
+func (identity Identity) Kind() string {
+    return identity.kind
+}
+
+func (identity Identity) Uid() string {
+    return identity.uid
 }
