@@ -8,27 +8,19 @@ import (
 
 func Test(t *testing.T) { TestingT(t) }
 
-type QueueSuite struct{
+type QueueSuite struct {
+    queues *models.Queues
 }
 
 var _ = Suite(&QueueSuite{})
 
 func (s *QueueSuite) SetUpTest(c *C) {
+    s.queues = models.NewQueues("Team", "inc")
 }
 
-func (s *QueueSuite) TearDownTest(c *C) {
-}
-
-func (s *QueueSuite) TestNewQueueWithNameAndTeamUid(c *C) {
-    queue := models.NewQueue(models.Attrs{"Name": "Sales", "TeamUid": "inc"})
+func (s *QueueSuite) TestCreateQueue(c *C) {
+    queue := s.queues.Create(models.Attrs{"Name": "Sales"})
     c.Assert(queue.Name(), Equals, "Sales")
-    c.Assert(queue.TeamUid(), Equals, "inc")
-    c.Assert(queue.Persisted(), Equals, false)
-}
-
-func (s *QueueSuite) TestCreateQueueWithNameAndTeamUid(c *C) {
-    queue := models.CreateQueue(models.Attrs{"Name": "Support", "TeamUid": "inc"})
-    c.Assert(queue.Name(), Equals, "Support")
     c.Assert(queue.TeamUid(), Equals, "inc")
     c.Assert(queue.Persisted(), Equals, true)
 }

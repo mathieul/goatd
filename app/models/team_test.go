@@ -48,3 +48,10 @@ func (s *TeamSuite) TestCreateQueue(c *C) {
     c.Assert(queue.TeamUid(), Equals, s.team.Uid())
     c.Assert(queue.Persisted(), Equals, true)
 }
+
+func (s *TeamSuite) TestCreateSkill(c *C) {
+    skill := s.team.Skills.Create(models.Attrs{"QueueUid": "0abc", "TeammateUid": "1def"})
+    c.Assert(skill.QueueUid(), Equals, "0abc")
+    c.Assert(skill.TeammateUid(), Equals, "1def")
+    c.Assert(skill.Persisted(), Equals, true)
+}

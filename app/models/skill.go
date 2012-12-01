@@ -1,5 +1,13 @@
 package models
 
+import (
+    "goatd/app/event"
+)
+
+/*
+ * Skill
+ */
+
 type Skill struct {
     Storage
     AttrQueueUid string
@@ -32,4 +40,25 @@ func (team *Skill) Level() int {
 
 func (team *Skill) Enabled() bool {
     return team.AttrEnabled
+}
+
+/*
+ * Skills
+ */
+
+type Skills struct {
+    owner *event.Identity
+    items []*Skill
+}
+
+func NewSkills(kind, uid string) (skills *Skills) {
+    skills = new(Skills)
+    skills.owner = event.NewIdentity(kind, uid)
+    return skills
+}
+
+func (skills *Skills) Create(attributes Attrs) (skill *Skill) {
+    skill = CreateSkill(skills.owner.AddToAttributes(attributes))
+    skills.items = append(skills.items, skill)
+    return skill
 }

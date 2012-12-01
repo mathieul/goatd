@@ -1,5 +1,9 @@
 package event
 
+import (
+    // . "goatd/app/common"
+)
+
 const (
     OfferTask Kind = iota
     AssignTask
@@ -91,4 +95,9 @@ func (identity Identity) Kind() string {
 
 func (identity Identity) Uid() string {
     return identity.uid
+}
+
+func (identity Identity) AddToAttributes(attributes map[string]interface{}) map[string]interface{} {
+    attributes[identity.kind + "Uid"] = identity.uid
+    return attributes
 }

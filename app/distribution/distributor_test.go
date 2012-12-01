@@ -10,16 +10,9 @@ import (
 
 func Test(t *testing.T) { TestingT(t) }
 
-type DistributorSuite struct{
-}
+type DistributorSuite struct {}
 
 var _ = Suite(&DistributorSuite{})
-
-func (s *DistributorSuite) SetUpTest(c *C) {
-}
-
-func (s *DistributorSuite) TearDownTest(c *C) {
-}
 
 func (s *DistributorSuite) TestNewDistributor(c *C) {
     team := models.NewTeam(models.Attrs{"Name": "Get To Work"})
@@ -47,8 +40,8 @@ func (s *DistributorSuite) TestBindingEvents(c *C) {
 
 func (s *DistributorSuite) TestAddTeammateToQueue(c *C) {
     team := models.NewTeam(models.Attrs{"Name": "The Team"})
-    teammate := s.team.Teammates.Create(models.Attrs{"Name": "The Mate"})
-    queue := s.team.Queues.Create(models.Attrs{"Name": "The Queue"})
+    teammate := team.Teammates.Create(models.Attrs{"Name": "The Mate"})
+    queue := team.Queues.Create(models.Attrs{"Name": "The Queue"})
 
     distributor := distribution.NewDistributor(team)
     distributor.AddTeammateToQueue(queue, teammate, models.LevelLow)

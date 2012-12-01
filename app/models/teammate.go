@@ -1,5 +1,13 @@
 package models
 
+import (
+	"goatd/app/event"
+)
+
+/*
+ * Teammate
+ */
+
 type Teammate struct {
 	Storage
     AttrName string
@@ -22,4 +30,25 @@ func (team *Teammate) Name() string {
 
 func (team *Teammate) TeamUid() string {
     return team.AttrTeamUid
+}
+
+/*
+ * Teammates
+ */
+
+type Teammates struct {
+	owner *event.Identity
+	items []*Teammate
+}
+
+func NewTeammates(kind, uid string) (teammates *Teammates) {
+	teammates = new(Teammates)
+	teammates.owner = event.NewIdentity(kind, uid)
+	return teammates
+}
+
+func (teammates *Teammates) Create(attributes Attrs) (teammate *Teammate) {
+	teammate = CreateTeammate(teammates.owner.AddToAttributes(attributes))
+	teammates.items = append(teammates.items, teammate)
+	return teammate
 }
