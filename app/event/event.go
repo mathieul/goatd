@@ -13,7 +13,7 @@ type Kind int
 type Event struct {
     Kind
     Identity
-    // data []string
+    Data []string
 }
 type EventBus chan *Event
 
@@ -52,8 +52,8 @@ func (busManager *BusManager) Stop() {
     busManager.done = nil
 }
 
-func (busManager *BusManager) PublishEvent(kind Kind, identity Identity) {
-    event := Event{kind, identity}
+func (busManager *BusManager) PublishEvent(kind Kind, identity Identity, data []string) {
+    event := Event{kind, identity, data}
     busManager.incoming <- event
 }
 

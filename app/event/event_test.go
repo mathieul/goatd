@@ -32,8 +32,9 @@ func (s *EventSuite) TestPublishEvent(c *C) {
         outgoing := s.manager.SubscribeToAllEvents()
         received = <- outgoing
     }()
-    s.manager.PublishEvent(event.OfferTask, s.identity)
+    s.manager.PublishEvent(event.OfferTask, s.identity, []string{"string"})
     time.Sleep(200 * time.Millisecond)
     c.Assert(received.Kind, Equals, event.OfferTask)
     c.Assert(received.Identity, Equals, s.identity)
+    c.Assert(received.Data[0], Equals, "string")
 }
