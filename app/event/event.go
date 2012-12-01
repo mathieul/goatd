@@ -19,15 +19,15 @@ type EventBus chan *Event
 
 
 /*
- * BusManager
+ * busManager
  */
-type BusManager struct {
+type busManager struct {
     incoming chan Event
     outgoings []chan Event
     done chan bool
 }
 
-func (busManager *BusManager) Start() {
+func (busManager *busManager) Start() {
     busManager.incoming = make(chan Event, 0)
     busManager.done = make(chan bool, 0)
     busManager.outgoings = []chan Event{}
@@ -45,22 +45,27 @@ func (busManager *BusManager) Start() {
     }()
 }
 
-func (busManager *BusManager) Stop() {
+func (busManager *busManager) Stop() {
     busManager.done <- true
     busManager.incoming = nil
     busManager.outgoings = nil
     busManager.done = nil
 }
 
-func (busManager *BusManager) PublishEvent(kind Kind, identity Identity, data []string) {
+func (busManager *busManager) PublishEvent(kind Kind, identity Identity, data []string) {
     event := Event{kind, identity, data}
     busManager.incoming <- event
 }
 
-func (busManager *BusManager) SubscribeToAllEvents() (<-chan Event) {
+func (busManager *busManager) SubscribeToAllEvents() (<-chan Event) {
     outgoing := make(chan Event, 0)
     busManager.outgoings = append(busManager.outgoings, outgoing)
     return outgoing
+}
+
+var manager busManager
+func Manager() *busManager {
+    return &manager
 }
 
 /*

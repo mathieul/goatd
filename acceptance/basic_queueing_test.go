@@ -3,6 +3,7 @@ package acceptance_test
 import (
 	. "launchpad.net/gocheck"
 	"testing"
+	"goatd/app/event"
 	"goatd/app/models"
 	"goatd/app/distribution"
 	"time"
@@ -26,10 +27,16 @@ type State struct {
 var _ = Suite(&AcceptanceS{})
 
 func (s *AcceptanceS) SetUpTest(c *C) {
+    event.Manager().Start()
 	s.team = models.CreateTeam(models.Attrs{"Name": "Wedding"})
 	s.mate = s.team.Teammates.Create(models.Attrs{"Name": "Bride"})
 	s.queue = s.team.Queues.Create(models.Attrs{"Name": "Thank you notes"})
 }
+
+func (s *AcceptanceS) TearDownTest(c *C) {
+    event.Manager().Stop()
+}
+
 
 func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
 	aLittleBit := 100 * time.Millisecond
