@@ -64,3 +64,9 @@ func (teammates *Teammates) Create(attributes Attrs) (teammate *Teammate) {
     teammates.items = append(teammates.items, teammate)
     return teammate
 }
+
+func (teammates *Teammates) Slice() (slice []*Teammate) {
+    slice = make([]*Teammate, len(teammates.items))
+    copy(slice, teammates.items)
+    return slice
+}

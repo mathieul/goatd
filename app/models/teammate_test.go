@@ -31,3 +31,10 @@ func (s *TeammateSuite) TestCreateTeammateWithTeam(c *C) {
     teammate := s.teammates.Create(models.Attrs{"Name": "Egret"})
     c.Assert(teammate.Team(), DeepEquals, s.team)
 }
+
+func (s *TeammateSuite) TestReturnSlice(c *C) {
+    t1 := s.teammates.Create(models.Attrs{"Name": "Jon"})
+    t2 := s.teammates.Create(models.Attrs{"Name": "Egret"})
+    t3 := s.teammates.Create(models.Attrs{"Name": "Aria"})
+    c.Assert(s.teammates.Slice(), DeepEquals, []*models.Teammate{t1, t2,t3})
+}

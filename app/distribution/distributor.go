@@ -46,3 +46,14 @@ func (distributor Distributor) Trigger(event Event, parameters []interface{}) {
         }
     }
 }
+
+func (distributor Distributor) AddTeammateToQueue(queue *models.Queue,
+        teammate *models.Teammate, level int) bool {
+    skills := distributor.team.Skills
+    attributes := models.Attrs{"TeammateUid": teammate.Uid(),
+        "QueueUid": queue.Uid(), "Level": level, "Enabled": true}
+    if skill := skills.Create(attributes); skill == nil {
+        return false
+    }
+    return true
+}

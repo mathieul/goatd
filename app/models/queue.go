@@ -24,13 +24,14 @@ func CreateQueue(attributes Attrs) (queue *Queue) {
     return queue
 }
 
-func (team *Queue) Name() string {
-    return team.AttrName
+func (queue Queue) Name() string {
+    return queue.AttrName
 }
 
-func (team *Queue) TeamUid() string {
-    return team.AttrTeamUid
+func (queue Queue) TeamUid() string {
+    return queue.AttrTeamUid
 }
+
 
 /*
  * Queues

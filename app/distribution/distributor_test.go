@@ -51,10 +51,8 @@ func (s *DistributorSuite) TestAddTeammateToQueue(c *C) {
     distributor := distribution.NewDistributor(s.team)
 
     distributor.AddTeammateToQueue(queue, teammate, models.LevelLow)
-    c.Assert(queue.Teammates().Slice(), DeepEquals, []models.Teammate{teammate})
-    c.Assert(teammate.Queues().Slice(), DeepEquals, []models.Queue{queue})
     query := models.Attrs{"TeammateUid": teammate.Uid(), "QueueUid": queue.Uid()}
-    skills := s.team.Skills().Select(query)
+    skills := s.team.Skills.Select(query)
     c.Assert(len(skills), Equals, 1)
     c.Assert(skills[0].QueueUid(), Equals, queue.Uid())
     c.Assert(skills[0].TeammateUid(), Equals, teammate.Uid())
