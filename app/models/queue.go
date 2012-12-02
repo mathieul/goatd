@@ -37,13 +37,13 @@ func (team *Queue) TeamUid() string {
  */
 
 type Queues struct {
-    owner *event.Identity
+    owner event.Identity
     items []*Queue
 }
 
-func NewQueues(kind, uid string) (queues *Queues) {
+func NewQueues(owner event.Identity) (queues *Queues) {
     queues = new(Queues)
-    queues.owner = event.NewIdentity(kind, uid)
+    queues.owner = owner
     return queues
 }
 

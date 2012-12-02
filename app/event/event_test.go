@@ -17,7 +17,7 @@ var _ = Suite(&EventSuite{})
 
 func (s *EventSuite) SetUpTest(c *C) {
     event.Manager().Start()
-    s.identity.Set("Team", "qazwsx098")
+    s.identity.Set("Team", "qazwsx098", nil)
 }
 
 func (s *EventSuite) TearDownTest(c *C) {

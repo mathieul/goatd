@@ -1,11 +1,16 @@
 package models
 
+import (
+    "goatd/app/event"
+)
+
 /*
  * Team
  */
 
 type Team struct {
     Storage
+    identity *event.Identity
     Teammates *Teammates
     Queues *Queues
     Skills *Skills
@@ -14,10 +19,10 @@ type Team struct {
 
 func NewTeam(attributes Attrs) (team *Team) {
     team = newModel(&Team{}, &attributes).(*Team)
-    uid := team.Uid()
-    team.Teammates = NewTeammates("Team", uid)
-    team.Queues = NewQueues("Team", uid)
-    team.Skills = NewSkills("Team", uid)
+    team.identity = event.NewIdentity("Team", team.Uid(), team)
+    team.Teammates = NewTeammates(*team.identity)
+    team.Queues = NewQueues(*team.identity)
+    team.Skills = NewSkills(*team.identity)
     return team
 }
 

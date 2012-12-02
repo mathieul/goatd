@@ -10,6 +10,7 @@ import (
 
 type Teammate struct {
     Storage
+    team *Team
     AttrName string
     AttrTeamUid string
 }
@@ -18,37 +19,48 @@ func NewTeammate(attributes Attrs) *Teammate {
     return newModel(&Teammate{}, &attributes).(*Teammate)
 }
 
-func CreateTeammate(attributes Attrs) (teammate *Teammate) {
-    teammate = NewTeammate(attributes)
+func CreateTeammate(attributes Attrs, team *Team) *Teammate {
+    teammate := NewTeammate(attributes)
+    teammate.SetTeam(team)
     teammate.Save()
     return teammate
 }
 
-func (team *Teammate) Name() string {
-    return team.AttrName
+func (teammate Teammate) Name() string {
+    return teammate.AttrName
 }
 
-func (team *Teammate) TeamUid() string {
-    return team.AttrTeamUid
+func (teammate Teammate) TeamUid() string {
+    return teammate.AttrTeamUid
 }
+
+func (teammate *Teammate) SetTeam(team *Team) {
+    teammate.team = team
+}
+
+func (teammate Teammate) Team() (team *Team) {
+    return teammate.team
+}
+
 
 /*
  * Teammates
  */
 
 type Teammates struct {
-    owner *event.Identity
+    owner event.Identity
     items []*Teammate
 }
 
-func NewTeammates(kind, uid string) (teammates *Teammates) {
+func NewTeammates(owner event.Identity) (teammates *Teammates) {
     teammates = new(Teammates)
-    teammates.owner = event.NewIdentity(kind, uid)
+    teammates.owner = owner
     return teammates
 }
 
 func (teammates *Teammates) Create(attributes Attrs) (teammate *Teammate) {
-    teammate = CreateTeammate(teammates.owner.AddToAttributes(attributes))
+    attributes = teammates.owner.AddToAttributes(attributes)
+    teammate = CreateTeammate(attributes, teammates.owner.Value().(*Team))
     teammates.items = append(teammates.items, teammate)
     return teammate
 }

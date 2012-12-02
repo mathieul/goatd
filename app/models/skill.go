@@ -47,13 +47,13 @@ func (team *Skill) Enabled() bool {
  */
 
 type Skills struct {
-    owner *event.Identity
+    owner event.Identity
     items []*Skill
 }
 
-func NewSkills(kind, uid string) (skills *Skills) {
+func NewSkills(owner event.Identity) (skills *Skills) {
     skills = new(Skills)
-    skills.owner = event.NewIdentity(kind, uid)
+    skills.owner = owner
     return skills
 }
 

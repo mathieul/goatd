@@ -51,6 +51,7 @@ func (s *TeamSuite) TestCreateTeammate(c *C) {
     teammate := s.team.Teammates.Create(models.Attrs{"Name": "Kirk Hammett"})
     c.Assert(teammate.Name(), Equals, "Kirk Hammett")
     c.Assert(teammate.TeamUid(), Equals, s.team.Uid())
+    c.Assert(teammate.Team(), DeepEquals, s.team)
     c.Assert(teammate.Persisted(), Equals, true)
 }
 

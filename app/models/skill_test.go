@@ -9,13 +9,15 @@ import (
 func Test(t *testing.T) { TestingT(t) }
 
 type SkillSuite struct {
+    team *models.Team
     skills *models.Skills
 }
 
 var _ = Suite(&SkillSuite{})
 
 func (s *SkillSuite) SetUpTest(c *C) {
-    s.skills = models.NewSkills("Team", "inc")
+    s.team = models.NewTeam(models.Attrs{"Name": "Hello, inc."})
+    s.skills = s.team.Skills
 }
 
 func (s *SkillSuite) TestCreateSkill(c *C) {
