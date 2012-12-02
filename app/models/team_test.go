@@ -26,6 +26,27 @@ func (s *TeamSuite) TestCreateTeam(c *C) {
     c.Assert(s.team.Persisted(), Equals, true)
 }
 
+func (s *TeamSuite) TestFindTeam(c *C) {
+    uid := s.teams.Create(models.Attrs{"Name": "Metallica"}).Uid()
+    s.teams.Create(models.Attrs{"Name": "Masada"})
+    team := s.teams.Find(uid)
+    c.Assert(team.Name(), Equals, "Metallica")
+    team = s.teams.Find("unknown")
+    c.Assert(team, IsNil)
+}
+
+func (s *TeamSuite) TestFindAllTeams(c *C) {
+    uid1 := s.teams.Create(models.Attrs{"Name": "One"}).Uid()
+    s.teams.Create(models.Attrs{"Name": "Two"})
+    s.teams.Create(models.Attrs{"Name": "Three"})
+    uid2 := s.teams.Create(models.Attrs{"Name": "Four"}).Uid()
+    s.teams.Create(models.Attrs{"Name": "Five"})
+
+    found := s.teams.FindAll([]string{uid1, uid2})
+    c.Assert(found[0].Name(), DeepEquals, "One")
+    c.Assert(found[1].Name(), DeepEquals, "Four")
+}
+
 func (s *TeamSuite) TestCreateTeammate(c *C) {
     teammate := s.team.Teammates.Create(models.Attrs{"Name": "Kirk Hammett"})
     c.Assert(teammate.Name(), Equals, "Kirk Hammett")

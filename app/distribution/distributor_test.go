@@ -10,21 +10,28 @@ import (
 
 func Test(t *testing.T) { TestingT(t) }
 
-type DistributorSuite struct {}
+type DistributorSuite struct {
+    teams *models.Teams
+    team *models.Team
+}
 
 var _ = Suite(&DistributorSuite{})
 
+func (s *DistributorSuite) SetUpTest(c *C) {
+    s.teams = models.NewTeams()
+    s.team = s.teams.Create(models.Attrs{"Name": "Get To Work"})
+}
+
 func (s *DistributorSuite) TestNewDistributor(c *C) {
-    team := models.NewTeam(models.Attrs{"Name": "Get To Work"})
-    distributor := distribution.NewDistributor(team)
-    c.Assert(distributor.Team(), DeepEquals, team)
+    distributor := distribution.NewDistributor(s.team)
+    c.Assert(distributor.Team(), DeepEquals, s.team)
 }
 
 func (s *DistributorSuite) TestBindingEvents(c *C) {
     var mockQueue, mockMate, mockTask string
     aLittleBit := 100 * time.Millisecond
 
-    distributor := distribution.NewDistributor(nil)
+    distributor := distribution.NewDistributor(s.team)
     distributor.On(distribution.EventOfferTask,
         func (event distribution.Event, parameters []interface{}) {
             mockQueue = parameters[0].(string)
@@ -39,16 +46,15 @@ func (s *DistributorSuite) TestBindingEvents(c *C) {
 }
 
 func (s *DistributorSuite) TestAddTeammateToQueue(c *C) {
-    team := models.NewTeam(models.Attrs{"Name": "The Team"})
-    teammate := team.Teammates.Create(models.Attrs{"Name": "The Mate"})
-    queue := team.Queues.Create(models.Attrs{"Name": "The Queue"})
+    teammate := s.team.Teammates.Create(models.Attrs{"Name": "The Mate"})
+    queue := s.team.Queues.Create(models.Attrs{"Name": "The Queue"})
+    distributor := distribution.NewDistributor(s.team)
 
-    distributor := distribution.NewDistributor(team)
     distributor.AddTeammateToQueue(queue, teammate, models.LevelLow)
     c.Assert(queue.Teammates().Slice(), DeepEquals, []models.Teammate{teammate})
     c.Assert(teammate.Queues().Slice(), DeepEquals, []models.Queue{queue})
     query := models.Attrs{"TeammateUid": teammate.Uid(), "QueueUid": queue.Uid()}
-    skills := team.Skills().Select(query)
+    skills := s.team.Skills().Select(query)
     c.Assert(len(skills), Equals, 1)
     c.Assert(skills[0].QueueUid(), Equals, queue.Uid())
     c.Assert(skills[0].TeammateUid(), Equals, teammate.Uid())

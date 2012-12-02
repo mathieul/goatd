@@ -49,3 +49,23 @@ func (teams *Teams) Create(attributes Attrs) (team *Team) {
     teams.items = append(teams.items, team)
     return team
 }
+
+func (teams Teams) FindAll(uids []string) (found []*Team) {
+    for _, candidate := range teams.items {
+        candidateUid := candidate.Uid()
+        for _, uid := range uids {
+            if candidateUid == uid {
+                found = append(found, candidate)
+            }
+        }
+    }
+    return found
+}
+
+func (teams Teams) Find(uid string) *Team {
+    found := teams.FindAll([]string{uid})
+    if len(found) == 0 {
+        return nil
+    }
+    return found[0]
+}
