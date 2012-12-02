@@ -10,14 +10,14 @@ func Test(t *testing.T) { TestingT(t) }
 
 type TeamSuite struct{
     teams *models.Teams
-	team *models.Team
+    team *models.Team
 }
 
 var _ = Suite(&TeamSuite{})
 
 func (s *TeamSuite) SetUpTest(c *C) {
     s.teams = models.NewTeams()
-	s.team = s.teams.Create(models.Attrs{"Name": "Jon Snow & Egret"})
+    s.team = s.teams.Create(models.Attrs{"Name": "Jon Snow & Egret"})
 }
 
 func (s *TeamSuite) TestCreateTeam(c *C) {
@@ -27,7 +27,7 @@ func (s *TeamSuite) TestCreateTeam(c *C) {
 }
 
 func (s *TeamSuite) TestCreateTeammate(c *C) {
-	teammate := s.team.Teammates.Create(models.Attrs{"Name": "Kirk Hammett"})
+    teammate := s.team.Teammates.Create(models.Attrs{"Name": "Kirk Hammett"})
     c.Assert(teammate.Name(), Equals, "Kirk Hammett")
     c.Assert(teammate.TeamUid(), Equals, s.team.Uid())
     c.Assert(teammate.Persisted(), Equals, true)

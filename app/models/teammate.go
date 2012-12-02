@@ -1,7 +1,7 @@
 package models
 
 import (
-	"goatd/app/event"
+    "goatd/app/event"
 )
 
 /*
@@ -9,19 +9,19 @@ import (
  */
 
 type Teammate struct {
-	Storage
+    Storage
     AttrName string
     AttrTeamUid string
 }
 
 func NewTeammate(attributes Attrs) *Teammate {
-	return newModel(&Teammate{}, &attributes).(*Teammate)
+    return newModel(&Teammate{}, &attributes).(*Teammate)
 }
 
 func CreateTeammate(attributes Attrs) (teammate *Teammate) {
-	teammate = NewTeammate(attributes)
-	teammate.Save()
-	return teammate
+    teammate = NewTeammate(attributes)
+    teammate.Save()
+    return teammate
 }
 
 func (team *Teammate) Name() string {
@@ -37,18 +37,18 @@ func (team *Teammate) TeamUid() string {
  */
 
 type Teammates struct {
-	owner *event.Identity
-	items []*Teammate
+    owner *event.Identity
+    items []*Teammate
 }
 
 func NewTeammates(kind, uid string) (teammates *Teammates) {
-	teammates = new(Teammates)
-	teammates.owner = event.NewIdentity(kind, uid)
-	return teammates
+    teammates = new(Teammates)
+    teammates.owner = event.NewIdentity(kind, uid)
+    return teammates
 }
 
 func (teammates *Teammates) Create(attributes Attrs) (teammate *Teammate) {
-	teammate = CreateTeammate(teammates.owner.AddToAttributes(attributes))
-	teammates.items = append(teammates.items, teammate)
-	return teammate
+    teammate = CreateTeammate(teammates.owner.AddToAttributes(attributes))
+    teammates.items = append(teammates.items, teammate)
+    return teammate
 }

@@ -1,7 +1,7 @@
 package models
 
 import (
-	"goatd/app/event"
+    "goatd/app/event"
 )
 
 /*
@@ -37,18 +37,18 @@ func (team *Queue) TeamUid() string {
  */
 
 type Queues struct {
-	owner *event.Identity
-	items []*Queue
+    owner *event.Identity
+    items []*Queue
 }
 
 func NewQueues(kind, uid string) (queues *Queues) {
-	queues = new(Queues)
-	queues.owner = event.NewIdentity(kind, uid)
-	return queues
+    queues = new(Queues)
+    queues.owner = event.NewIdentity(kind, uid)
+    return queues
 }
 
 func (queues *Queues) Create(attributes Attrs) (queue *Queue) {
-	queue = CreateQueue(queues.owner.AddToAttributes(attributes))
-	queues.items = append(queues.items, queue)
-	return queue
+    queue = CreateQueue(queues.owner.AddToAttributes(attributes))
+    queues.items = append(queues.items, queue)
+    return queue
 }
