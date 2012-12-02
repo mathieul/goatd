@@ -1,5 +1,9 @@
 package models
 
+/*
+ * Team
+ */
+
 type Team struct {
 	Storage
 	Teammates *Teammates
@@ -10,9 +14,10 @@ type Team struct {
 
 func NewTeam(attributes Attrs) (team *Team) {
 	team = newModel(&Team{}, &attributes).(*Team)
-	team.Teammates = NewTeammates("Team", team.Uid())
-	team.Queues = NewQueues("Team", team.Uid())
-	team.Skills = NewSkills("Team", team.Uid())
+	uid := team.Uid()
+	team.Teammates = NewTeammates("Team", uid)
+	team.Queues = NewQueues("Team", uid)
+	team.Skills = NewSkills("Team", uid)
 	return team
 }
 
@@ -24,4 +29,23 @@ func CreateTeam(attributes Attrs) (team *Team) {
 
 func (team *Team) Name() string {
     return team.AttrName
+}
+
+
+/*
+ * Teams
+ */
+
+type Teams struct {
+	items []*Team
+}
+
+func NewTeams() *Teams {
+	return new(Teams)
+}
+
+func (teams *Teams) Create(attributes Attrs) (team *Team) {
+	team = CreateTeam(attributes)
+	teams.items = append(teams.items, team)
+	return team
 }
