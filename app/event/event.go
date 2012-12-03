@@ -21,17 +21,22 @@ type EventBus chan *Event
 /*
  * Identity
  */
+
+type Loner interface {
+    Uid() string
+}
+
 type Identity struct {
     kind string
     uid string
-    value interface{}
+    value Loner
 }
 
-func NewIdentity(kind, uid string, value interface{}) *Identity {
+func NewIdentity(kind, uid string, value Loner) *Identity {
     return &Identity{kind, uid, value}
 }
 
-func (identity *Identity) Set(kind, uid string, value interface{}) {
+func (identity *Identity) Set(kind, uid string, value Loner) {
     identity.kind = kind
     identity.uid = uid
     identity.value = value
@@ -45,7 +50,7 @@ func (identity Identity) Uid() string {
     return identity.uid
 }
 
-func (identity Identity) Value() interface{} {
+func (identity Identity) Value() Loner {
     return identity.value
 }
 

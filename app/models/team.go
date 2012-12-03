@@ -17,9 +17,19 @@ type Team struct {
     AttrName string
 }
 
+func (team Team) Uid() string {
+    return team.Storage.Uid()
+}
+
+func (team Team) Name() string {
+    return team.AttrName
+}
+
 func NewTeam(attributes Attrs) (team *Team) {
     team = newModel(&Team{}, &attributes).(*Team)
-    team.identity = event.NewIdentity("Team", team.Uid(), team)
+    var loner event.Loner
+    loner = *team
+    team.identity = event.NewIdentity("Team", team.Uid(), loner)
     team.Teammates = NewTeammates(*team.identity)
     team.Queues = NewQueues(*team.identity)
     team.Skills = NewSkills(*team.identity)
@@ -30,10 +40,6 @@ func CreateTeam(attributes Attrs) (team *Team) {
     team = NewTeam(attributes)
     team.Save()
     return team
-}
-
-func (team *Team) Name() string {
-    return team.AttrName
 }
 
 

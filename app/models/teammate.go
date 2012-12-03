@@ -60,7 +60,8 @@ func NewTeammates(owner event.Identity) (teammates *Teammates) {
 
 func (teammates *Teammates) Create(attributes Attrs) (teammate *Teammate) {
     attributes = teammates.owner.AddToAttributes(attributes)
-    teammate = CreateTeammate(attributes, teammates.owner.Value().(*Team))
+    team := teammates.owner.Value().(*Team)
+    teammate = CreateTeammate(attributes, team)
     teammates.items = append(teammates.items, teammate)
     return teammate
 }
