@@ -112,20 +112,20 @@ func (storage *Storage) Save() {
 }
 
 
-/*
- * Owner
- */
-type Owner struct {
-    uid string
-    name string
-}
+// /*
+//  * Owner
+//  */
+// type Owner struct {
+//     uid string
+//     name string
+// }
 
-func (owner *Owner) SetOwner(name, uid string) {
-    owner.name = name
-    owner.uid = uid
-}
+// func (owner *Owner) SetOwner(name, uid string) {
+//     owner.name = name
+//     owner.uid = uid
+// }
 
-func (owner Owner) AddOwnerToAttributes(attributes Attrs) Attrs {
-    attributes[owner.name + "Uid"] = owner.uid
-    return attributes
-}
+// func (owner Owner) AddOwnerToAttributes(attributes Attrs) Attrs {
+//     attributes[owner.name + "Uid"] = owner.uid
+//     return attributes
+// }
