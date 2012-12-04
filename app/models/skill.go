@@ -70,9 +70,9 @@ func toSkillSlice(source []interface{}) []*Skill {
 
 func NewSkills(owner identification.Identity) (skills *Skills) {
     skills = new(Skills)
-    skills.Collection = NewCollection(func(attributes Attrs, lonerTeam interface{}) interface{} {
+    skills.Collection = NewCollection(func(attributes Attrs, owner interface{}) interface{} {
         skill := CreateSkill(attributes)
-        skill.SetTeam(lonerTeam.(*Team))
+        skill.SetTeam(owner.(*Team))
         return skill
     }, owner)
     return skills
@@ -87,7 +87,10 @@ func (skills Skills) Slice() []*Skill {
 }
 
 func (skills Skills) Find(uid string) *Skill {
-    return skills.Collection.Find(uid).(*Skill)
+    if found := skills.Collection.Find(uid); found != nil {
+        return found.(*Skill)
+    }
+    return nil
 }
 
 func (skills Skills) FindAll(uids []string) []*Skill {

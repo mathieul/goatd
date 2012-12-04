@@ -45,36 +45,80 @@ func CreateTeam(attributes Attrs) (team *Team) {
  * Teams
  */
 
+// type Teams struct {
+//     items []*Team
+// }
+
+// func NewTeams() *Teams {
+//     return new(Teams)
+// }
+
+// func (teams *Teams) Create(attributes Attrs) (team *Team) {
+//     team = CreateTeam(attributes)
+//     teams.items = append(teams.items, team)
+//     return team
+// }
+
+// func (teams Teams) FindAll(uids []string) (found []*Team) {
+//     for _, candidate := range teams.items {
+//         candidateUid := candidate.Uid()
+//         for _, uid := range uids {
+//             if candidateUid == uid {
+//                 found = append(found, candidate)
+//             }
+//         }
+//     }
+//     return found
+// }
+
+// func (teams Teams) Find(uid string) *Team {
+//     found := teams.FindAll([]string{uid})
+//     if len(found) == 0 {
+//         return nil
+//     }
+//     return found[0]
+// }
+
 type Teams struct {
-    items []*Team
+    Collection
 }
 
-func NewTeams() *Teams {
-    return new(Teams)
+func toTeamSlice(source []interface{}) []*Team {
+    teams := make([]*Team, 0, len(source))
+    for _, team := range source {
+        teams = append(teams, team.(*Team))
+    }
+    return teams
+}
+
+func NewTeams(owner identification.Identity) (teams *Teams) {
+    teams = new(Teams)
+    teams.Collection = NewCollection(func(attributes Attrs, parent interface{}) interface{} {
+        team := CreateTeam(attributes)
+        return team
+    }, owner)
+    return teams
 }
 
 func (teams *Teams) Create(attributes Attrs) (team *Team) {
-    team = CreateTeam(attributes)
-    teams.items = append(teams.items, team)
-    return team
+    return teams.Collection.Create(attributes).(*Team)
 }
 
-func (teams Teams) FindAll(uids []string) (found []*Team) {
-    for _, candidate := range teams.items {
-        candidateUid := candidate.Uid()
-        for _, uid := range uids {
-            if candidateUid == uid {
-                found = append(found, candidate)
-            }
-        }
-    }
-    return found
+func (teams Teams) Slice() []*Team {
+    return toTeamSlice(teams.Collection.Slice())
 }
 
 func (teams Teams) Find(uid string) *Team {
-    found := teams.FindAll([]string{uid})
-    if len(found) == 0 {
-        return nil
+    if found := teams.Collection.Find(uid); found != nil {
+        return found.(*Team)
     }
-    return found[0]
+    return nil
+}
+
+func (teams Teams) FindAll(uids []string) []*Team {
+    return toTeamSlice(teams.Collection.FindAll(uids))
+}
+
+func (teams Teams) Select(tester func(interface{}) bool) (result []*Team) {
+    return toTeamSlice(teams.Collection.Select(tester))
 }

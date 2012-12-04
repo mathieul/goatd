@@ -64,9 +64,9 @@ func toQueueSlice(source []interface{}) []*Queue {
 
 func NewQueues(owner identification.Identity) (queues *Queues) {
     queues = new(Queues)
-    queues.Collection = NewCollection(func(attributes Attrs, lonerTeam interface{}) interface{} {
+    queues.Collection = NewCollection(func(attributes Attrs, parent interface{}) interface{} {
         queue := CreateQueue(attributes)
-        queue.SetTeam(lonerTeam.(*Team))
+        queue.SetTeam(parent.(*Team))
         return queue
     }, owner)
     return queues
@@ -81,7 +81,10 @@ func (queues Queues) Slice() []*Queue {
 }
 
 func (queues Queues) Find(uid string) *Queue {
-    return queues.Collection.Find(uid).(*Queue)
+    if found := queues.Collection.Find(uid); found != nil {
+        return found.(*Queue)
+    }
+    return nil
 }
 
 func (queues Queues) FindAll(uids []string) []*Queue {

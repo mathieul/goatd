@@ -46,31 +46,6 @@ func (teammate Teammate) Team() (team *Team) {
  * Teammates
  */
 
-// type Teammates struct {
-//     owner identification.Identity
-//     items []*Teammate
-// }
-
-// func NewTeammates(owner identification.Identity) (teammates *Teammates) {
-//     teammates = new(Teammates)
-//     teammates.owner = owner
-//     return teammates
-// }
-
-// func (teammates *Teammates) Create(attributes Attrs) (teammate *Teammate) {
-//     attributes = teammates.owner.AddToAttributes(attributes)
-//     team := teammates.owner.Value().(*Team)
-//     teammate = CreateTeammate(attributes, team)
-//     teammates.items = append(teammates.items, teammate)
-//     return teammate
-// }
-
-// func (teammates *Teammates) Slice() (slice []*Teammate) {
-//     slice = make([]*Teammate, len(teammates.items))
-//     copy(slice, teammates.items)
-//     return slice
-// }
-
 type Teammates struct {
     Collection
 }
@@ -85,9 +60,9 @@ func toTeammateSlice(source []interface{}) []*Teammate {
 
 func NewTeammates(owner identification.Identity) (teammates *Teammates) {
     teammates = new(Teammates)
-    teammates.Collection = NewCollection(func(attributes Attrs, lonerTeam interface{}) interface{} {
+    teammates.Collection = NewCollection(func(attributes Attrs, owner interface{}) interface{} {
         teammate := CreateTeammate(attributes)
-        teammate.SetTeam(lonerTeam.(*Team))
+        teammate.SetTeam(owner.(*Team))
         return teammate
     }, owner)
     return teammates
@@ -102,7 +77,10 @@ func (teammates Teammates) Slice() []*Teammate {
 }
 
 func (teammates Teammates) Find(uid string) *Teammate {
-    return teammates.Collection.Find(uid).(*Teammate)
+    if found := teammates.Collection.Find(uid); found != nil {
+        return found.(*Teammate)
+    }
+    return nil
 }
 
 func (teammates Teammates) FindAll(uids []string) []*Teammate {

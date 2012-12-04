@@ -3,6 +3,8 @@ package models_test
 import (
     . "launchpad.net/gocheck"
     "testing"
+    "strings"
+    "goatd/app/identification"
     "goatd/app/models"
 )
 
@@ -16,7 +18,7 @@ type TeamSuite struct{
 var _ = Suite(&TeamSuite{})
 
 func (s *TeamSuite) SetUpTest(c *C) {
-    s.teams = models.NewTeams()
+    s.teams = models.NewTeams(identification.NoIdentity())
     s.team = s.teams.Create(models.Attrs{"Name": "Jon Snow & Egret"})
 }
 
@@ -24,6 +26,13 @@ func (s *TeamSuite) TestCreateTeam(c *C) {
     c.Assert(s.team.Name(), Equals, "Jon Snow & Egret")
     c.Assert(len(s.team.Uid()), Equals, 8 + 1 + 8)
     c.Assert(s.team.Persisted(), Equals, true)
+}
+
+func (s *TeamSuite) TestReturnsSlice(c *C) {
+    t1 := s.teams.Create(models.Attrs{"Name": "Lannister"})
+    t2 := s.teams.Create(models.Attrs{"Name": "Stark"})
+    t3 := s.teams.Create(models.Attrs{"Name": "Baratheon"})
+    c.Assert(s.teams.Slice(), DeepEquals, []*models.Team{s.team, t1, t2, t3})
 }
 
 func (s *TeamSuite) TestFindTeam(c *C) {
@@ -45,6 +54,18 @@ func (s *TeamSuite) TestFindAllTeams(c *C) {
     found := s.teams.FindAll([]string{uid1, uid2})
     c.Assert(found[0].Name(), DeepEquals, "One")
     c.Assert(found[1].Name(), DeepEquals, "Four")
+}
+
+func (s *TeamSuite) TestSelectTeams(c *C) {
+    tyrion := s.teams.Create(models.Attrs{"Name": "Tyrion Lannister"})
+    s.teams.Create(models.Attrs{"Name": "Jon Snow"})
+    jamie := s.teams.Create(models.Attrs{"Name": "Jamie Lannister"})
+    c.Assert(s.teams.Select(func (item interface{}) bool {
+            team := item.(*models.Team)
+            return strings.Contains(team.Name(), "Lannister")
+        }),
+        DeepEquals,
+        []*models.Team{tyrion, jamie})
 }
 
 func (s *TeamSuite) TestCreateTeammate(c *C) {

@@ -56,12 +56,12 @@ func (s *TeammateSuite) TestFindTeammateSlice(c *C) {
 }
 
 func (s *TeammateSuite) TestSelectTeammates(c *C) {
-    tyrion := s.teammates.Create(models.Attrs{"Name": "Tyrion Lanister"})
+    tyrion := s.teammates.Create(models.Attrs{"Name": "Tyrion Lannister"})
     s.teammates.Create(models.Attrs{"Name": "Jon Snow"})
-    jamie := s.teammates.Create(models.Attrs{"Name": "Jamie Lanister"})
+    jamie := s.teammates.Create(models.Attrs{"Name": "Jamie Lannister"})
     c.Assert(s.teammates.Select(func (item interface{}) bool {
             teammate := item.(*models.Teammate)
-            return strings.Contains(teammate.Name(), "Lanister")
+            return strings.Contains(teammate.Name(), "Lannister")
         }),
         DeepEquals,
         []*models.Teammate{tyrion, jamie})

@@ -51,12 +51,12 @@ func (s *QueueSuite) TestFindQueueSlice(c *C) {
 }
 
 func (s *QueueSuite) TestSelectQueues(c *C) {
-    tyrion := s.queues.Create(models.Attrs{"Name": "Tyrion Lanister"})
+    tyrion := s.queues.Create(models.Attrs{"Name": "Tyrion Lannister"})
     s.queues.Create(models.Attrs{"Name": "Jon Snow"})
-    jamie := s.queues.Create(models.Attrs{"Name": "Jamie Lanister"})
+    jamie := s.queues.Create(models.Attrs{"Name": "Jamie Lannister"})
     c.Assert(s.queues.Select(func (item interface{}) bool {
             queue := item.(*models.Queue)
-            return strings.Contains(queue.Name(), "Lanister")
+            return strings.Contains(queue.Name(), "Lannister")
         }),
         DeepEquals,
         []*models.Queue{tyrion, jamie})

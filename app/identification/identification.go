@@ -14,6 +14,10 @@ func NewIdentity(kind, uid string, value interface{}) *Identity {
     return &Identity{kind, uid, value}
 }
 
+func NoIdentity() Identity {
+    return Identity{"", "", nil}
+}
+
 func (identity *Identity) Set(kind, uid string, value interface{}) {
     identity.kind = kind
     identity.uid = uid
