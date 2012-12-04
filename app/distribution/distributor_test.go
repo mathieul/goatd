@@ -51,8 +51,11 @@ func (s *DistributorSuite) TestAddTeammateToQueue(c *C) {
     distributor := distribution.NewDistributor(s.team)
 
     distributor.AddTeammateToQueue(queue, teammate, models.LevelLow)
-    query := models.Attrs{"TeammateUid": teammate.Uid(), "QueueUid": queue.Uid()}
-    skills := s.team.Skills.Select(query)
+    teammateUid, queueUid := teammate.Uid(), queue.Uid()
+    skills := s.team.Skills.Select(func (item interface{}) bool {
+        skill := item.(*models.Skill)
+        return skill.TeammateUid() == teammateUid && skill.QueueUid() == queueUid
+    })
     c.Assert(len(skills), Equals, 1)
     c.Assert(skills[0].QueueUid(), Equals, queue.Uid())
     c.Assert(skills[0].TeammateUid(), Equals, teammate.Uid())

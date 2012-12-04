@@ -58,10 +58,7 @@ func (s *SkillSuite) TestSelectSkills(c *C) {
     s.skills.Create(models.Attrs{"QueueUid": "03", "TeammateUid": "t2", "Level": models.LevelMedium})
     c.Assert(s.skills.Select(func (item interface{}) bool {
             skill := item.(*models.Skill)
-            if skill.Level() == models.LevelHigh && skill.TeammateUid() == "t1" {
-                return true
-            }
-            return false
+            return skill.Level() == models.LevelHigh && skill.TeammateUid() == "t1"
         }),
         DeepEquals,
         []*models.Skill{matches})

@@ -56,10 +56,7 @@ func (s *QueueSuite) TestSelectQueues(c *C) {
     jamie := s.queues.Create(models.Attrs{"Name": "Jamie Lanister"})
     c.Assert(s.queues.Select(func (item interface{}) bool {
             queue := item.(*models.Queue)
-            if strings.Contains(queue.Name(), "Lanister") {
-                return true
-            }
-            return false
+            return strings.Contains(queue.Name(), "Lanister")
         }),
         DeepEquals,
         []*models.Queue{tyrion, jamie})
