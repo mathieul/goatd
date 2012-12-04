@@ -39,25 +39,23 @@ func (s *EventSuite) TestPublishEvent(c *C) {
 }
 
 func (s *EventSuite) TestSubscribingToSomeEvents(c *C) {
-    received1 := make([]event.Event, 0, 2)
-    received2 := make([]event.Event, 0, 2)
+    var e11, e12, e21, e22 event.Event
     go func() {
-        incoming := event.Manager().SubscribeTo([]event.Event{event.OfferTask, event.CompleteTask})
-        received1[0] = <- incoming
-        received1[1] = <- incoming
+        incoming := event.Manager().SubscribeTo([]event.Kind{event.OfferTask, event.CompleteTask})
+        e11 = <- incoming
+        e12 = <- incoming
     }()
     go func() {
         incoming := event.Manager().SubscribeToEvent(event.CompleteTask)
-        received2[0] = <- incoming
-        received2[1] = <- incoming
+        e21 = <- incoming
+        e22 = <- incoming
     }()
     event.Manager().PublishEvent(event.CompleteTask, s.identity, []string{"complete 1"})
     event.Manager().PublishEvent(event.OfferTask, s.identity, []string{"offer"})
-    event.Manager().PublishEvent(event.CompleteTask, s.identity, []string{"complete 2"})
 
     time.Sleep(200 * time.Millisecond)
-    c.Assert(received1[0].Data[0], Equals, "complete 1")
-    c.Assert(received1[1].Data[0], Equals, "offer")
-    c.Assert(received1[0].Data[0], Equals, "complete 1")
-    c.Assert(received1[1].Data[0], Equals, "complete 2")
+    c.Assert(e11.Data[0], Equals, "complete 1")
+    c.Assert(e12.Data[0], Equals, "offer")
+    c.Assert(e21.Data[0], Equals, "complete 1")
+    c.Assert(e22.Data, IsNil)
 }
