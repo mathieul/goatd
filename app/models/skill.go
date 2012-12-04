@@ -10,6 +10,7 @@ import (
 
 type Skill struct {
     Storage
+    team *Team
     AttrQueueUid string
     AttrTeammateUid string
     AttrLevel int
@@ -26,39 +27,73 @@ func CreateSkill(attributes Attrs) (skill *Skill) {
     return skill
 }
 
-func (team *Skill) QueueUid() string {
-    return team.AttrQueueUid
+func (skill *Skill) QueueUid() string {
+    return skill.AttrQueueUid
 }
 
-func (team *Skill) TeammateUid() string {
-    return team.AttrTeammateUid
+func (skill *Skill) TeammateUid() string {
+    return skill.AttrTeammateUid
 }
 
-func (team *Skill) Level() int {
-    return team.AttrLevel
+func (skill *Skill) Level() int {
+    return skill.AttrLevel
 }
 
-func (team *Skill) Enabled() bool {
-    return team.AttrEnabled
+func (skill *Skill) Enabled() bool {
+    return skill.AttrEnabled
 }
+
+func (skill *Skill) SetTeam(team *Team) {
+    skill.team = team
+}
+
+func (skill Skill) Team() (team *Team) {
+    return skill.team
+}
+
 
 /*
  * Skills
  */
 
 type Skills struct {
-    owner identification.Identity
-    items []*Skill
+    Collection
+}
+
+func toSkillSlice(source []interface{}) []*Skill {
+    skills := make([]*Skill, 0, len(source))
+    for _, skill := range source {
+        skills = append(skills, skill.(*Skill))
+    }
+    return skills
 }
 
 func NewSkills(owner identification.Identity) (skills *Skills) {
     skills = new(Skills)
-    skills.owner = owner
+    skills.Collection = NewCollection(func(attributes Attrs, lonerTeam interface{}) interface{} {
+        skill := CreateSkill(attributes)
+        skill.SetTeam(lonerTeam.(*Team))
+        return skill
+    }, owner)
     return skills
 }
 
 func (skills *Skills) Create(attributes Attrs) (skill *Skill) {
-    skill = CreateSkill(skills.owner.AddToAttributes(attributes))
-    skills.items = append(skills.items, skill)
-    return skill
+    return skills.Collection.Create(attributes).(*Skill)
+}
+
+func (skills Skills) Slice() []*Skill {
+    return toSkillSlice(skills.Collection.Slice())
+}
+
+func (skills Skills) Find(uid string) *Skill {
+    return skills.Collection.Find(uid).(*Skill)
+}
+
+func (skills Skills) FindAll(uids []string) []*Skill {
+    return toSkillSlice(skills.Collection.FindAll(uids))
+}
+
+func (skills Skills) Select(tester func(interface{}) bool) (result []*Skill) {
+    return toSkillSlice(skills.Collection.Select(tester))
 }
