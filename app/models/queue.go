@@ -86,3 +86,14 @@ func (queues Queues) FindAll(uids []string) (result []*Queue) {
     }
     return result
 }
+
+func (queues Queues) Select(tester func(*Queue) bool) (result []*Queue) {
+    result = make([]*Queue, 0)
+    for _, pointer := range queues.Items {
+        queue := pointer.(*Queue)
+        if tester(queue) {
+            result = append(result, queue)
+        }
+    }
+    return result
+}

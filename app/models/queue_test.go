@@ -4,6 +4,7 @@ import (
     . "launchpad.net/gocheck"
     "testing"
     "goatd/app/models"
+    "strings"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -47,4 +48,18 @@ func (s *QueueSuite) TestFindQueueSlice(c *C) {
     c.Assert(s.queues.FindAll([]string{q1.Uid(), q3.Uid()}),
              DeepEquals,
              []*models.Queue{q1, q3})
+}
+
+func (s *QueueSuite) TestSelectQueues(c *C) {
+    tyrion := s.queues.Create(models.Attrs{"Name": "Tyrion Lanister"})
+    s.queues.Create(models.Attrs{"Name": "Jon Snow"})
+    jamie := s.queues.Create(models.Attrs{"Name": "Jamie Lanister"})
+    c.Assert(s.queues.Select(func (queue *models.Queue) bool {
+            if strings.Contains(queue.Name(), "Lanister") {
+                return true
+            }
+            return false
+        }),
+        DeepEquals,
+        []*models.Queue{tyrion, jamie})
 }
