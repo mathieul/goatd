@@ -41,6 +41,7 @@ func (s *SkillSuite) TestFindSkill(c *C) {
     s.skills.Create(models.Attrs{"QueueUid": "01", "TeammateUid": "t1"})
     s2 := s.skills.Create(models.Attrs{"QueueUid": "01", "TeammateUid": "t2"})
     c.Assert(s.skills.Find(s2.Uid()), DeepEquals, s2)
+    c.Assert(s.skills.Find("unknown"), IsNil)
 }
 
 func (s *SkillSuite) TestFindSkillSlice(c *C) {

@@ -39,6 +39,7 @@ func (s *QueueSuite) TestFindQueue(c *C) {
     s.queues.Create(models.Attrs{"Name": "One"})
     q2 := s.queues.Create(models.Attrs{"Name": "Two"})
     c.Assert(s.queues.Find(q2.Uid()), DeepEquals, q2)
+    c.Assert(s.queues.Find("unknown"), IsNil)
 }
 
 func (s *QueueSuite) TestFindQueueSlice(c *C) {

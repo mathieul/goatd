@@ -25,10 +25,6 @@ func CreateQueue(attributes Attrs) (queue *Queue) {
     return queue
 }
 
-func (queue Queue) Uid() string {
-    return queue.Storage.Uid()
-}
-
 func (queue Queue) Name() string {
     return queue.AttrName
 }

@@ -44,6 +44,7 @@ func (s *TeammateSuite) TestFindTeammate(c *C) {
     s.teammates.Create(models.Attrs{"Name": "Jon"})
     egret := s.teammates.Create(models.Attrs{"Name": "Egret"})
     c.Assert(s.teammates.Find(egret.Uid()), DeepEquals, egret)
+    c.Assert(s.teammates.Find("unknown"), IsNil)
 }
 
 func (s *TeammateSuite) TestFindTeammateSlice(c *C) {

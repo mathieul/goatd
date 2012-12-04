@@ -89,3 +89,9 @@ func (s *TeamSuite) TestCreateSkill(c *C) {
     c.Assert(skill.TeammateUid(), Equals, "1def")
     c.Assert(skill.Persisted(), Equals, true)
 }
+
+func (s *TeamSuite) TestCreateTask(c *C) {
+    task := s.team.Tasks.Create(models.Attrs{"Title": "Buy the milk"})
+    c.Assert(task.Title(), Equals, "Buy the milk")
+    c.Assert(task.Persisted(), Equals, true)
+}

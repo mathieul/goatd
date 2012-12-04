@@ -11,9 +11,10 @@ import (
 type Team struct {
     Storage
     identity *identification.Identity
-    Teammates *Teammates
-    Queues *Queues
-    Skills *Skills
+    *Teammates
+    *Queues
+    *Skills
+    *Tasks
     AttrName string
 }
 
@@ -31,6 +32,7 @@ func NewTeam(attributes Attrs) (team *Team) {
     team.Teammates = NewTeammates(*team.identity)
     team.Queues = NewQueues(*team.identity)
     team.Skills = NewSkills(*team.identity)
+    team.Tasks = NewTasks(*team.identity)
     return team
 }
 
