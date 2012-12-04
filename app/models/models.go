@@ -162,6 +162,10 @@ func (collection *Collection) Create(attributes Attrs) interface{} {
     return model
 }
 
+func (collection *Collection) Slice() []interface{} {
+    return collection.Items
+}
+
 func (collection Collection) Find(uid string) interface{} {
     found := collection.FindAll([]string{uid})
     if len(found) == 0 {
@@ -182,17 +186,12 @@ func (collection Collection) FindAll(uids []string) (found []interface{}) {
     return found
 }
 
-// func (collection Collection) Select(query Attrs) (found []interface{}) {
-//     for _, candidate := range collection.Items {
-//         match := true
-//         for name, value := range query {
-//             if candidate[name] != value {
-//                 match = false
-//             }
-//         }
-//         if match {
-//             found = append(found, candidate)
-//         }
-//     }
-//     return found
-// }
+func (collection Collection) Select(tester func(interface{}) bool) (result []interface{}) {
+    result = make([]interface{}, 0)
+    for _, item := range collection.Items {
+        if tester(item) {
+            result = append(result, item)
+        }
+    }
+    return result
+}

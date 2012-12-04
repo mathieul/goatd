@@ -54,6 +54,14 @@ type Queues struct {
     Collection
 }
 
+func toQueueSlice(source []interface{}) []*Queue {
+    queues := make([]*Queue, 0, len(source))
+    for _, queue := range source {
+        queues = append(queues, queue.(*Queue))
+    }
+    return queues
+}
+
 func NewQueues(owner identification.Identity) (queues *Queues) {
     queues = new(Queues)
     queues.Collection = NewCollection(func(attributes Attrs, lonerTeam interface{}) interface{} {
@@ -69,31 +77,17 @@ func (queues *Queues) Create(attributes Attrs) (queue *Queue) {
 }
 
 func (queues Queues) Slice() []*Queue {
-    result := make([]*Queue, 0, len(queues.Items))
-    for _, pointer := range queues.Items {
-        result = append(result, pointer.(*Queue))
-    }
-    return result
+    return toQueueSlice(queues.Collection.Slice())
 }
 
 func (queues Queues) Find(uid string) *Queue {
     return queues.Collection.Find(uid).(*Queue)
 }
 
-func (queues Queues) FindAll(uids []string) (result []*Queue) {
-    for _, queue := range queues.Collection.FindAll(uids) {
-        result = append(result, queue.(*Queue))
-    }
-    return result
+func (queues Queues) FindAll(uids []string) []*Queue {
+    return toQueueSlice(queues.Collection.FindAll(uids))
 }
 
-func (queues Queues) Select(tester func(*Queue) bool) (result []*Queue) {
-    result = make([]*Queue, 0)
-    for _, pointer := range queues.Items {
-        queue := pointer.(*Queue)
-        if tester(queue) {
-            result = append(result, queue)
-        }
-    }
-    return result
+func (queues Queues) Select(tester func(interface{}) bool) (result []*Queue) {
+    return toQueueSlice(queues.Collection.Select(tester))
 }
