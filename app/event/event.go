@@ -1,5 +1,9 @@
 package event
 
+import (
+    "goatd/app/identification"
+)
+
 const (
     OfferTask Kind = iota
     AssignTask
@@ -12,48 +16,10 @@ const (
 type Kind int
 type Event struct {
     Kind
-    Identity
+    identification.Identity
     Data []string
 }
 type EventBus chan *Event
-
-
-/*
- * Identity
- */
-
-type Identity struct {
-    kind string
-    uid string
-    value interface{}
-}
-
-func NewIdentity(kind, uid string, value interface{}) *Identity {
-    return &Identity{kind, uid, value}
-}
-
-func (identity *Identity) Set(kind, uid string, value interface{}) {
-    identity.kind = kind
-    identity.uid = uid
-    identity.value = value
-}
-
-func (identity Identity) Kind() string {
-    return identity.kind
-}
-
-func (identity Identity) Uid() string {
-    return identity.uid
-}
-
-func (identity Identity) Value() interface{} {
-    return identity.value
-}
-
-func (identity Identity) AddToAttributes(attributes map[string]interface{}) map[string]interface{} {
-    attributes[identity.kind + "Uid"] = identity.uid
-    return attributes
-}
 
 
 /*
@@ -90,7 +56,7 @@ func (busManager *busManager) Stop() {
     busManager.done = nil
 }
 
-func (busManager *busManager) PublishEvent(kind Kind, identity Identity, data []string) {
+func (busManager *busManager) PublishEvent(kind Kind, identity identification.Identity, data []string) {
     event := Event{kind, identity, data}
     busManager.incoming <- event
 }

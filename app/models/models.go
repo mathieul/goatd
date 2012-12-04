@@ -5,6 +5,7 @@ import (
     "log"
     "fmt"
     "os"
+    "goatd/app/identification"
 )
 
 const (
@@ -84,7 +85,7 @@ func newModel(model interface{}, attributes *Attrs) interface{} {
     return model
 }
 
-func simpleMethodCall(model interface{}, methodName string) (result interface{}) {
+func simpleMethodCall(model interface{}, methodName string) interface{} {
     value := reflect.ValueOf(model)
     kind := value.Elem().Type().Kind()
     if kind != reflect.Struct {
@@ -94,7 +95,11 @@ func simpleMethodCall(model interface{}, methodName string) (result interface{})
     if !method.IsValid() {
         log.Fatal(fmt.Errorf("simpleMethodCall(): model must have a %q method", methodName))
     }
-    return method.Call([]reflect.Value{})
+    result := method.Call([]reflect.Value{})
+    if len(result) != 1 {
+        log.Fatal(fmt.Errorf("simpleMethodCall(): method %q must return one value", methodName))
+    }
+    return result[0].Interface()
 }
 
 
@@ -123,3 +128,71 @@ func (storage Storage) Uid() string {
 func (storage *Storage) Save() {
     storage.persisted = true
 }
+
+
+/*
+ * Collection
+ */
+
+ type Collectioner interface {
+    Create(Attrs) interface{}
+    Find(string) interface{}
+    FindAll([]string) []interface{}
+    // Select(Attrs) []interface{}
+}
+
+type CollectionCreator func (Attrs, interface{}) interface{}
+type Collection struct {
+    creator CollectionCreator
+    Items []interface{}
+    owner identification.Identity
+}
+
+func NewCollection(creator CollectionCreator, owner identification.Identity) (collection Collection) {
+    collection = *new(Collection)
+    collection.creator = creator
+    collection.owner = owner
+    return collection
+}
+
+func (collection *Collection) Create(attributes Attrs) interface{} {
+    attributes = collection.owner.AddToAttributes(attributes)
+    model := collection.creator(attributes, collection.owner.Value())
+    collection.Items = append(collection.Items, model)
+    return model
+}
+
+func (collection Collection) Find(uid string) interface{} {
+    found := collection.FindAll([]string{uid})
+    if len(found) == 0 {
+        return nil
+    }
+    return found[0]
+}
+
+func (collection Collection) FindAll(uids []string) (found []interface{}) {
+    for _, candidate := range collection.Items {
+        candidateUid := simpleMethodCall(candidate, "Uid").(string)
+        for _, uid := range uids {
+            if candidateUid == uid {
+                found = append(found, candidate)
+            }
+        }
+    }
+    return found
+}
+
+// func (collection Collection) Select(query Attrs) (found []interface{}) {
+//     for _, candidate := range collection.Items {
+//         match := true
+//         for name, value := range query {
+//             if candidate[name] != value {
+//                 match = false
+//             }
+//         }
+//         if match {
+//             found = append(found, candidate)
+//         }
+//     }
+//     return found
+// }

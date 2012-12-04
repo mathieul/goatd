@@ -1,7 +1,7 @@
 package models
 
 import (
-    "goatd/app/event"
+    "goatd/app/identification"
 )
 
 /*
@@ -47,11 +47,11 @@ func (team *Skill) Enabled() bool {
  */
 
 type Skills struct {
-    owner event.Identity
+    owner identification.Identity
     items []*Skill
 }
 
-func NewSkills(owner event.Identity) (skills *Skills) {
+func NewSkills(owner identification.Identity) (skills *Skills) {
     skills = new(Skills)
     skills.owner = owner
     return skills

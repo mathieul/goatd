@@ -1,7 +1,7 @@
 package models
 
 import (
-    "goatd/app/event"
+    "goatd/app/identification"
 )
 
 /*
@@ -48,11 +48,11 @@ func (teammate Teammate) Team() (team *Team) {
  */
 
 type Teammates struct {
-    owner event.Identity
+    owner identification.Identity
     items []*Teammate
 }
 
-func NewTeammates(owner event.Identity) (teammates *Teammates) {
+func NewTeammates(owner identification.Identity) (teammates *Teammates) {
     teammates = new(Teammates)
     teammates.owner = owner
     return teammates

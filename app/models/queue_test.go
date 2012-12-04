@@ -34,10 +34,17 @@ func (s *QueueSuite) TestReturnsSlice(c *C) {
     c.Assert(s.queues.Slice(), DeepEquals, []*models.Queue{q1, q2, q3})
 }
 
-// func (s *QueueSuite) TestReturnAssignedTeammates(c *C) {
-//     queue := s.queues.Create(models.Attrs{"Name": "James Bond"})
-//     craig := t.team.Teammates.Create(models.Attrs{"Name": "Daniel Craig"})
-//     caine := t.team.Teammates.Create(models.Attrs{"Name": "Michael Caine"})
-//     connery := t.team.Teammates.Create(models.Attrs{"Name": "Sean Connery"})
-//     c.Assert(queue.Teammates(), DeepEquals, []*models.Teammate{craig, connery})
-// }
+func (s *QueueSuite) TestFindQueue(c *C) {
+    s.queues.Create(models.Attrs{"Name": "One"})
+    q2 := s.queues.Create(models.Attrs{"Name": "Two"})
+    c.Assert(s.queues.Find(q2.Uid()), DeepEquals, q2)
+}
+
+func (s *QueueSuite) TestFindQueueSlice(c *C) {
+    q1 := s.queues.Create(models.Attrs{"Name": "One"})
+    s.queues.Create(models.Attrs{"Name": "Two"})
+    q3 := s.queues.Create(models.Attrs{"Name": "Three"})
+    c.Assert(s.queues.FindAll([]string{q1.Uid(), q3.Uid()}),
+             DeepEquals,
+             []*models.Queue{q1, q3})
+}

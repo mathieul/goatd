@@ -1,7 +1,7 @@
 package models
 
 import (
-    "goatd/app/event"
+    "goatd/app/identification"
 )
 
 /*
@@ -10,7 +10,7 @@ import (
 
 type Team struct {
     Storage
-    identity *event.Identity
+    identity *identification.Identity
     Teammates *Teammates
     Queues *Queues
     Skills *Skills
@@ -27,7 +27,7 @@ func (team Team) Name() string {
 
 func NewTeam(attributes Attrs) (team *Team) {
     team = newModel(&Team{}, &attributes).(*Team)
-    team.identity = event.NewIdentity("Team", team.Uid(), team)
+    team.identity = identification.NewIdentity("Team", team.Uid(), team)
     team.Teammates = NewTeammates(*team.identity)
     team.Queues = NewQueues(*team.identity)
     team.Skills = NewSkills(*team.identity)

@@ -3,6 +3,7 @@ package event_test
 import (
     . "launchpad.net/gocheck"
     "testing"
+    "goatd/app/identification"
     "goatd/app/event"
     "time"
 )
@@ -10,7 +11,7 @@ import (
 func Test(t *testing.T) { TestingT(t) }
 
 type EventSuite struct{
-    identity event.Identity
+    identity identification.Identity
 }
 
 var _ = Suite(&EventSuite{})
