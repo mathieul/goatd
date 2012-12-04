@@ -3,6 +3,7 @@ package acceptance_test
 import (
     . "launchpad.net/gocheck"
     "testing"
+    "goatd/app/identification"
     "goatd/app/event"
     "goatd/app/models"
     "goatd/app/distribution"
@@ -29,7 +30,7 @@ var _ = Suite(&AcceptanceS{})
 
 func (s *AcceptanceS) SetUpTest(c *C) {
     event.Manager().Start()
-    s.teams = models.NewTeam()
+    s.teams = models.NewTeams(identification.NoIdentity())
     s.team = s.teams.Create(models.Attrs{"Name": "Wedding"})
     s.mate = s.team.Teammates.Create(models.Attrs{"Name": "Bride"})
     s.queue = s.team.Queues.Create(models.Attrs{"Name": "Thank you notes"})
@@ -58,7 +59,12 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
     }()
 
     distributor.AddTeammateToQueue(s.queue, s.mate, models.LevelHigh)
-    c.Assert(s.mate.Queues().Slice(), DeepEquals, []models.Queue{s.queue})
+    skills := s.team.Skills.Select(func (item interface{}) bool {
+        skill := item.(*models.Skill)
+        return skill.TeammateUid() == s.mate.Uid() && skill.QueueUid() == s.queue.Uid()
+    })
+    c.Assert(len(skills), Equals, 1)
+    c.Assert(skills[0].Level(), Equals, models.LevelHigh)
 
     c.Assert(models.StatusSignedOut, Equals, s.mate.Status())
     s.mate.signIn()
