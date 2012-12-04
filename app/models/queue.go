@@ -51,17 +51,17 @@ func (queue Queue) Team() (team *Team) {
  */
 
  type Collectioner interface {
-    Create(Attrs) event.Loner
-    Slice() []event.Loner
-    Find(string) event.Loner
-    FindAll([]string) []event.Loner
-    // Select(Attrs) []event.Loner
+    Create(Attrs) interface{}
+    Slice() []interface{}
+    Find(string) interface{}
+    FindAll([]string) []interface{}
+    // Select(Attrs) []interface{}
 }
 
-type CollectionCreator func (Attrs, event.Loner) event.Loner
+type CollectionCreator func (Attrs, interface{}) interface{}
 type Collection struct {
     creator CollectionCreator
-    items []event.Loner
+    items []interface{}
     owner event.Identity
 }
 
@@ -72,20 +72,20 @@ func NewCollection(creator CollectionCreator, owner event.Identity) (collection 
     return collection
 }
 
-func (collection *Collection) Create(attributes Attrs) event.Loner {
+func (collection *Collection) Create(attributes Attrs) interface{} {
     attributes = collection.owner.AddToAttributes(attributes)
     model := collection.creator(attributes, collection.owner.Value())
     collection.items = append(collection.items, model)
     return model
 }
 
-func (collection Collection) Slice() []event.Loner {
-    slice := make([]event.Loner, len(collection.items))
+func (collection Collection) Slice() []interface{} {
+    slice := make([]interface{}, len(collection.items))
     copy(slice, collection.items)
     return slice
 }
 
-func (collection Collection) Find(uid string) event.Loner {
+func (collection Collection) Find(uid string) interface{} {
     found := collection.FindAll([]string{uid})
     if len(found) == 0 {
         return nil
@@ -93,9 +93,9 @@ func (collection Collection) Find(uid string) event.Loner {
     return found[0]
 }
 
-func (collection Collection) FindAll(uids []string) (found []event.Loner) {
+func (collection Collection) FindAll(uids []string) (found []interface{}) {
     for _, candidate := range collection.items {
-        candidateUid := candidate.Uid()
+        candidateUid := simpleMethodCall(candidate, "Uid").(string)
         for _, uid := range uids {
             if candidateUid == uid {
                 found = append(found, candidate)
@@ -105,7 +105,7 @@ func (collection Collection) FindAll(uids []string) (found []event.Loner) {
     return found
 }
 
-// func (collection Collection) Select(query Attrs) (found []event.Loner) {
+// func (collection Collection) Select(query Attrs) (found []interface{}) {
 //     for _, candidate := range collection.items {
 //         match := true
 //         for name, value := range query {
@@ -127,7 +127,7 @@ type Queues struct {
 
 func NewQueues(owner event.Identity) (queues *Queues) {
     queues = new(Queues)
-    queues.Collection = NewCollection(func(attributes Attrs, lonerTeam event.Loner) event.Loner {
+    queues.Collection = NewCollection(func(attributes Attrs, lonerTeam interface{}) interface{} {
         queue := CreateQueue(attributes)
         queue.SetTeam(lonerTeam.(*Team))
         return queue
@@ -136,7 +136,9 @@ func NewQueues(owner event.Identity) (queues *Queues) {
 }
 
 func (queues *Queues) Create(attributes Attrs) (queue *Queue) {
-    queue = CreateQueue(queues.owner.AddToAttributes(attributes))
-    queues.items = append(queues.items, queue)
-    return queue
+    return queues.Collection.Create(attributes).(*Queue)
+}
+
+func (queues Queues) Slice() []*Queue {
+    return queues.Collection.Slice().([]*Queue)
 }

@@ -84,6 +84,19 @@ func newModel(model interface{}, attributes *Attrs) interface{} {
     return model
 }
 
+func simpleMethodCall(model interface{}, methodName string) (result interface{}) {
+    value := reflect.ValueOf(model)
+    kind := value.Elem().Type().Kind()
+    if kind != reflect.Struct {
+        log.Fatal(fmt.Errorf("simpleMethodCall(): model must be a Struct, and it is a %q", kind))
+    }
+    method := value.MethodByName(methodName)
+    if !method.IsValid() {
+        log.Fatal(fmt.Errorf("simpleMethodCall(): model must have a %q method", methodName))
+    }
+    return method.Call([]reflect.Value{})
+}
+
 
 /*
  * Storage
@@ -110,22 +123,3 @@ func (storage Storage) Uid() string {
 func (storage *Storage) Save() {
     storage.persisted = true
 }
-
-
-// /*
-//  * Owner
-//  */
-// type Owner struct {
-//     uid string
-//     name string
-// }
-
-// func (owner *Owner) SetOwner(name, uid string) {
-//     owner.name = name
-//     owner.uid = uid
-// }
-
-// func (owner Owner) AddOwnerToAttributes(attributes Attrs) Attrs {
-//     attributes[owner.name + "Uid"] = owner.uid
-//     return attributes
-// }

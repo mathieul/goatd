@@ -27,9 +27,7 @@ func (team Team) Name() string {
 
 func NewTeam(attributes Attrs) (team *Team) {
     team = newModel(&Team{}, &attributes).(*Team)
-    var loner event.Loner
-    loner = *team
-    team.identity = event.NewIdentity("Team", team.Uid(), loner)
+    team.identity = event.NewIdentity("Team", team.Uid(), team)
     team.Teammates = NewTeammates(*team.identity)
     team.Queues = NewQueues(*team.identity)
     team.Skills = NewSkills(*team.identity)

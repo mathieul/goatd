@@ -27,6 +27,13 @@ func (s *QueueSuite) TestCreateQueue(c *C) {
     c.Assert(queue.Persisted(), Equals, true)
 }
 
+func (s *QueueSuite) TestReturnsSlice(c *C) {
+    q1 := s.queues.Create(models.Attrs{"Name": "One"})
+    q2 := s.queues.Create(models.Attrs{"Name": "Two"})
+    q3 := s.queues.Create(models.Attrs{"Name": "Three"})
+    c.Assert(s.queues.Slice(), DeepEquals, []*models.Queue{q1, q2, q3})
+}
+
 // func (s *QueueSuite) TestReturnAssignedTeammates(c *C) {
 //     queue := s.queues.Create(models.Attrs{"Name": "James Bond"})
 //     craig := t.team.Teammates.Create(models.Attrs{"Name": "Daniel Craig"})
