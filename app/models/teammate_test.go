@@ -67,3 +67,12 @@ func (s *TeammateSuite) TestSelectTeammates(c *C) {
         DeepEquals,
         []*models.Teammate{tyrion, jamie})
 }
+
+func (s *TeammateSuite) TestSignInSignOutTeammate(c *C) {
+    agent := s.teammates.Create(models.Attrs{"Name": "Agent"})
+    c.Assert(agent.Status(), Equals, models.StatusSignedOut)
+    agent.SignIn()
+    c.Assert(agent.Status(), Equals, models.StatusOnBreak)
+    agent.SignOut()
+    c.Assert(agent.Status(), Equals, models.StatusSignedOut)
+}

@@ -2,6 +2,7 @@ package models
 
 import (
     "goatd/app/identification"
+    "github.com/sdegutis/fsm"
 )
 
 /*
@@ -11,12 +12,24 @@ import (
 type Teammate struct {
     Storage
     team *Team
+    sm fsm.StateMachine
     AttrName string
     AttrTeamUid string
 }
 
+func setupTeammateStateMachine(teammate *Teammate) fsm.StateMachine {
+    rules := []fsm.Rule{
+        {From: "signed-out", Event: "sign-in", To: "on-break"},
+        {From: "on-break", Event: "sign-out", To: "signed-out"},
+    }
+    sm := fsm.NewStateMachine(rules, teammate)
+    return sm
+}
+
 func NewTeammate(attributes Attrs) *Teammate {
-    return newModel(&Teammate{}, &attributes).(*Teammate)
+    teammate := newModel(&Teammate{}, &attributes).(*Teammate)
+    teammate.sm = setupTeammateStateMachine(teammate)
+    return teammate
 }
 
 func CreateTeammate(attributes Attrs) *Teammate {
@@ -25,21 +38,23 @@ func CreateTeammate(attributes Attrs) *Teammate {
     return teammate
 }
 
-func (teammate Teammate) Name() string {
-    return teammate.AttrName
+func (teammate *Teammate) StateMachineCallback(action string, args []interface{}) {
+    // TODO
 }
 
-func (teammate Teammate) TeamUid() string {
-    return teammate.AttrTeamUid
-}
+func (teammate Teammate) Name() string { return teammate.AttrName }
 
-func (teammate *Teammate) SetTeam(team *Team) {
-    teammate.team = team
-}
+func (teammate Teammate) TeamUid() string { return teammate.AttrTeamUid }
 
-func (teammate Teammate) Team() (team *Team) {
-    return teammate.team
-}
+func (teammate *Teammate) SetTeam(team *Team) { teammate.team = team }
+
+func (teammate Teammate) Team() (team *Team) { return teammate.team }
+
+func (teammate Teammate) Status() Status { return statusFromString[teammate.sm.CurrentState] }
+
+func (teammate *Teammate) SignIn() { teammate.sm.Process("sign-in") }
+
+func (teammate *Teammate) SignOut() { teammate.sm.Process("sign-out") }
 
 
 /*

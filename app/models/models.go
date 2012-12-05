@@ -36,6 +36,20 @@ const (
 type Attrs map[string]interface{}
 type Status int
 
+
+/*
+ * Init
+ */
+var statusFromString map[string]Status
+
+func init() {
+    statusFromString = map[string]Status{
+        "signed-out": StatusSignedOut,
+        "on-break": StatusOnBreak,
+    }
+}
+
+
 /*
  * Helpers
  */

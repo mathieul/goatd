@@ -66,9 +66,9 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
     c.Assert(len(skills), Equals, 1)
     c.Assert(skills[0].Level(), Equals, models.LevelHigh)
 
-    c.Assert(models.StatusSignedOut, Equals, s.mate.Status())
-    s.mate.signIn()
-    c.Assert(models.StatusOnBreak, Equals, s.mate.Status())
+    c.Assert(s.mate.Status(), Equals, models.StatusSignedOut)
+    s.mate.SignIn()
+    c.Assert(s.mate.Status(), Equals, models.StatusOnBreak)
 
     task := models.NewTask(models.Attrs{"Title": "thank Jones family"})
     c.Assert("created", Equals, task.Status())
