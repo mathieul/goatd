@@ -26,6 +26,14 @@ func (team Team) Name() string {
     return team.AttrName
 }
 
+func (team Team) TasksQueued(queue *Queue) ([]*Task) {
+    queueUid := queue.Uid()
+    return team.Tasks.Select(func (item interface{}) bool {
+        task := item.(*Task)
+        return task.Status() == StatusQueued && task.QueueUid() == queueUid
+    })
+}
+
 func NewTeam(attributes Attrs) (team *Team) {
     team = newModel(&Team{}, &attributes).(*Team)
     team.identity = identification.NewIdentity("Team", team.Uid(), team)
@@ -46,40 +54,6 @@ func CreateTeam(attributes Attrs) (team *Team) {
 /*
  * Teams
  */
-
-// type Teams struct {
-//     items []*Team
-// }
-
-// func NewTeams() *Teams {
-//     return new(Teams)
-// }
-
-// func (teams *Teams) Create(attributes Attrs) (team *Team) {
-//     team = CreateTeam(attributes)
-//     teams.items = append(teams.items, team)
-//     return team
-// }
-
-// func (teams Teams) FindAll(uids []string) (found []*Team) {
-//     for _, candidate := range teams.items {
-//         candidateUid := candidate.Uid()
-//         for _, uid := range uids {
-//             if candidateUid == uid {
-//                 found = append(found, candidate)
-//             }
-//         }
-//     }
-//     return found
-// }
-
-// func (teams Teams) Find(uid string) *Team {
-//     found := teams.FindAll([]string{uid})
-//     if len(found) == 0 {
-//         return nil
-//     }
-//     return found[0]
-// }
 
 type Teams struct {
     Collection

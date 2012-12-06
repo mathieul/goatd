@@ -60,8 +60,8 @@ func (task Task) Team() (team *Team) { return task.team }
 
 func (task Task) Status() Status { return statusFromString[task.sm.CurrentState] }
 
-func (task *Task) Queue(queueUid string) bool {
-    if error := task.sm.Process("queue", queueUid); error != nil {
+func (task *Task) Queue(queue *Queue) bool {
+    if error := task.sm.Process("queue", queue.Uid()); error != nil {
         return false
     }
     return true
@@ -113,6 +113,6 @@ func (tasks Tasks) FindAll(uids []string) []*Task {
     return toTaskSlice(tasks.Collection.FindAll(uids))
 }
 
-func (tasks Tasks) Select(tester func(interface{}) bool) (result []*Task) {
+func (tasks Tasks) Select(tester func(interface{}) bool) []*Task {
     return toTaskSlice(tasks.Collection.Select(tester))
 }
