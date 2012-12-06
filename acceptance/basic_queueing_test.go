@@ -3,11 +3,12 @@ package acceptance_test
 import (
     . "launchpad.net/gocheck"
     "testing"
+    "fmt"
+    "time"
     "goatd/app/identification"
     "goatd/app/event"
     "goatd/app/models"
     "goatd/app/distribution"
-    "time"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -43,9 +44,9 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
         incoming := event.Manager().SubscribeTo([]event.Kind{
             event.OfferTask, event.AssignTask, event.CompleteTask,
         })
-        eventOne = <-incoming
-        eventTwo = <-incoming
-        eventThree = <-incoming
+        eventOne = <-incoming; fmt.Println("eventOne:", eventOne)
+        eventTwo = <-incoming; fmt.Println("eventTwo:", eventTwo)
+        eventThree = <-incoming; fmt.Println("eventThree:", eventThree)
     }()
 
     distributor.AddTeammateToQueue(s.queue, s.mate, models.LevelHigh)

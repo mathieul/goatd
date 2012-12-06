@@ -14,18 +14,19 @@ const (
 )
 
 const (
-    StatusSignedOut Status = iota
+    StatusNone Status = iota
+    StatusSignedOut
     StatusOnBreak
     StatusWaiting
     StatusOffered
     StatusBusy
-    StatusAssigned
     StatusWrappingUp
     StatusCompleted
     StatusOtherWork
 
     StatusCreated
     StatusQueued
+    StatusAssigned
 )
 
 const (

@@ -1,6 +1,7 @@
 package models
 
 import (
+    "strings"
     "goatd/app/identification"
     "github.com/sdegutis/fsm"
 )
@@ -15,13 +16,17 @@ type Teammate struct {
     sm fsm.StateMachine
     AttrName string
     AttrTeamUid string
+    AttrTaskUid string
 }
 
 func setupTeammateStateMachine(teammate *Teammate) fsm.StateMachine {
     rules := []fsm.Rule{
         {From: "signed-out", Event: "sign-in", To: "on-break"},
         {From: "on-break", Event: "sign-out", To: "signed-out"},
+        {From: "waiting", Event: "sign-out", To: "signed-out"},
         {From: "on-break", Event: "make-available", To: "waiting"},
+        {From: "waiting", Event: "offer-task", To: "offered", Action: "setTaskUid"},
+        {From: "offered", Event: "accept-task", To: "busy"},
     }
     sm := fsm.NewStateMachine(rules, teammate)
     return sm
@@ -40,7 +45,10 @@ func CreateTeammate(attributes Attrs) *Teammate {
 }
 
 func (teammate *Teammate) StateMachineCallback(action string, args []interface{}) {
-    // TODO
+    switch action {
+    case "setTaskUid":
+        teammate.AttrTaskUid = args[0].(string)
+    }
 }
 
 func (teammate Teammate) Name() string { return teammate.AttrName }
@@ -53,11 +61,41 @@ func (teammate Teammate) Team() (team *Team) { return teammate.team }
 
 func (teammate Teammate) Status() Status { return statusFromString[teammate.sm.CurrentState] }
 
-func (teammate *Teammate) SignIn() { teammate.sm.Process("sign-in") }
+func (teammate *Teammate) SignIn() bool {
+    if error := teammate.sm.Process("sign-in"); error != nil { return false }
+    return true
+}
 
-func (teammate *Teammate) MakeAvailable() { teammate.sm.Process("make-available") }
+func (teammate *Teammate) MakeAvailable() bool {
+    if error := teammate.sm.Process("make-available"); error != nil { return false }
+    return true
+}
 
-func (teammate *Teammate) SignOut() { teammate.sm.Process("sign-out") }
+func (teammate *Teammate) OfferTask(task *Task) bool {
+    if error := teammate.sm.Process("offer-task", task.Uid()); error != nil { return false }
+    return true
+}
+
+func (teammate *Teammate) AcceptTask(task *Task) bool {
+    if task.Uid() != teammate.AttrTaskUid { return false }
+    if error := teammate.sm.Process("accept-task"); error != nil { return false }
+    return true
+}
+
+func (teammate *Teammate) SignOut() bool {
+    if error := teammate.sm.Process("sign-out"); error != nil { return false }
+    return true
+}
+
+func (teammate Teammate) CurrentTask() *Task {
+    if teammate.AttrTaskUid == "" { return nil }
+    found := teammate.team.Tasks.Select(func (item interface{}) bool {
+        task := item.(*Task)
+        return strings.Contains(task.Uid(), teammate.AttrTaskUid)
+    })
+    if len(found) == 0 { return nil }
+    return found[0]
+}
 
 
 /*

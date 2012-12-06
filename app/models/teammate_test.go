@@ -12,6 +12,7 @@ func Test(t *testing.T) { TestingT(t) }
 type TeammateSuite struct{
     team *models.Team
     teammates *models.Teammates
+    agent *models.Teammate
 }
 
 var _ = Suite(&TeammateSuite{})
@@ -19,6 +20,7 @@ var _ = Suite(&TeammateSuite{})
 func (s *TeammateSuite) SetUpTest(c *C) {
     s.team = models.NewTeam(models.Attrs{"Name": "Jon Snow & Egret"})
     s.teammates = s.team.Teammates
+    s.agent = s.teammates.Create(models.Attrs{"Name": "Agent"})
 }
 
 func (s *TeammateSuite) TestCreateTeammate(c *C) {
@@ -37,7 +39,7 @@ func (s *TeammateSuite) TestReturnSlice(c *C) {
     t1 := s.teammates.Create(models.Attrs{"Name": "Jon"})
     t2 := s.teammates.Create(models.Attrs{"Name": "Egret"})
     t3 := s.teammates.Create(models.Attrs{"Name": "Aria"})
-    c.Assert(s.teammates.Slice(), DeepEquals, []*models.Teammate{t1, t2,t3})
+    c.Assert(s.teammates.Slice(), DeepEquals, []*models.Teammate{s.agent, t1, t2, t3})
 }
 
 func (s *TeammateSuite) TestFindTeammate(c *C) {
@@ -69,17 +71,29 @@ func (s *TeammateSuite) TestSelectTeammates(c *C) {
 }
 
 func (s *TeammateSuite) TestSignInSignOutTeammate(c *C) {
-    agent := s.teammates.Create(models.Attrs{"Name": "Agent"})
-    c.Assert(agent.Status(), Equals, models.StatusSignedOut)
-    agent.SignIn()
-    c.Assert(agent.Status(), Equals, models.StatusOnBreak)
-    agent.SignOut()
-    c.Assert(agent.Status(), Equals, models.StatusSignedOut)
+    c.Assert(s.agent.Status(), Equals, models.StatusSignedOut)
+    c.Assert(s.agent.SignIn(), Equals, true)
+    c.Assert(s.agent.Status(), Equals, models.StatusOnBreak)
+    c.Assert(s.agent.SignOut(), Equals, true)
+    c.Assert(s.agent.Status(), Equals, models.StatusSignedOut)
 }
 
-func (s *TeammateSuite) TestAvailability(c *C) {
-    agent := s.teammates.Create(models.Attrs{"Name": "Agent"})
-    agent.SignIn()
-    agent.MakeAvailable()
-    c.Assert(agent.Status(), Equals, models.StatusWaiting)
+func (s *TeammateSuite) TestChangingAvailability(c *C) {
+    s.agent.SignIn()
+    c.Assert(s.agent.MakeAvailable(), Equals, true)
+    c.Assert(s.agent.Status(), Equals, models.StatusWaiting)
+    task := s.team.Tasks.Create(models.Attrs{"Title": "Do It"})
+    c.Assert(s.agent.OfferTask(task), Equals, true)
+    c.Assert(s.agent.Status(), Equals, models.StatusOffered)
+    c.Assert(s.agent.CurrentTask(), DeepEquals, task)
+}
+
+func (s *TeammateSuite) TestAcceptTask(c *C) {
+    task := s.team.Tasks.Create(models.Attrs{"Title": "Do It"})
+    s.agent.SignIn()
+    s.agent.MakeAvailable()
+    s.agent.OfferTask(task)
+    c.Assert(s.agent.AcceptTask(task), Equals, true)
+    c.Assert(s.agent.Status(), Equals, models.StatusBusy    )
+    c.Assert(s.agent.CurrentTask(), DeepEquals, task)
 }
