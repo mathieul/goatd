@@ -22,13 +22,25 @@ const (
     StatusWrappingUp
     StatusCompleted
     StatusOtherWork
+
+    StatusCreated
+    StatusQueued
 )
 
 const (
-    LevelLow int = iota
+    LevelNone int = iota
+    LevelLow
     LevelMedium
     LevelHigh
 )
+
+const (
+    PriorityNone int = iota
+    PriorityLow
+    PriorityMedium
+    PriorityHigh
+)
+
 
 /*
  * Basic types
@@ -46,6 +58,14 @@ func init() {
     statusFromString = map[string]Status{
         "signed-out": StatusSignedOut,
         "on-break": StatusOnBreak,
+        "offered": StatusOffered,
+        "busy": StatusBusy,
+        "assigned": StatusAssigned,
+        "wrapping-up": StatusWrappingUp,
+        "completed": StatusCompleted,
+        "other-work": StatusOtherWork,
+        "created": StatusCreated,
+        "queued": StatusQueued,
     }
 }
 

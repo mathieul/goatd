@@ -4,12 +4,6 @@ import (
     "goatd/app/models"
 )
 
-const (
-    EventOfferTask Event = iota
-    EventAssignTask
-    EventCompleteTask
-)
-
 
 /*
  * Basic types
@@ -52,8 +46,12 @@ func (distributor Distributor) AddTeammateToQueue(queue *models.Queue,
     skills := distributor.team.Skills
     attributes := models.Attrs{"TeammateUid": teammate.Uid(),
         "QueueUid": queue.Uid(), "Level": level, "Enabled": true}
-    if skill := skills.Create(attributes); skill == nil {
-        return false
-    }
+    if skill := skills.Create(attributes); skill == nil { return false }
+    return true
+}
+
+func (distributor Distributor) EnqueueTask(queue *models.Queue,
+        task *models.Task, priority int) bool {
+    if !task.Queue(queue.Uid()) { return false }
     return true
 }

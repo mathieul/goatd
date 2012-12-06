@@ -27,6 +27,13 @@ func (s *TaskSuite) TestCreateTaskWithTitle(c *C) {
     c.Assert(task.Persisted(), Equals, true)
 }
 
+func (s *TaskSuite) TestTaskHasPriority(c *C) {
+    task := s.tasks.Create(models.Attrs{"Title": "Blah"})
+    c.Assert(task.Priority(), Equals, models.PriorityMedium)
+    task.SetPriority(models.PriorityHigh)
+    c.Assert(task.Priority(), Equals, models.PriorityHigh)
+}
+
 func (s *TaskSuite) TestReturnsSlice(c *C) {
     q1 := s.tasks.Create(models.Attrs{"Title": "One"})
     q2 := s.tasks.Create(models.Attrs{"Title": "Two"})
@@ -60,4 +67,13 @@ func (s *TaskSuite) TestSelectTasks(c *C) {
         }),
         DeepEquals,
         []*models.Task{tyrion, jamie})
+}
+
+func (s *TaskSuite) TestSignInSignOutTask(c *C) {
+    task := s.tasks.Create(models.Attrs{"Title": "Clean-up my room"})
+    c.Assert(task.Status(), Equals, models.StatusCreated)
+    c.Assert(task.Queue("someId"), Equals, true)
+    c.Assert(task.Status(), Equals, models.StatusQueued)
+    c.Assert(task.QueueUid(), Equals, "someId")
+    c.Assert(task.Queue("someId"), Equals, false)
 }

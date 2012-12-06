@@ -2,6 +2,7 @@ package models
 
 import (
     "goatd/app/identification"
+    "github.com/sdegutis/fsm"
 )
 
 /*
@@ -11,11 +12,25 @@ import (
 type Task struct {
     Storage
     team *Team
+    sm fsm.StateMachine
     AttrTitle string
+    AttrQueueUid string
+    AttrPriority int
 }
 
-func NewTask(attributes Attrs) *Task {
-    return newModel(&Task{}, &attributes).(*Task)
+func setupTaksStateMachine(task *Task) fsm.StateMachine {
+    rules := []fsm.Rule{
+        {From: "created", Event: "queue", To: "queued", Action: "setQueueUid"},
+    }
+    sm := fsm.NewStateMachine(rules, task)
+    return sm
+}
+
+func NewTask(attributes Attrs) (task *Task) {
+    task = newModel(&Task{}, &attributes).(*Task)
+    if task.AttrPriority == PriorityNone { task.AttrPriority = PriorityMedium }
+    task.sm = setupTaksStateMachine(task)
+    return task
 }
 
 func CreateTask(attributes Attrs) (task *Task) {
@@ -24,16 +39,32 @@ func CreateTask(attributes Attrs) (task *Task) {
     return task
 }
 
-func (team *Task) Title() string {
-    return team.AttrTitle
+func (task *Task) StateMachineCallback(action string, args []interface{}) {
+    switch action {
+    case "setQueueUid":
+        task.AttrQueueUid = args[0].(string)
+    }
 }
 
-func (task *Task) SetTeam(team *Team) {
-    task.team = team
-}
+func (team Task) Title() string { return team.AttrTitle }
 
-func (task Task) Team() (team *Team) {
-    return task.team
+func (team Task) QueueUid() string { return team.AttrQueueUid }
+
+func (team *Task) SetPriority(priority int) { team.AttrPriority = priority }
+
+func (team Task) Priority() int { return team.AttrPriority }
+
+func (task *Task) SetTeam(team *Team) { task.team = team }
+
+func (task Task) Team() (team *Team) { return task.team }
+
+func (task Task) Status() Status { return statusFromString[task.sm.CurrentState] }
+
+func (task *Task) Queue(queueUid string) bool {
+    if error := task.sm.Process("queue", queueUid); error != nil {
+        return false
+    }
+    return true
 }
 
 
