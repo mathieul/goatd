@@ -76,3 +76,10 @@ func (s *TeammateSuite) TestSignInSignOutTeammate(c *C) {
     agent.SignOut()
     c.Assert(agent.Status(), Equals, models.StatusSignedOut)
 }
+
+func (s *TeammateSuite) TestAvailability(c *C) {
+    agent := s.teammates.Create(models.Attrs{"Name": "Agent"})
+    agent.SignIn()
+    agent.MakeAvailable()
+    c.Assert(agent.Status(), Equals, models.StatusWaiting)
+}

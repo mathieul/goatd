@@ -21,6 +21,7 @@ func setupTeammateStateMachine(teammate *Teammate) fsm.StateMachine {
     rules := []fsm.Rule{
         {From: "signed-out", Event: "sign-in", To: "on-break"},
         {From: "on-break", Event: "sign-out", To: "signed-out"},
+        {From: "on-break", Event: "make-available", To: "waiting"},
     }
     sm := fsm.NewStateMachine(rules, teammate)
     return sm
@@ -53,6 +54,8 @@ func (teammate Teammate) Team() (team *Team) { return teammate.team }
 func (teammate Teammate) Status() Status { return statusFromString[teammate.sm.CurrentState] }
 
 func (teammate *Teammate) SignIn() { teammate.sm.Process("sign-in") }
+
+func (teammate *Teammate) MakeAvailable() { teammate.sm.Process("make-available") }
 
 func (teammate *Teammate) SignOut() { teammate.sm.Process("sign-out") }
 

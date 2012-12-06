@@ -16,6 +16,7 @@ const (
 const (
     StatusSignedOut Status = iota
     StatusOnBreak
+    StatusWaiting
     StatusOffered
     StatusBusy
     StatusAssigned
@@ -58,6 +59,7 @@ func init() {
     statusFromString = map[string]Status{
         "signed-out": StatusSignedOut,
         "on-break": StatusOnBreak,
+        "waiting": StatusWaiting,
         "offered": StatusOffered,
         "busy": StatusBusy,
         "assigned": StatusAssigned,
