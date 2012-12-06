@@ -5,6 +5,7 @@ import (
     "testing"
     "goatd/app/models"
     "strings"
+    "fmt"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -61,4 +62,18 @@ func (s *QueueSuite) TestSelectQueues(c *C) {
         }),
         DeepEquals,
         []*models.Queue{tyrion, jamie})
+}
+
+func (s *QueueSuite) TestQueueTasksWithSamePriority(c *C) {
+    caller := s.queues.Create(models.Attrs{"Name": "Caller"})
+    tasks := make([]*models.Task, 0, 10)
+    for i := 0; i < 10; i++ {
+        task := s.team.Tasks.Create(models.Attrs{
+            "Title": fmt.Sprintf("#%02d", i),
+            "Priority": models.PriorityLow,
+        })
+        caller.Enqueue(task)
+        tasks = append(tasks, task)
+    }
+    c.Assert(caller.QueuedTasks(), DeepEquals, tasks)
 }

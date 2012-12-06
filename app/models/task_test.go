@@ -73,8 +73,8 @@ func (s *TaskSuite) TestSignInSignOutTask(c *C) {
     queue := s.team.Queues.Create(models.Attrs{"Name": "My TODOs"})
     task := s.tasks.Create(models.Attrs{"Title": "Clean-up my room"})
     c.Assert(task.Status(), Equals, models.StatusCreated)
-    c.Assert(task.Queue(queue), Equals, true)
+    c.Assert(task.Enqueue(queue), Equals, true)
     c.Assert(task.Status(), Equals, models.StatusQueued)
     c.Assert(task.QueueUid(), Equals, queue.Uid())
-    c.Assert(task.Queue(queue), Equals, false)
+    c.Assert(task.Enqueue(queue), Equals, false)
 }

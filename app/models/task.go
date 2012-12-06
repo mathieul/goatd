@@ -20,7 +20,7 @@ type Task struct {
 
 func setupTaksStateMachine(task *Task) fsm.StateMachine {
     rules := []fsm.Rule{
-        {From: "created", Event: "queue", To: "queued", Action: "setQueueUid"},
+        {From: "created", Event: "enqueue", To: "queued", Action: "setQueueUid"},
     }
     sm := fsm.NewStateMachine(rules, task)
     return sm
@@ -60,8 +60,8 @@ func (task Task) Team() (team *Team) { return task.team }
 
 func (task Task) Status() Status { return statusFromString[task.sm.CurrentState] }
 
-func (task *Task) Queue(queue *Queue) bool {
-    if error := task.sm.Process("queue", queue.Uid()); error != nil {
+func (task *Task) Enqueue(queue *Queue) bool {
+    if error := task.sm.Process("enqueue", queue.Uid()); error != nil {
         return false
     }
     return true

@@ -41,6 +41,15 @@ func (queue Queue) Team() (team *Team) {
     return queue.team
 }
 
+func (queue *Queue) Enqueue(task *Task) bool {
+    // TODO
+    return true
+}
+
+func (queue Queue) QueuedTasks() []*Task {
+    return []*Task{}
+}
+
 
 /*
  * Queues
