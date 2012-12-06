@@ -19,13 +19,6 @@ type AcceptanceS struct{
     queue *models.Queue
 }
 
-type State struct {
-    event distribution.Event
-    mate  *models.Teammate
-    queue *models.Queue
-    task  *models.Task
-}
-
 var _ = Suite(&AcceptanceS{})
 
 func (s *AcceptanceS) SetUpTest(c *C) {
@@ -45,17 +38,14 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
     aLittleBit := 100 * time.Millisecond
     distributor := distribution.NewDistributor(s.team)
 
-    var state State
-    callback := func (event distribution.Event, p []interface{}) {
-        state.event = event
-        state.queue = p[0].(*models.Queue)
-        state.mate  = p[1].(*models.Teammate)
-        state.task  = p[2].(*models.Task)
-    }
+    var eventOne, eventTwo, eventThree event.Event
     go func() {
-        distributor.On(distribution.EventOfferTask, callback)
-        distributor.On(distribution.EventAssignTask, callback)
-        distributor.On(distribution.EventCompleteTask, callback)
+        incoming := event.Manager().SubscribeTo([]event.Kind{
+            event.OfferTask, event.AssignTask, event.CompleteTask,
+        })
+        eventOne = <-incoming
+        eventTwo = <-incoming
+        eventThree = <-incoming
     }()
 
     distributor.AddTeammateToQueue(s.queue, s.mate, models.LevelHigh)
@@ -72,19 +62,19 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
 
     task := models.NewTask(models.Attrs{"Title": "thank Jones family"})
     c.Assert(task.Status(), Equals, models.StatusCreated)
-    distributor.EnqueueTask(s.queue, task, distribution.PriorityMedium)
+    distributor.EnqueueTask(s.queue, task, models.PriorityMedium)
     c.Assert(task.Status(), Equals, models.StatusQueued)
 
-    s.mate.makeAvailable()
+    s.mate.MakeAvailable()
     time.Sleep(aLittleBit)
-    c.Assert(models.StatusOffered, Equals, s.mate.Status())
-    c.Assert(task, DeepEquals, s.mate.CurrentTask())
-    c.Assert(models.StatusOffered, Equals, task.Status())
+    c.Assert(s.mate.Status(), Equals, models.StatusOffered)
+    c.Assert(s.mate.CurrentTask(), DeepEquals, task)
+    c.Assert(task.Status(), Equals, models.StatusOffered)
 
-    c.Assert(state.event, Equals, event.OfferTask)
-    c.Assert(s.queue, Equals, state.queue)
-    c.Assert(s.mate, Equals, state.mate)
-    c.Assert(task, Equals, state.task)
+    c.Assert(eventOne.Kind, Equals, event.OfferTask)
+    c.Assert(eventOne.Data[0], Equals, s.queue.Uid())
+    c.Assert(eventOne.Data[1], Equals, s.mate.Uid())
+    c.Assert(eventOne.Data[2], Equals, task.Uid())
 
     s.mate.AcceptTask(task)
     time.Sleep(aLittleBit)
