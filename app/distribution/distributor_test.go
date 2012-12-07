@@ -6,7 +6,6 @@ import (
     "goatd/app/identification"
     "goatd/app/distribution"
     "goatd/app/models"
-    "strings"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -45,22 +44,4 @@ func (s *DistributorSuite) TestAddTeammateToQueue(c *C) {
     c.Assert(skills[0].TeammateUid(), Equals, teammate.Uid())
     c.Assert(skills[0].Level(), Equals, models.LevelLow)
     c.Assert(skills[0].Enabled(), Equals, true)
-}
-
-func (s *DistributorSuite) TestEnqueueTask(c *C) {
-    distributor := distribution.NewDistributor(s.team)
-    queue := s.team.Queues.Create(models.Attrs{"Name": "Support"})
-    task := s.team.Tasks.Create(models.Attrs{"Title": "My printer is not working"})
-
-    result := distributor.EnqueueTask(queue, task, models.PriorityMedium)
-    c.Assert(result, Equals, true)
-    c.Assert(task.Status(), Equals, models.StatusQueued)
-    c.Assert(task.Priority(), Equals, models.PriorityMedium)
-    queuedTasks := s.team.Tasks.Select(func (item interface{}) bool {
-        task := item.(*models.Task)
-        return strings.Contains(task.QueueUid(), queue.Uid())
-    })
-    c.Assert(queuedTasks, DeepEquals, []*models.Task{task})
-    result = distributor.EnqueueTask(queue, task, models.PriorityHigh)
-    c.Assert(result, Equals, false)
 }

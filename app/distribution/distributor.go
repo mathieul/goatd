@@ -49,9 +49,3 @@ func (distributor Distributor) AddTeammateToQueue(queue *models.Queue,
     if skill := skills.Create(attributes); skill == nil { return false }
     return true
 }
-
-func (distributor Distributor) EnqueueTask(queue *models.Queue,
-        task *models.Task, priority int) bool {
-    if !task.Queue(queue.Uid()) { return false }
-    return true
-}

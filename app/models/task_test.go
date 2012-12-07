@@ -69,12 +69,14 @@ func (s *TaskSuite) TestSelectTasks(c *C) {
         []*models.Task{tyrion, jamie})
 }
 
-func (s *TaskSuite) TestSignInSignOutTask(c *C) {
+func (s *TaskSuite) TestEnqueueTask(c *C) {
     queue := s.team.Queues.Create(models.Attrs{"Name": "My TODOs"})
     task := s.tasks.Create(models.Attrs{"Title": "Clean-up my room"})
     c.Assert(task.Status(), Equals, models.StatusCreated)
     c.Assert(task.Enqueue(queue), Equals, true)
     c.Assert(task.Status(), Equals, models.StatusQueued)
     c.Assert(task.QueueUid(), Equals, queue.Uid())
+    c.Assert(queue.QueuedTasks(), DeepEquals, []*models.Task{task})
+
     c.Assert(task.Enqueue(queue), Equals, false)
 }

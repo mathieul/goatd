@@ -21,6 +21,7 @@ type Task struct {
 func setupTaksStateMachine(task *Task) fsm.StateMachine {
     rules := []fsm.Rule{
         {From: "created", Event: "enqueue", To: "queued", Action: "setQueueUid"},
+        {From: "queued", Event: "dequeue", To: "created", Action: "resetQueueUid"},
     }
     sm := fsm.NewStateMachine(rules, task)
     return sm
@@ -43,6 +44,8 @@ func (task *Task) StateMachineCallback(action string, args []interface{}) {
     switch action {
     case "setQueueUid":
         task.AttrQueueUid = args[0].(string)
+    case "resetQueueUid":
+        task.AttrQueueUid = ""
     }
 }
 
@@ -62,6 +65,10 @@ func (task Task) Status() Status { return statusFromString[task.sm.CurrentState]
 
 func (task *Task) Enqueue(queue *Queue) bool {
     if error := task.sm.Process("enqueue", queue.Uid()); error != nil {
+        return false
+    }
+    if !queue.InsertTask(task) {
+        task.sm.Process("dequeue", queue.Uid())
         return false
     }
     return true

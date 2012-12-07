@@ -63,7 +63,7 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
 
     task := models.NewTask(models.Attrs{"Title": "thank Jones family"})
     c.Assert(task.Status(), Equals, models.StatusCreated)
-    distributor.EnqueueTask(s.queue, task, models.PriorityMedium)
+    task.Enqueue(s.queue)
     c.Assert(task.Status(), Equals, models.StatusQueued)
 
     s.mate.MakeAvailable()
@@ -82,12 +82,12 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
     c.Assert(models.StatusBusy, Equals, s.mate.Status())
     c.Assert(task, DeepEquals, s.mate.CurrentTask())
     c.Assert(models.StatusAssigned, Equals, task.Status())
-    c.Assert([]models.Task{task}, DeepEquals, s.queue.Tasks().Slice())
+    c.Assert(s.queue.QueuedTasks(), DeepEquals, []*models.Task{task})
 
-    c.Assert(distribution.EventAssignTask, Equals, state.event)
-    c.Assert(s.queue, Equals, state.queue)
-    c.Assert(s.mate, Equals, state.mate)
-    c.Assert(task, Equals, state.task)
+    c.Assert(eventTwo.Kind, Equals, event.AssignTask)
+    c.Assert(eventTwo.Data[0], Equals, s.queue.Uid())
+    c.Assert(eventTwo.Data[1], Equals, s.mate.Uid())
+    c.Assert(eventTwo.Data[2], Equals, task.Uid())
 
     s.mate.FinishTask(task)
     time.Sleep(aLittleBit)

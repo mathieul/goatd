@@ -99,9 +99,9 @@ func (s *TeamSuite) TestCreateTask(c *C) {
 func (s *TeamSuite) TestFindQueuedTasks(c *C) {
     caller := s.team.Queues.Create(models.Attrs{"Name": "Caller"})
     callJohn := s.team.Tasks.Create(models.Attrs{"Title": "Call John"})
-    callJohn.Queue(caller)
+    callJohn.Enqueue(caller)
     callJane := s.team.Tasks.Create(models.Attrs{"Title": "Call Jane"})
-    callJane.Queue(caller)
+    callJane.Enqueue(caller)
     s.team.Tasks.Create(models.Attrs{"Title": "Email Arthur"})
     c.Assert(s.team.TasksQueued(caller), DeepEquals, []*models.Task{callJohn, callJane})
 }

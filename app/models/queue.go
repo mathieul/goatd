@@ -5,18 +5,29 @@ import (
 )
 
 /*
+ * Global
+ */
+
+const (
+    initialQueueLength = 10
+)
+
+/*
  * Queue
  */
 
 type Queue struct {
     Storage
     team *Team
+    queuedTasks []*Task
     AttrName string
     AttrTeamUid string
 }
 
-func NewQueue(attributes Attrs) *Queue {
-    return newModel(&Queue{}, &attributes).(*Queue)
+func NewQueue(attributes Attrs) (queue *Queue) {
+    queue = newModel(&Queue{}, &attributes).(*Queue)
+    queue.queuedTasks = make([]*Task, 0, initialQueueLength)
+    return queue
 }
 
 func CreateQueue(attributes Attrs) (queue *Queue) {
@@ -41,13 +52,13 @@ func (queue Queue) Team() (team *Team) {
     return queue.team
 }
 
-func (queue *Queue) Enqueue(task *Task) bool {
-    // TODO
+func (queue *Queue) InsertTask(task *Task) bool {
+    queue.queuedTasks = append(queue.queuedTasks, task)
     return true
 }
 
 func (queue Queue) QueuedTasks() []*Task {
-    return []*Task{}
+    return queue.queuedTasks
 }
 
 
