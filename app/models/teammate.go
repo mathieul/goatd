@@ -22,11 +22,22 @@ type Teammate struct {
 func setupTeammateStateMachine(teammate *Teammate) fsm.StateMachine {
     rules := []fsm.Rule{
         {From: "signed-out", Event: "sign-in", To: "on-break"},
+        {From: "waiting", Event: "go-on-break", To: "on-break"},
+        {From: "wrapping-up", Event: "go-on-break", To: "on-break"},
+        {From: "offered", Event: "go-on-break", To: "on-break"},
+        {From: "other-work", Event: "go-on-break", To: "on-break"},
+
         {From: "on-break", Event: "sign-out", To: "signed-out"},
         {From: "waiting", Event: "sign-out", To: "signed-out"},
+
         {From: "on-break", Event: "make-available", To: "waiting"},
         {From: "waiting", Event: "offer-task", To: "offered", Action: "setTaskUid"},
         {From: "offered", Event: "accept-task", To: "busy"},
+        {From: "busy", Event: "finish-task", To: "wrapping-up", Action: "resetTaskUid"},
+
+        {From: "on-break", Event: "start-other-work", To: "other-work"},
+        {From: "waiting", Event: "start-other-work", To: "other-work"},
+        {From: "wrapping-up", Event: "start-other-work", To: "other-work"},
     }
     sm := fsm.NewStateMachine(rules, teammate)
     return sm
@@ -48,6 +59,8 @@ func (teammate *Teammate) StateMachineCallback(action string, args []interface{}
     switch action {
     case "setTaskUid":
         teammate.AttrTaskUid = args[0].(string)
+    case "resetTaskUid":
+        teammate.AttrTaskUid = ""
     }
 }
 
@@ -66,6 +79,11 @@ func (teammate *Teammate) SignIn() bool {
     return true
 }
 
+func (teammate *Teammate) GoOnBreak() bool {
+    if error := teammate.sm.Process("go-on-break"); error != nil { return false }
+    return true
+}
+
 func (teammate *Teammate) MakeAvailable() bool {
     if error := teammate.sm.Process("make-available"); error != nil { return false }
     return true
@@ -79,6 +97,17 @@ func (teammate *Teammate) OfferTask(task *Task) bool {
 func (teammate *Teammate) AcceptTask(task *Task) bool {
     if task.Uid() != teammate.AttrTaskUid { return false }
     if error := teammate.sm.Process("accept-task"); error != nil { return false }
+    return true
+}
+
+func (teammate *Teammate) FinishTask(task *Task) bool {
+    if task.Uid() != teammate.AttrTaskUid { return false }
+    if error := teammate.sm.Process("finish-task"); error != nil { return false }
+    return true
+}
+
+func (teammate *Teammate) StartOtherWork() bool {
+    if error := teammate.sm.Process("start-other-work"); error != nil { return false }
     return true
 }
 

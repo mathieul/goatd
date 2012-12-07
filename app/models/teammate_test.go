@@ -88,12 +88,33 @@ func (s *TeammateSuite) TestChangingAvailability(c *C) {
     c.Assert(s.agent.CurrentTask(), DeepEquals, task)
 }
 
-func (s *TeammateSuite) TestAcceptTask(c *C) {
-    task := s.team.Tasks.Create(models.Attrs{"Title": "Do It"})
+func (s *TeammateSuite) TestAcceptFinishTask(c *C) {
     s.agent.SignIn()
     s.agent.MakeAvailable()
+    task := s.team.Tasks.Create(models.Attrs{"Title": "Do It"})
     s.agent.OfferTask(task)
     c.Assert(s.agent.AcceptTask(task), Equals, true)
-    c.Assert(s.agent.Status(), Equals, models.StatusBusy    )
+    c.Assert(s.agent.Status(), Equals, models.StatusBusy)
     c.Assert(s.agent.CurrentTask(), DeepEquals, task)
+
+    c.Assert(s.agent.FinishTask(task), Equals, true)
+    c.Assert(s.agent.Status(), Equals, models.StatusWrappingUp)
+    c.Assert(s.agent.CurrentTask(), IsNil)
+}
+
+func (s *TeammateSuite) TestOtherWorkOnBreakTask(c *C) {
+    s.agent.SignIn()
+    s.agent.MakeAvailable()
+    task := s.team.Tasks.Create(models.Attrs{"Title": "Do It"})
+    s.agent.OfferTask(task)
+    s.agent.AcceptTask(task)
+    c.Assert(s.agent.StartOtherWork(), Equals, false)
+    s.agent.FinishTask(task)
+
+    c.Assert(s.agent.StartOtherWork(), Equals, true)
+    c.Assert(s.agent.Status(), Equals, models.StatusOtherWork)
+    c.Assert(s.agent.GoOnBreak(), Equals, true)
+    c.Assert(s.agent.Status(), Equals, models.StatusOnBreak)
+    c.Assert(s.agent.StartOtherWork(), Equals, true)
+    c.Assert(s.agent.Status(), Equals, models.StatusOtherWork)
 }

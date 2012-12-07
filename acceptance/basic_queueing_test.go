@@ -94,7 +94,7 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
     c.Assert(models.StatusWrappingUp, Equals, s.mate.Status())
     c.Assert(s.mate.CurrentTask(), IsNil)
     c.Assert(models.StatusCompleted, Equals, task.Status())
-    c.Assert([]models.Task{}, DeepEquals, s.queue.Tasks().Slice())
+    c.Assert(s.queue.QueuedTasks(), DeepEquals, []*models.Task{})
 
     s.mate.StartOtherWork()
     c.Assert(models.StatusOtherWork, Equals, s.mate.Status())
