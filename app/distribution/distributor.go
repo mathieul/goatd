@@ -2,6 +2,7 @@ package distribution
 
 import (
     "goatd/app/models"
+    "goatd/app/event"
 )
 
 
@@ -20,8 +21,26 @@ type Distributor struct {
     callbacks map[Event][]CallbackFunc
 }
 
-func NewDistributor(team *models.Team) *Distributor {
-    return &Distributor{team, make(map[Event][]CallbackFunc)}
+func NewDistributor(team *models.Team) (distributor *Distributor) {
+    distributor = &Distributor{team, make(map[Event][]CallbackFunc)}
+    distributor.setupListeners()
+    return distributor
+}
+
+func (distributor *Distributor) setupListeners() {
+    if !event.Manager().Running() {
+        panic("Event manager is not running.")
+    }
+    go func() {
+        incoming := event.Manager().SubscribeTo([]event.Kind{event.KindTeammateAvailable})
+        for event.Manager().Running() {
+            select {
+            case event := <- incoming:
+                // TODO
+                panic(event)
+            }
+        }
+    }()
 }
 
 func (distributor Distributor) Team() *models.Team {

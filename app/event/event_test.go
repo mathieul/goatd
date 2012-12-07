@@ -31,9 +31,9 @@ func (s *EventSuite) TestPublishEvent(c *C) {
         incoming := event.Manager().SubscribeToAll()
         received = <- incoming
     }()
-    event.Manager().PublishEvent(event.OfferTask, s.identity, []string{"string"})
+    event.Manager().PublishEvent(event.KindOfferTask, s.identity, []string{"string"})
     time.Sleep(200 * time.Millisecond)
-    c.Assert(received.Kind, Equals, event.OfferTask)
+    c.Assert(received.Kind, Equals, event.KindOfferTask)
     c.Assert(received.Identity, Equals, s.identity)
     c.Assert(received.Data[0], Equals, "string")
 }
@@ -41,17 +41,17 @@ func (s *EventSuite) TestPublishEvent(c *C) {
 func (s *EventSuite) TestSubscribingToSomeEvents(c *C) {
     var e11, e12, e21, e22 event.Event
     go func() {
-        incoming := event.Manager().SubscribeTo([]event.Kind{event.OfferTask, event.CompleteTask})
+        incoming := event.Manager().SubscribeTo([]event.Kind{event.KindOfferTask, event.KindCompleteTask})
         e11 = <- incoming
         e12 = <- incoming
     }()
     go func() {
-        incoming := event.Manager().SubscribeToEvent(event.CompleteTask)
+        incoming := event.Manager().SubscribeToEvent(event.KindCompleteTask)
         e21 = <- incoming
         e22 = <- incoming
     }()
-    event.Manager().PublishEvent(event.CompleteTask, s.identity, []string{"complete 1"})
-    event.Manager().PublishEvent(event.OfferTask, s.identity, []string{"offer"})
+    event.Manager().PublishEvent(event.KindCompleteTask, s.identity, []string{"complete 1"})
+    event.Manager().PublishEvent(event.KindOfferTask, s.identity, []string{"offer"})
 
     time.Sleep(200 * time.Millisecond)
     c.Assert(e11.Data[0], Equals, "complete 1")

@@ -5,9 +5,11 @@ import (
 )
 
 const (
-    OfferTask Kind = iota
-    AssignTask
-    CompleteTask
+    KindNone Kind = iota
+    KindOfferTask
+    KindAssignTask
+    KindCompleteTask
+    KindTeammateAvailable
 )
 
 var allKinds []Kind
@@ -18,7 +20,7 @@ var allKinds []Kind
 var manager *busManager
 func init() {
     manager = new(busManager)
-    allKinds = []Kind{OfferTask, AssignTask, CompleteTask}
+    allKinds = []Kind{KindOfferTask, KindAssignTask, KindCompleteTask}
 }
 
 func Manager() *busManager {
@@ -45,9 +47,10 @@ type busManager struct {
     incoming chan Event
     outgoings map[Kind][]chan Event
     done chan bool
+    running bool
 }
 
-func (busManager *busManager) Init() {
+func (busManager *busManager) init() {
     busManager.incoming = make(chan Event, 0)
     busManager.done = make(chan bool, 0)
     busManager.outgoings = make(map[Kind][]chan Event, len(allKinds))
@@ -56,9 +59,14 @@ func (busManager *busManager) Init() {
     }
 }
 
+func (busManager busManager) Running() bool {
+    return busManager.running
+}
+
 func (busManager *busManager) Start() {
-    busManager.Init()
+    busManager.init()
     go func() {
+        busManager.running = true
         for {
             select {
             case event := <- busManager.incoming:
@@ -77,11 +85,17 @@ func (busManager *busManager) Stop() {
     busManager.incoming = nil
     busManager.outgoings = nil
     busManager.done = nil
+    busManager.running = false
 }
 
-func (busManager *busManager) PublishEvent(kind Kind, identity identification.Identity, data []string) {
-    event := Event{kind, identity, data}
-    busManager.incoming <- event
+func (busManager *busManager) PublishEvent(kind Kind,
+        identity identification.Identity, data []string) bool {
+    if busManager.running {
+        event := Event{kind, identity, data}
+        busManager.incoming <- event
+        return true
+    }
+    return false
 }
 
 func (busManager *busManager) SubscribeTo(kinds []Kind) (<-chan Event) {

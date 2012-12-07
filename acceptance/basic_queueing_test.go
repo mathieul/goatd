@@ -42,7 +42,7 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
     var eventOne, eventTwo, eventThree event.Event
     go func() {
         incoming := event.Manager().SubscribeTo([]event.Kind{
-            event.OfferTask, event.AssignTask, event.CompleteTask,
+            event.KindOfferTask, event.KindAssignTask, event.KindCompleteTask,
         })
         eventOne = <-incoming; fmt.Println("eventOne:", eventOne)
         eventTwo = <-incoming; fmt.Println("eventTwo:", eventTwo)
@@ -72,7 +72,7 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
     c.Assert(s.mate.CurrentTask(), DeepEquals, task)
     c.Assert(task.Status(), Equals, models.StatusOffered)
 
-    c.Assert(eventOne.Kind, Equals, event.OfferTask)
+    c.Assert(eventOne.Kind, Equals, event.KindOfferTask)
     c.Assert(eventOne.Data[0], Equals, s.queue.Uid())
     c.Assert(eventOne.Data[1], Equals, s.mate.Uid())
     c.Assert(eventOne.Data[2], Equals, task.Uid())
@@ -84,7 +84,7 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
     c.Assert(models.StatusAssigned, Equals, task.Status())
     c.Assert(s.queue.QueuedTasks(), DeepEquals, []*models.Task{task})
 
-    c.Assert(eventTwo.Kind, Equals, event.AssignTask)
+    c.Assert(eventTwo.Kind, Equals, event.KindAssignTask)
     c.Assert(eventTwo.Data[0], Equals, s.queue.Uid())
     c.Assert(eventTwo.Data[1], Equals, s.mate.Uid())
     c.Assert(eventTwo.Data[2], Equals, task.Uid())

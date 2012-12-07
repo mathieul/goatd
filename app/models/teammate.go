@@ -2,8 +2,9 @@ package models
 
 import (
     "strings"
-    "goatd/app/identification"
     "github.com/sdegutis/fsm"
+    "goatd/app/identification"
+    "goatd/app/event"
 )
 
 /*
@@ -12,6 +13,7 @@ import (
 
 type Teammate struct {
     Storage
+    identity *identification.Identity
     team *Team
     sm fsm.StateMachine
     AttrName string
@@ -30,7 +32,7 @@ func setupTeammateStateMachine(teammate *Teammate) fsm.StateMachine {
         {From: "on-break", Event: "sign-out", To: "signed-out"},
         {From: "waiting", Event: "sign-out", To: "signed-out"},
 
-        {From: "on-break", Event: "make-available", To: "waiting"},
+        {From: "on-break", Event: "make-available", To: "waiting", Action: "publishWaiting"},
         {From: "waiting", Event: "offer-task", To: "offered", Action: "setTaskUid"},
         {From: "offered", Event: "accept-task", To: "busy"},
         {From: "busy", Event: "finish-task", To: "wrapping-up", Action: "resetTaskUid"},
@@ -45,6 +47,7 @@ func setupTeammateStateMachine(teammate *Teammate) fsm.StateMachine {
 
 func NewTeammate(attributes Attrs) *Teammate {
     teammate := newModel(&Teammate{}, &attributes).(*Teammate)
+    teammate.identity = identification.NewIdentity("Teammate", teammate.Uid(), teammate)
     teammate.sm = setupTeammateStateMachine(teammate)
     return teammate
 }
@@ -61,6 +64,8 @@ func (teammate *Teammate) StateMachineCallback(action string, args []interface{}
         teammate.AttrTaskUid = args[0].(string)
     case "resetTaskUid":
         teammate.AttrTaskUid = ""
+    case "publishWaiting":
+        event.Manager().PublishEvent(event.KindTeammateAvailable, *teammate.identity, nil)
     }
 }
 
