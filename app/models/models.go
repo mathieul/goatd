@@ -50,11 +50,16 @@ const (
 type Attrs map[string]interface{}
 type Status int
 
+func (status Status) String() string {
+    return fmt.Sprintf("Status{%s}", statusToString[status])
+}
+
 
 /*
  * Init
  */
 var statusFromString map[string]Status
+var statusToString map[Status]string
 
 func init() {
     statusFromString = map[string]Status{
@@ -69,6 +74,20 @@ func init() {
         "other-work": StatusOtherWork,
         "created": StatusCreated,
         "queued": StatusQueued,
+    }
+    statusToString = map[Status]string{
+        StatusNone: "None",
+        StatusSignedOut: "SignedOut",
+        StatusOnBreak: "OnBreak",
+        StatusWaiting: "Waiting",
+        StatusOffered: "Offered",
+        StatusBusy: "Busy",
+        StatusWrappingUp: "WrappingUp",
+        StatusOtherWork: "OtherWork",
+        StatusCreated: "Created",
+        StatusQueued: "Queued",
+        StatusAssigned: "Assigned",
+        StatusCompleted: "Completed",
     }
 }
 
