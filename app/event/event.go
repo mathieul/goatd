@@ -50,7 +50,11 @@ type busManager struct {
     running bool
 }
 
-func (busManager *busManager) init() {
+func (busManager busManager) Running() bool {
+    return busManager.running
+}
+
+func (busManager *busManager) setupChannels() {
     busManager.incoming = make(chan Event, 0)
     busManager.done = make(chan bool, 0)
     busManager.outgoings = make(map[Kind][]chan Event, len(allKinds))
@@ -59,12 +63,18 @@ func (busManager *busManager) init() {
     }
 }
 
-func (busManager busManager) Running() bool {
-    return busManager.running
+func (busManager *busManager) cleanupChannels() {
+    close(busManager.done)
+    close(busManager.incoming)
+    for _, channels := range busManager.outgoings {
+        for _, channel := range channels {
+            close(channel)
+        }
+    }
 }
 
 func (busManager *busManager) Start() {
-    busManager.init()
+    busManager.setupChannels()
     go func() {
         busManager.running = true
         for {
@@ -77,15 +87,13 @@ func (busManager *busManager) Start() {
                 break
             }
         }
+        busManager.running = false
+        busManager.cleanupChannels()
     }()
 }
 
 func (busManager *busManager) Stop() {
     busManager.done <- true
-    busManager.incoming = nil
-    busManager.outgoings = nil
-    busManager.done = nil
-    busManager.running = false
 }
 
 func (busManager *busManager) PublishEvent(kind Kind,

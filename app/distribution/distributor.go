@@ -23,22 +23,19 @@ type Distributor struct {
 
 func NewDistributor(team *models.Team) (distributor *Distributor) {
     distributor = &Distributor{team, make(map[Event][]CallbackFunc)}
-    distributor.setupListeners()
+    distributor.monitorDistributionTriggers()
     return distributor
 }
 
-func (distributor *Distributor) setupListeners() {
+func (distributor *Distributor) monitorDistributionTriggers() {
     if !event.Manager().Running() {
         panic("Event manager is not running.")
     }
     go func() {
         incoming := event.Manager().SubscribeTo([]event.Kind{event.KindTeammateAvailable})
-        for event.Manager().Running() {
-            select {
-            case event := <- incoming:
-                // TODO
-                panic(event)
-            }
+        for theEvent := range incoming {
+            theEvent := <- incoming
+            teammate := theEvent
         }
     }()
 }
