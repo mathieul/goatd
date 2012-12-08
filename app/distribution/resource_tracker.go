@@ -1,7 +1,6 @@
 package distribution
 
 import (
-    "fmt"
     "goatd/app/event"
     "goatd/app/models"
 )
@@ -17,9 +16,7 @@ type ResourceTracker struct {
 
 func (tracker *ResourceTracker) TeammateQueuesReady(teammate *models.Teammate) []*models.Queue {
     uids := tracker.queuesByTeammate[teammate.Uid()]
-    fmt.Println("TeammateQueuesReady: uids =", uids)
     allQueues := tracker.team.Queues.FindAll(uids)
-    fmt.Println("TeammateQueuesReady: allQueues =", allQueues)
     if allQueues == nil { return []*models.Queue{} }
     queues := make([]*models.Queue, 0, len(allQueues))
     for _, queue := range allQueues {
@@ -42,7 +39,6 @@ func (tracker *ResourceTracker) startTracking() {
                 uids = append(uids, queueUid)
             }
             tracker.queuesByTeammate[teammateUid] = uids
-            fmt.Println("startTracking: uids =", uids)
         }
     }()
 }

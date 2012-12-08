@@ -59,11 +59,15 @@ func (distributor Distributor) AddTeammateToQueue(queue *models.Queue,
 
 func (distributor *Distributor) FindAndAssignTaskForTeammate(teammate *models.Teammate) {
     queues := distributor.tracker.TeammateQueuesReady(teammate)
-    task := TaskSelectorByOldestNextTask(queues)
-    teammate.OfferTask(task)
+    if task := TaskSelectorByOldestNextTask(queues); task != nil {
+        teammate.OfferTask(task)
+    }
 }
 
 func TaskSelectorByOldestNextTask(queues []*models.Queue) *models.Task {
     // TODO, for now just return the first one :D
-    return queues[0].QueuedTasks()[0]
+    if len(queues) == 0 { return nil }
+    tasks := queues[0].QueuedTasks()
+    if len(tasks) == 0 { return nil }
+    return tasks[0]
 }

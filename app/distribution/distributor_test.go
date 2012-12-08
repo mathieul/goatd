@@ -58,6 +58,7 @@ func (s *DistributorSuite) TestAddTeammateToQueue(c *C) {
 func (s *DistributorSuite) TestAssignTaskWhenTeammateAvailable(c *C) {
     teammate := s.team.Teammates.Create(models.Attrs{"Name": "The Mate"})
     queue := s.team.Queues.Create(models.Attrs{"Name": "The Queue"})
+    s.distributor.AddTeammateToQueue(queue, teammate, models.LevelHigh)
     task := s.team.Tasks.Create(models.Attrs{"Title": "Do It"})
     task.Enqueue(queue)
     teammate.SignIn()

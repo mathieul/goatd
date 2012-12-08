@@ -22,6 +22,7 @@ func setupTaksStateMachine(task *Task) fsm.StateMachine {
     rules := []fsm.Rule{
         {From: "created", Event: "enqueue", To: "queued", Action: "setQueueUid"},
         {From: "queued", Event: "dequeue", To: "created", Action: "resetQueueUid"},
+        {From: "queued", Event: "offer", To: "offered"},
     }
     sm := fsm.NewStateMachine(rules, task)
     return sm
@@ -69,6 +70,13 @@ func (task *Task) Enqueue(queue *Queue) bool {
     }
     if !queue.InsertTask(task) {
         task.sm.Process("dequeue", queue.Uid())
+        return false
+    }
+    return true
+}
+
+func (task *Task) Offer() bool {
+    if error := task.sm.Process("offer"); error != nil {
         return false
     }
     return true
