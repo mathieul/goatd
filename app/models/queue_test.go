@@ -66,8 +66,10 @@ func (s *QueueSuite) TestSelectQueues(c *C) {
 
 func (s *QueueSuite) TestInsertTask(c *C) {
     caller := s.queues.Create(models.Attrs{"Name": "Caller"})
+    c.Assert(caller.IsReady(), Equals, false)
     task := s.team.Tasks.Create(models.Attrs{"Title": "Do It"})
     c.Assert(caller.InsertTask(task), Equals, true)
+    c.Assert(caller.IsReady(), Equals, true)
     c.Assert(caller.QueuedTasks(), DeepEquals, []*models.Task{task})
 }
 

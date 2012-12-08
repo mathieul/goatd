@@ -20,6 +20,7 @@ type Queue struct {
     Storage
     team *Team
     queuedTasks []*Task
+    isReady bool
     AttrName string
     AttrTeamUid string
 }
@@ -27,6 +28,7 @@ type Queue struct {
 func NewQueue(attributes Attrs) (queue *Queue) {
     queue = newModel(&Queue{}, &attributes).(*Queue)
     queue.queuedTasks = make([]*Task, 0, initialQueueLength)
+    queue.isReady = false
     return queue
 }
 
@@ -52,8 +54,13 @@ func (queue Queue) Team() (team *Team) {
     return queue.team
 }
 
+func (queue Queue) IsReady() bool {
+    return queue.isReady
+}
+
 func (queue *Queue) InsertTask(task *Task) bool {
     queue.queuedTasks = append(queue.queuedTasks, task)
+    queue.isReady = true
     return true
 }
 

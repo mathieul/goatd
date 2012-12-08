@@ -60,6 +60,8 @@ func (status Status) String() string {
  */
 var statusFromString map[string]Status
 var statusToString map[Status]string
+var levelToString map[int]string
+var boolToString map[bool]string
 
 func init() {
     statusFromString = map[string]Status{
@@ -88,6 +90,15 @@ func init() {
         StatusQueued: "Queued",
         StatusAssigned: "Assigned",
         StatusCompleted: "Completed",
+    }
+    levelToString = map[int]string{
+        LevelLow: "LevelLow",
+        LevelMedium: "LevelMedium",
+        LevelHigh: "LevelHigh",
+    }
+    boolToString = map[bool]string{
+        true: "True",
+        false: "False",
     }
 }
 
@@ -194,7 +205,7 @@ func (storage *Storage) Save() {
     Create(Attrs) interface{}
     Find(string) interface{}
     FindAll([]string) []interface{}
-    // Select(Attrs) []interface{}
+    Select(func(interface{}) bool) []interface{}
 }
 
 type CollectionCreator func (Attrs, interface{}) interface{}

@@ -10,6 +10,7 @@ const (
     KindAssignTask
     KindCompleteTask
     KindTeammateAvailable
+    KindSkillCreated        // QueueUid, TeammateUid, Level, Enabled
 )
 
 var allKinds []Kind

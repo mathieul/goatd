@@ -2,6 +2,7 @@ package models
 
 import (
     "goatd/app/identification"
+    "goatd/app/event"
 )
 
 /*
@@ -11,6 +12,7 @@ import (
 type Skill struct {
     Storage
     team *Team
+    identity *identification.Identity
     AttrQueueUid string
     AttrTeammateUid string
     AttrLevel int
@@ -18,12 +20,21 @@ type Skill struct {
 }
 
 func NewSkill(attributes Attrs) *Skill {
-    return newModel(&Skill{}, &attributes).(*Skill)
+    skill := newModel(&Skill{}, &attributes).(*Skill)
+    skill.identity = identification.NewIdentity("Skill", skill.Uid(), skill)
+    return skill
 }
 
 func CreateSkill(attributes Attrs) (skill *Skill) {
     skill = NewSkill(attributes)
     skill.Save()
+    event.Manager().PublishEvent(event.KindSkillCreated, *skill.identity,
+        []string{
+            skill.QueueUid(),
+            skill.TeammateUid(),
+            levelToString[skill.Level()],
+            boolToString[skill.Enabled()],
+        })
     return skill
 }
 
