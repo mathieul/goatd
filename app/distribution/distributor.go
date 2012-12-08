@@ -60,7 +60,14 @@ func (distributor Distributor) AddTeammateToQueue(queue *models.Queue,
 func (distributor *Distributor) FindAndAssignTaskForTeammate(teammate *models.Teammate) {
     queues := distributor.tracker.TeammateQueuesReady(teammate)
     if task := TaskSelectorByOldestNextTask(queues); task != nil {
-        teammate.OfferTask(task)
+        if teammate.OfferTask(task) {
+            if task.Offer() {
+                event.Manager().PublishEvent(event.KindOfferTask, distributor.team.Identity(),
+                    []string{teammate.Uid(), task.Uid()})
+            } else {
+                teammate.RejectTask(task)
+            }
+        }
     }
 }
 

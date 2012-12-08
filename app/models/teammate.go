@@ -97,7 +97,6 @@ func (teammate *Teammate) MakeAvailable() bool {
 
 func (teammate *Teammate) OfferTask(task *Task) bool {
     if error := teammate.sm.Process("offer-task", task.Uid()); error != nil { return false }
-    task.Offer()
     return true
 }
 

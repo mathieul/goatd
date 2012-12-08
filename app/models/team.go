@@ -26,12 +26,16 @@ func (team Team) Name() string {
     return team.AttrName
 }
 
-func (team Team) TasksQueued(queue *Queue) ([]*Task) {
+func (team Team) TasksQueued(queue *Queue) []*Task {
     queueUid := queue.Uid()
     return team.Tasks.Select(func (item interface{}) bool {
         task := item.(*Task)
         return task.Status() == StatusQueued && task.QueueUid() == queueUid
     })
+}
+
+func (team Team) Identity() identification.Identity {
+    return *team.identity
 }
 
 func NewTeam(attributes Attrs) (team *Team) {

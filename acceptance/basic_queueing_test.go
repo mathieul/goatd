@@ -61,7 +61,7 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
     s.mate.SignIn()
     c.Assert(s.mate.Status(), Equals, models.StatusOnBreak)
 
-    task := models.NewTask(models.Attrs{"Title": "thank Jones family"})
+    task := s.team.Tasks.Create(models.Attrs{"Title": "thank Jones family"})
     c.Assert(task.Status(), Equals, models.StatusCreated)
     task.Enqueue(s.queue)
     c.Assert(task.Status(), Equals, models.StatusQueued)
@@ -73,15 +73,14 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
     c.Assert(task.Status(), Equals, models.StatusOffered)
 
     c.Assert(eventOne.Kind, Equals, event.KindOfferTask)
-    c.Assert(eventOne.Data[0], Equals, s.queue.Uid())
-    c.Assert(eventOne.Data[1], Equals, s.mate.Uid())
-    c.Assert(eventOne.Data[2], Equals, task.Uid())
+    c.Assert(eventOne.Data[0], Equals, s.mate.Uid())
+    c.Assert(eventOne.Data[1], Equals, task.Uid())
 
     s.mate.AcceptTask(task)
     time.Sleep(aLittleBit)
-    c.Assert(models.StatusBusy, Equals, s.mate.Status())
-    c.Assert(task, DeepEquals, s.mate.CurrentTask())
-    c.Assert(models.StatusAssigned, Equals, task.Status())
+    c.Assert(s.mate.Status(), Equals, models.StatusBusy)
+    c.Assert(s.mate.CurrentTask(), DeepEquals, task)
+    c.Assert(task.Status(), Equals, models.StatusAssigned)
     c.Assert(s.queue.QueuedTasks(), DeepEquals, []*models.Task{task})
 
     c.Assert(eventTwo.Kind, Equals, event.KindAssignTask)
