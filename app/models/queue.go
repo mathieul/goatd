@@ -64,6 +64,21 @@ func (queue *Queue) InsertTask(task *Task) bool {
     return true
 }
 
+func (queue *Queue) RemoveTask(taskToRemove *Task) bool {
+    index, uid := -1, taskToRemove.Uid()
+    for i, task := range queue.queuedTasks {
+        if task.Uid() == uid {
+            index = i
+            break
+        }
+    }
+    queue.queuedTasks = append(queue.queuedTasks[:index], queue.queuedTasks[index + 1:]...)
+    if len(queue.queuedTasks) == 0 {
+        queue.isReady = false
+    }
+    return true
+}
+
 func (queue Queue) QueuedTasks() []*Task {
     return queue.queuedTasks
 }

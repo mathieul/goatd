@@ -39,6 +39,7 @@ func (distributor *Distributor) monitorDistributionTriggers() {
         incoming := event.Manager().SubscribeTo([]event.Kind{
             event.KindTeammateAvailable,
             event.KindAcceptTask,
+            event.KindCompleteTask,
         })
         for theEvent := range incoming {
             teammate := theEvent.Identity.Value().(*models.Teammate)
@@ -47,6 +48,8 @@ func (distributor *Distributor) monitorDistributionTriggers() {
                 distributor.FindAndAssignTaskForTeammate(teammate)
             case event.KindAcceptTask:
                 distributor.AssignTask(teammate, theEvent.Data[1])
+            case event.KindCompleteTask:
+                distributor.CompleteTask(teammate, theEvent.Data[1])
             }
         }
     }()
@@ -82,6 +85,13 @@ func (distributor *Distributor) FindAndAssignTaskForTeammate(teammate *models.Te
 func (distributor *Distributor) AssignTask(teammate *models.Teammate, taskUid string) {
     task := distributor.team.Tasks.Find(taskUid)
     task.Assign()
+}
+
+func (distributor *Distributor) CompleteTask(teammate *models.Teammate, taskUid string) {
+    task := distributor.team.Tasks.Find(taskUid)
+    task.Complete()
+    queue := distributor.team.Queues.Find(task.QueueUid())
+    queue.RemoveTask(task)
 }
 
 func TaskSelectorByOldestNextTask(queues []*models.Queue) *models.Task {

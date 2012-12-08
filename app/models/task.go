@@ -24,6 +24,7 @@ func setupTaksStateMachine(task *Task) fsm.StateMachine {
         {From: "queued", Event: "dequeue", To: "created", Action: "resetQueueUid"},
         {From: "queued", Event: "offer", To: "offered"},
         {From: "offered", Event: "assign", To: "assigned"},
+        {From: "assigned", Event: "complete", To: "completed"},
     }
     sm := fsm.NewStateMachine(rules, task)
     return sm
@@ -81,6 +82,11 @@ func (task *Task) Offer() bool {
 
 func (task *Task) Assign() bool {
     if error := task.sm.Process("assign"); error != nil { return false }
+    return true
+}
+
+func (task *Task) Complete() bool {
+    if error := task.sm.Process("complete"); error != nil { return false }
     return true
 }
 

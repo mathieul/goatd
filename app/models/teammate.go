@@ -65,6 +65,8 @@ func (teammate *Teammate) StateMachineCallback(action string, args []interface{}
         teammate.AttrTaskUid = args[0].(string)
     case "resetTaskUid":
         teammate.AttrTaskUid = ""
+        event.Manager().PublishEvent(event.KindCompleteTask, *teammate.identity,
+            []string{teammate.Uid(), args[0].(*Task).Uid()})
     case "publishWaiting":
         event.Manager().PublishEvent(event.KindTeammateAvailable, *teammate.identity, nil)
     case "publishAcceptTask":
@@ -118,7 +120,7 @@ func (teammate *Teammate) RejectTask(task *Task) bool {
 
 func (teammate *Teammate) FinishTask(task *Task) bool {
     if task.Uid() != teammate.AttrTaskUid { return false }
-    if error := teammate.sm.Process("finish-task"); error != nil { return false }
+    if error := teammate.sm.Process("finish-task", task); error != nil { return false }
     return true
 }
 

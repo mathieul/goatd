@@ -91,15 +91,19 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
     time.Sleep(aLittleBit)
     c.Assert(models.StatusWrappingUp, Equals, s.mate.Status())
     c.Assert(s.mate.CurrentTask(), IsNil)
-    c.Assert(models.StatusCompleted, Equals, task.Status())
+    c.Assert(task.Status(), Equals, models.StatusCompleted)
     c.Assert(s.queue.QueuedTasks(), DeepEquals, []*models.Task{})
 
+    c.Assert(eventThree.Kind, Equals, event.KindCompleteTask)
+    c.Assert(eventThree.Data[0], Equals, s.mate.Uid())
+    c.Assert(eventThree.Data[1], Equals, task.Uid())
+
     s.mate.StartOtherWork()
-    c.Assert(models.StatusOtherWork, Equals, s.mate.Status())
+    c.Assert(s.mate.Status(), Equals, models.StatusOtherWork)
 
     s.mate.GoOnBreak()
-    c.Assert(models.StatusOnBreak, Equals, s.mate.Status())
+    c.Assert(s.mate.Status(), Equals, models.StatusOnBreak)
 
     s.mate.SignOut()
-    c.Assert(models.StatusSignedOut, Equals, s.mate.Status())
+    c.Assert(s.mate.Status(), Equals, models.StatusSignedOut)
 }

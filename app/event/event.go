@@ -6,9 +6,9 @@ import (
 
 const (
     KindNone Kind = iota
-    KindOfferTask
+    KindOfferTask           // TeammateUid, TaskUid
     KindAcceptTask          // TeammateUid, TaskUid
-    KindCompleteTask
+    KindCompleteTask        // TeammateUid, TaskUid
     KindTeammateAvailable
     KindSkillCreated        // QueueUid, TeammateUid, Level, Enabled
 )
