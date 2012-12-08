@@ -23,6 +23,7 @@ func setupTaksStateMachine(task *Task) fsm.StateMachine {
         {From: "created", Event: "enqueue", To: "queued", Action: "setQueueUid"},
         {From: "queued", Event: "dequeue", To: "created", Action: "resetQueueUid"},
         {From: "queued", Event: "offer", To: "offered"},
+        {From: "offered", Event: "assign", To: "assigned"},
     }
     sm := fsm.NewStateMachine(rules, task)
     return sm
@@ -65,9 +66,7 @@ func (task Task) Team() (team *Team) { return task.team }
 func (task Task) Status() Status { return statusFromString[task.sm.CurrentState] }
 
 func (task *Task) Enqueue(queue *Queue) bool {
-    if error := task.sm.Process("enqueue", queue.Uid()); error != nil {
-        return false
-    }
+    if error := task.sm.Process("enqueue", queue.Uid()); error != nil { return false }
     if !queue.InsertTask(task) {
         task.sm.Process("dequeue", queue.Uid())
         return false
@@ -76,9 +75,12 @@ func (task *Task) Enqueue(queue *Queue) bool {
 }
 
 func (task *Task) Offer() bool {
-    if error := task.sm.Process("offer"); error != nil {
-        return false
-    }
+    if error := task.sm.Process("offer"); error != nil { return false }
+    return true
+}
+
+func (task *Task) Assign() bool {
+    if error := task.sm.Process("assign"); error != nil { return false }
     return true
 }
 

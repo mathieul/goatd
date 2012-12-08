@@ -7,7 +7,7 @@ import (
 const (
     KindNone Kind = iota
     KindOfferTask
-    KindAssignTask
+    KindAcceptTask          // TeammateUid, TaskUid
     KindCompleteTask
     KindTeammateAvailable
     KindSkillCreated        // QueueUid, TeammateUid, Level, Enabled
@@ -21,7 +21,10 @@ var allKinds []Kind
 var manager *busManager
 func init() {
     manager = new(busManager)
-    allKinds = []Kind{KindOfferTask, KindAssignTask, KindCompleteTask}
+    allKinds = []Kind{
+        KindOfferTask, KindAcceptTask, KindCompleteTask,
+        KindTeammateAvailable, KindSkillCreated,
+    }
 }
 
 func Manager() *busManager {

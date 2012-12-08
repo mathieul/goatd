@@ -36,10 +36,18 @@ func NewDistributor(team *models.Team) (distributor *Distributor) {
 
 func (distributor *Distributor) monitorDistributionTriggers() {
     go func() {
-        incoming := event.Manager().SubscribeTo([]event.Kind{event.KindTeammateAvailable})
+        incoming := event.Manager().SubscribeTo([]event.Kind{
+            event.KindTeammateAvailable,
+            event.KindAcceptTask,
+        })
         for theEvent := range incoming {
             teammate := theEvent.Identity.Value().(*models.Teammate)
-            distributor.FindAndAssignTaskForTeammate(teammate)
+            switch theEvent.Kind {
+            case event.KindTeammateAvailable:
+                distributor.FindAndAssignTaskForTeammate(teammate)
+            case event.KindAcceptTask:
+                distributor.AssignTask(teammate, theEvent.Data[1])
+            }
         }
     }()
 }
@@ -69,6 +77,11 @@ func (distributor *Distributor) FindAndAssignTaskForTeammate(teammate *models.Te
             }
         }
     }
+}
+
+func (distributor *Distributor) AssignTask(teammate *models.Teammate, taskUid string) {
+    task := distributor.team.Tasks.Find(taskUid)
+    task.Assign()
 }
 
 func TaskSelectorByOldestNextTask(queues []*models.Queue) *models.Task {

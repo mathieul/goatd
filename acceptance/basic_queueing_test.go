@@ -42,7 +42,7 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
     var eventOne, eventTwo, eventThree event.Event
     go func() {
         incoming := event.Manager().SubscribeTo([]event.Kind{
-            event.KindOfferTask, event.KindAssignTask, event.KindCompleteTask,
+            event.KindOfferTask, event.KindAcceptTask, event.KindCompleteTask,
         })
         eventOne = <-incoming; fmt.Println("eventOne:", eventOne)
         eventTwo = <-incoming; fmt.Println("eventTwo:", eventTwo)
@@ -83,10 +83,9 @@ func (s *AcceptanceS) TestAssignsATaskToATeamMate(c *C) {
     c.Assert(task.Status(), Equals, models.StatusAssigned)
     c.Assert(s.queue.QueuedTasks(), DeepEquals, []*models.Task{task})
 
-    c.Assert(eventTwo.Kind, Equals, event.KindAssignTask)
-    c.Assert(eventTwo.Data[0], Equals, s.queue.Uid())
-    c.Assert(eventTwo.Data[1], Equals, s.mate.Uid())
-    c.Assert(eventTwo.Data[2], Equals, task.Uid())
+    c.Assert(eventTwo.Kind, Equals, event.KindAcceptTask)
+    c.Assert(eventTwo.Data[0], Equals, s.mate.Uid())
+    c.Assert(eventTwo.Data[1], Equals, task.Uid())
 
     s.mate.FinishTask(task)
     time.Sleep(aLittleBit)

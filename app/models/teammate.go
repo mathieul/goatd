@@ -34,7 +34,7 @@ func setupTeammateStateMachine(teammate *Teammate) fsm.StateMachine {
 
         {From: "on-break", Event: "make-available", To: "waiting", Action: "publishWaiting"},
         {From: "waiting", Event: "offer-task", To: "offered", Action: "setTaskUid"},
-        {From: "offered", Event: "accept-task", To: "busy"},
+        {From: "offered", Event: "accept-task", To: "busy", Action: "publishAcceptTask"},
         {From: "offered", Event: "reject-task", To: "waiting", Action: "resetTaskUid"},
         {From: "busy", Event: "finish-task", To: "wrapping-up", Action: "resetTaskUid"},
 
@@ -67,6 +67,10 @@ func (teammate *Teammate) StateMachineCallback(action string, args []interface{}
         teammate.AttrTaskUid = ""
     case "publishWaiting":
         event.Manager().PublishEvent(event.KindTeammateAvailable, *teammate.identity, nil)
+    case "publishAcceptTask":
+        event.Manager().PublishEvent(event.KindAcceptTask, *teammate.identity,
+            []string{teammate.Uid(), args[0].(*Task).Uid()})
+
     }
 }
 
@@ -102,7 +106,7 @@ func (teammate *Teammate) OfferTask(task *Task) bool {
 
 func (teammate *Teammate) AcceptTask(task *Task) bool {
     if task.Uid() != teammate.AttrTaskUid { return false }
-    if error := teammate.sm.Process("accept-task"); error != nil { return false }
+    if error := teammate.sm.Process("accept-task", task); error != nil { return false }
     return true
 }
 
