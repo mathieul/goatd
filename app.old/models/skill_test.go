@@ -3,7 +3,7 @@ package models_test
 import (
     . "launchpad.net/gocheck"
     "testing"
-    "goatd/app/models"
+    "goatd/app.old/models"
 )
 
 func Test(t *testing.T) { TestingT(t) }

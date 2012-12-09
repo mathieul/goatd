@@ -1,7 +1,7 @@
 package models
 
 import (
-    "goatd/app/identification"
+    "goatd/app.old/identification"
     "github.com/sdegutis/fsm"
 )
 

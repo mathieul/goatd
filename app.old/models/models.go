@@ -5,7 +5,7 @@ import (
     "log"
     "fmt"
     "os"
-    "goatd/app/identification"
+    "goatd/app.old/identification"
 )
 
 const (

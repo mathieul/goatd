@@ -1,8 +1,8 @@
 package models
 
 import (
-    "goatd/app/identification"
-    "goatd/app/event"
+    "goatd/app.old/identification"
+    "goatd/app.old/event"
 )
 
 /*

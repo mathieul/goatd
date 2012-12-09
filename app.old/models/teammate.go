@@ -3,8 +3,8 @@ package models
 import (
     "strings"
     "github.com/sdegutis/fsm"
-    "goatd/app/identification"
-    "goatd/app/event"
+    "goatd/app.old/identification"
+    "goatd/app.old/event"
 )
 
 /*

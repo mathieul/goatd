@@ -4,8 +4,8 @@ import (
     . "launchpad.net/gocheck"
     "testing"
     "strings"
-    "goatd/app/identification"
-    "goatd/app/models"
+    "goatd/app.old/identification"
+    "goatd/app.old/models"
 )
 
 func Test(t *testing.T) { TestingT(t) }

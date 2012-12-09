@@ -4,10 +4,10 @@ import (
     . "launchpad.net/gocheck"
     "testing"
     "time"
-    "goatd/app/identification"
-    "goatd/app/event"
-    "goatd/app/models"
-    "goatd/app/distribution"
+    "goatd/app.old/identification"
+    "goatd/app.old/event"
+    "goatd/app.old/models"
+    "goatd/app.old/distribution"
 )
 
 func Test(t *testing.T) { TestingT(t) }

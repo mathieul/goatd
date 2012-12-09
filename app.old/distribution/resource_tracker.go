@@ -1,8 +1,8 @@
 package distribution
 
 import (
-    "goatd/app/event"
-    "goatd/app/models"
+    "goatd/app.old/event"
+    "goatd/app.old/models"
 )
 
 
