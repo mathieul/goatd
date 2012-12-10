@@ -19,7 +19,7 @@ var _ = Suite(&EventSuite{})
 func (s *EventSuite) SetUpTest(c *C) {
     s.busManager = event.NewBusManager()
     s.busManager.Start()
-    s.identity.Set("Team", "qazwsx098", nil)
+    s.identity.Set("Team", "qazwsx098")
 }
 
 func (s *EventSuite) TearDownTest(c *C) {

@@ -7,21 +7,19 @@ package event
 type Identity struct {
     kind string
     uid string
-    value interface{}
 }
 
-func NewIdentity(kind, uid string, value interface{}) *Identity {
-    return &Identity{kind, uid, value}
+func NewIdentity(kind, uid string) *Identity {
+    return &Identity{kind, uid}
 }
 
 func NoIdentity() Identity {
-    return Identity{"", "", nil}
+    return Identity{"", ""}
 }
 
-func (identity *Identity) Set(kind, uid string, value interface{}) {
+func (identity *Identity) Set(kind, uid string) {
     identity.kind = kind
     identity.uid = uid
-    identity.value = value
 }
 
 func (identity Identity) Kind() string {
@@ -30,10 +28,6 @@ func (identity Identity) Kind() string {
 
 func (identity Identity) Uid() string {
     return identity.uid
-}
-
-func (identity Identity) Value() interface{} {
-    return identity.value
 }
 
 func (identity Identity) AddToAttributes(attributes map[string]interface{}) map[string]interface{} {
