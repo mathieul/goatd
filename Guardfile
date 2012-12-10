@@ -2,12 +2,16 @@
 
 guard 'shell', :all_on_start => false do
   runner = ->(m) {
-    file = "#{m[1]}_test.go"
-    if File.exists?(file)
-      puts "\n\n>>> RUNNING #{file} >>>\n\n"
-      `go test #{file}`
-    end
+    changed = File.basename(m[0])
+    target = case m[1]
+           when "app"
+             "goatd/app/#{File.dirname(m[2])}"
+           when "acceptance"
+             m[0]
+           end
+    puts "\n\n>>> [#{changed}] CHANGED >>> RUNNING #{target} >>>\n\n"
+    `go test #{target}`
   }
-  watch /(app\/.*?)(_test|).go/, &runner
-  watch /(acceptance\/.*?)(_test|).go/, &runner
+  watch /(app)\/(.*?)(_test|).go/, &runner
+  watch /(acceptance)\/(.*?)(_test|).go/, &runner
 end
