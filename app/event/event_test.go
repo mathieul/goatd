@@ -9,7 +9,7 @@ import (
 
 func Test(t *testing.T) { TestingT(t) }
 
-type EventSuite struct{
+type EventSuite struct {
     busManager *event.BusManager
     identity event.Identity
 }

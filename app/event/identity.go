@@ -1,5 +1,36 @@
 package event
 
+import (
+    "os"
+    "fmt"
+    "log"
+)
+
+
+/*
+ * Global
+ */
+
+const (
+    randomDevice = "/dev/urandom"
+)
+
+/*
+ * Helpers
+ */
+
+func generateUid() string {
+    data := make([]byte, 8)
+    if randomizer, err := os.Open(randomDevice); err != nil {
+        log.Fatal(fmt.Errorf("generateUid(): can't open random device %s (%q)", randomDevice, err))
+    } else {
+        defer randomizer.Close()
+        randomizer.Read(data)
+    }
+    return fmt.Sprintf("%x-%x", data[0:4], data[4:])
+}
+
+
 /*
  * Identity
  */
@@ -9,8 +40,12 @@ type Identity struct {
     uid string
 }
 
-func NewIdentity(kind, uid string) *Identity {
-    return &Identity{kind, uid}
+func NewIdentity(kind, uid string) (identity *Identity) {
+    identity = &Identity{kind, uid}
+    if uid == "" {
+        identity.uid = generateUid()
+    }
+    return identity
 }
 
 func NoIdentity() Identity {
