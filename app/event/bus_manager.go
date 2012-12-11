@@ -5,7 +5,7 @@ package event
  */
 type Event struct {
     Kind
-    Identity
+    *Identity
     Data []interface{}
 }
 type EventBus chan *Event
@@ -72,7 +72,7 @@ func (busManager *BusManager) Stop() {
 }
 
 func (busManager *BusManager) PublishEvent(kind Kind,
-        identity Identity, data []interface{}) bool {
+        identity *Identity, data []interface{}) bool {
     if busManager.running {
         event := Event{kind, identity, data}
         busManager.incoming <- event

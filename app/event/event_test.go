@@ -11,7 +11,7 @@ func Test(t *testing.T) { TestingT(t) }
 
 type EventSuite struct {
     busManager *event.BusManager
-    identity event.Identity
+    identity *event.Identity
 }
 
 var _ = Suite(&EventSuite{})
@@ -19,7 +19,7 @@ var _ = Suite(&EventSuite{})
 func (s *EventSuite) SetUpTest(c *C) {
     s.busManager = event.NewBusManager()
     s.busManager.Start()
-    s.identity.Set("Team", "qazwsx098")
+    s.identity = event.NewIdentity("Team")
 }
 
 func (s *EventSuite) TearDownTest(c *C) {
