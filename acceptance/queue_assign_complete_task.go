@@ -31,7 +31,6 @@ func (s *AcceptanceSuite) TearDownTest(c *C) {
     s.busManager.Stop()
 }
 
-
 func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
     aLittleBit := 100 * time.Millisecond
 
