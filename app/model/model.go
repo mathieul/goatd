@@ -72,6 +72,10 @@ func simpleMethodCall(model interface{}, methodName string) interface{} {
  * Collection
  */
 
+type Modeler interface {
+    Uid() string
+    Copy() Modeler
+}
 type CollectionCreator func (A) interface{}
 type Collection struct {
     creator CollectionCreator
@@ -79,8 +83,8 @@ type Collection struct {
     owner *event.Identity
 }
 
-func NewCollection(creator CollectionCreator, owner *event.Identity) (collection Collection) {
-    collection = *new(Collection)
+func NewCollection(creator CollectionCreator, owner *event.Identity) (collection *Collection) {
+    collection = new(Collection)
     collection.creator = creator
     collection.owner = owner
     return collection

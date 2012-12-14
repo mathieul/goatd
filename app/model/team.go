@@ -17,8 +17,16 @@ type Team struct {
     AttrName string
 }
 
-func (team Team) Name() string {
+func (team *Team) Name() string {
     return team.AttrName
+}
+
+func (team *Team) Uid() string {
+    return team.Identity.Uid()
+}
+
+func (team *Team) Copy() Modeler {
+    return &Team{team.Identity, team.AttrName}
 }
 
 func NewTeam(attributes A) (team *Team) {
@@ -37,7 +45,7 @@ func NewTeam(attributes A) (team *Team) {
  */
 
 type Teams struct {
-    Collection
+    *Collection
 }
 
 func toTeamSlice(source []interface{}) []*Team {
