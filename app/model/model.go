@@ -21,7 +21,7 @@ type A map[string]interface{}
 /*
  * Helpers
  */
-func setAttributeValue(destination interface{}, name string, value interface{}) {
+func setAttributeValue(destination Model, name string, value interface{}) {
     destValue := reflect.ValueOf(destination).Elem()
     if destValue.Type().Kind() != reflect.Struct {
         log.Fatal(fmt.Errorf("setAttributeValue(): destination must be a pointer to a Struct, not %v", destValue.Type().Kind()))
@@ -39,7 +39,7 @@ func setAttributeValue(destination interface{}, name string, value interface{}) 
     }
 }
 
-func newModel(model interface{}, attributes *A) interface{} {
+func newModel(model Model, attributes *A) interface{} {
     value := reflect.ValueOf(model)
     kind := value.Elem().Type().Kind()
     if kind != reflect.Struct {
@@ -51,7 +51,7 @@ func newModel(model interface{}, attributes *A) interface{} {
     return model
 }
 
-func simpleMethodCall(model interface{}, methodName string) interface{} {
+func simpleMethodCall(model Model, methodName string) interface{} {
     value := reflect.ValueOf(model)
     kind := value.Elem().Type().Kind()
     if kind != reflect.Struct {
@@ -72,14 +72,14 @@ func simpleMethodCall(model interface{}, methodName string) interface{} {
  * Collection
  */
 
-type Modeler interface {
+type Model interface {
     Uid() string
-    Copy() Modeler
+    Copy() Model
 }
-type CollectionCreator func (A) interface{}
+type CollectionCreator func (A) Model
 type Collection struct {
     creator CollectionCreator
-    Items []interface{}
+    Items []Model
     owner *event.Identity
 }
 
@@ -99,11 +99,11 @@ func (collection *Collection) New(attributes A) interface{} {
     return model
 }
 
-func (collection *Collection) Slice() []interface{} {
+func (collection *Collection) Slice() []Model {
     return collection.Items
 }
 
-func (collection Collection) Find(uid string) interface{} {
+func (collection Collection) Find(uid string) Model {
     found := collection.FindAll([]string{uid})
     if len(found) == 0 {
         return nil
@@ -111,7 +111,7 @@ func (collection Collection) Find(uid string) interface{} {
     return found[0]
 }
 
-func (collection Collection) FindAll(uids []string) (found []interface{}) {
+func (collection Collection) FindAll(uids []string) (found []Model) {
     for _, candidate := range collection.Items {
         candidateUid := simpleMethodCall(candidate, "Uid").(string)
         for _, uid := range uids {
@@ -123,8 +123,8 @@ func (collection Collection) FindAll(uids []string) (found []interface{}) {
     return found
 }
 
-func (collection Collection) Select(tester func(interface{}) bool) (result []interface{}) {
-    result = make([]interface{}, 0)
+func (collection Collection) Select(tester func(interface{}) bool) (result []Model) {
+    result = make([]Model, 0)
     for _, item := range collection.Items {
         if tester(item) {
             result = append(result, item)

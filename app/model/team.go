@@ -21,11 +21,7 @@ func (team *Team) Name() string {
     return team.AttrName
 }
 
-func (team *Team) Uid() string {
-    return team.Identity.Uid()
-}
-
-func (team *Team) Copy() Modeler {
+func (team *Team) Copy() Model {
     return &Team{team.Identity, team.AttrName}
 }
 
@@ -48,7 +44,7 @@ type Teams struct {
     *Collection
 }
 
-func toTeamSlice(source []interface{}) []*Team {
+func toTeamSlice(source []Model) []*Team {
     teams := make([]*Team, 0, len(source))
     for _, team := range source {
         teams = append(teams, team.(*Team))
@@ -58,7 +54,7 @@ func toTeamSlice(source []interface{}) []*Team {
 
 func NewTeams() (teams *Teams) {
     teams = new(Teams)
-    teams.Collection = NewCollection(func(attributes A) interface{} {
+    teams.Collection = NewCollection(func(attributes A) Model {
         team := NewTeam(attributes)
         return team
     }, nil)

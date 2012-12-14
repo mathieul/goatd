@@ -55,7 +55,7 @@ func newPersistentStore() (store *persistentStore) {
     store.Request = make(chan request, 0)
     store.Response = make(chan interface{}, 0)
     store.collections = make(map[Kind]*model.Collection)
-    store.collections[KindTeam] = model.NewCollection(func(attributes model.A) interface{} {
+    store.collections[KindTeam] = model.NewCollection(func(attributes model.A) model.Model {
         team := model.NewTeam(attributes)
         return team
     }, nil)
@@ -72,7 +72,7 @@ func (store *persistentStore) start() {
             case OpCreate:
                 response = collection.New(request.args[0].(model.A))
             case OpFind:
-                response = collection.Find(request.args[0].(string))
+                response = collection.Find(request.args[0].(string)).Copy()
             default:
                 panic(fmt.Errorf("Unknown operation %v\n", request.Operation))
             }
