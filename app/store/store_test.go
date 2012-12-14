@@ -21,13 +21,11 @@ func (s *StoreSuite) SetUpTest(c *C) {
 }
 
 func (s *StoreSuite) TestCreateTeam(c *C) {
-    team := s.store.Create(store.KindTeam, model.A{"Name": "Aria & Tyrion"}).(*model.Team)
+    team := s.store.CreateTeam(model.A{"Name": "Aria & Tyrion"})
     c.Assert(team, Not(IsNil))
     c.Assert(team.Name(), Equals, "Aria & Tyrion")
 
-    result := s.store.Find(store.KindTeam, team.Uid())
-    c.Assert(result, Not(IsNil))
-    teamFound := result.(*model.Team)
+    teamFound := s.store.FindTeam(team.Uid())
     c.Assert(teamFound.Uid(), Equals, team.Uid())
     c.Assert(teamFound.Name(), Equals, "Aria & Tyrion")
     c.Assert(teamFound, Not(Equals), team)

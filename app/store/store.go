@@ -91,14 +91,29 @@ func NewStore() *Store {
     return &Store{}
 }
 
-func (store *Store) Create(kind Kind, attributes model.A) interface{} {
+func (store *Store) Create(kind Kind, attributes model.A) model.Model {
     args := []interface{}{attributes}
     persisted.Request <- request{kind, OpCreate, args}
-    return <- persisted.Response
+    value := <- persisted.Response
+    return value.(model.Model)
 }
 
-func (store *Store) Find(kind Kind, uid string) interface{} {
+func (store *Store) Find(kind Kind, uid string) model.Model {
     args := []interface{}{uid}
     persisted.Request <- request{kind, OpFind, args}
-    return <- persisted.Response
+    if value := <- persisted.Response; value != nil {
+        return value.(model.Model)
+    }
+    return nil
+}
+
+func (store *Store) CreateTeam(attributes model.A) *model.Team {
+    return store.Create(KindTeam, attributes).(*model.Team)
+}
+
+func (store *Store) FindTeam(uid string) *model.Team {
+    if value := store.Find(KindTeam, uid); value != nil {
+        return value.(*model.Team)
+    }
+    return nil
 }
