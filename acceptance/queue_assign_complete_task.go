@@ -14,7 +14,7 @@ func Test(t *testing.T) { TestingT(t) }
 
 type AcceptanceSuite struct{
     busManager *event.BusManager
-    store *store.MemoryStore
+    store *model.Store
 }
 
 var _ = Suite(&AcceptanceSuite{})
@@ -22,7 +22,7 @@ var _ = Suite(&AcceptanceSuite{})
 func (s *AcceptanceSuite) SetUpTest(c *C) {
     s.busManager = event.NewBusManager()
     s.busManager.Start()
-    s.store = store.NewMemoryStore(s.busManager)
+    s.store = store.NewStore(s.busManager)
     s.store.Start()
 }
 
@@ -37,9 +37,9 @@ func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
     # provisioning
     team := s.store.Teams.Create(model.A{"Name": "Jones Household"})
     distributor := dispatch.NewDistributor(team, s.busManager, s.store)
-    mate := team.Teammates.Create(model.A{"Name": "Jack"})
-    queue := team.Queues.Create(model.A{"Name": "Duties"})
-    skill := team.Skills.Create(model.A{"QueueUid": queue.Uid(), "TeammateUid": mate.Uid()})
+    mate := s.store.Teammates.Create(team, model.A{"Name": "Jack"})
+    queue := s.store..Queues.Create(team, model.A{"Name": "Duties"})
+    skill := s.store..Skills.Create(team, model.A{"QueueUid": queue.Uid(), "TeammateUid": mate.Uid()})
 
     # keep track of events received
     var eventOne, eventTwo, eventThree event.Event
