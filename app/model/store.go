@@ -84,10 +84,14 @@ func (store *persistentStore) start() {
  * Store API
  */
 
-type Store struct {}
+type Store struct {
+    Teams *TeamStoreProxy
+}
 
-func NewStore() *Store {
-    return &Store{}
+func NewStore() (store *Store) {
+    store = new(Store)
+    store.Teams = &TeamStoreProxy{store}
+    return store
 }
 
 func (store *Store) Create(kind Kind, attributes A) Model {
@@ -106,13 +110,15 @@ func (store *Store) Find(kind Kind, uid string) Model {
     return nil
 }
 
-func (store *Store) CreateTeam(attributes A) *Team {
-    return store.Create(KindTeam, attributes).(*Team)
+type TeamStoreProxy struct {
+    store *Store
 }
 
-func (store *Store) FindTeam(uid string) *Team {
-    if value := store.Find(KindTeam, uid); value != nil {
-        return value.(*Team)
-    }
+func (proxy *TeamStoreProxy) Create(attributes A) *Team {
+    return proxy.store.Create(KindTeam, attributes).(*Team)
+}
+
+func (proxy *TeamStoreProxy) Find(uid string) *Team {
+    if value := proxy.store.Find(KindTeam, uid); value != nil { return value.(*Team) }
     return nil
 }
