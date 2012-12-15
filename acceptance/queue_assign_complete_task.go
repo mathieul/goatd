@@ -37,9 +37,9 @@ func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
     # provisioning
     team := s.store.Teams.Create(model.A{"Name": "Jones Household"})
     distributor := dispatch.NewDistributor(team, s.busManager, s.store)
-    mate := s.store.Teammates.Create(team, model.A{"Name": "Jack"})
-    queue := s.store..Queues.Create(team, model.A{"Name": "Duties"})
-    skill := s.store..Skills.Create(team, model.A{"QueueUid": queue.Uid(), "TeammateUid": mate.Uid()})
+    mate := s.store.Teammates.Create(model.A{"Name": "Jack"}, team)
+    queue := s.store.Queues.Create(model.A{"Name": "Duties"}, team)
+    skill := s.store.Skills.Create(model.A{}, team, mate, queue)
 
     # keep track of events received
     var eventOne, eventTwo, eventThree event.Event

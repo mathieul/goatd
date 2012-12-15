@@ -10,10 +10,6 @@ import (
 
 type Team struct {
     *event.Identity
-    // *Teammates
-    // *Queues
-    // *Skills
-    // *Tasks
     AttrName string
 }
 
