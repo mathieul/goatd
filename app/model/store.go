@@ -9,6 +9,16 @@ const (
     KindTeam
 )
 
+func (kind Kind) String() string {
+    var value string
+    switch kind {
+    case KindNone:  value = "Opera"
+    case KindTeam:  value = "Create"
+    default:        value = fmt.Sprintf("Unknown(%d)", kind)
+    }
+    return fmt.Sprintf("<Kind{%s}>", value)
+}
+
 const (
     OpNone Operation = iota
     OpCreate
@@ -16,6 +26,19 @@ const (
     OpFindAll
     OpSelect
 )
+
+func (operation Operation) String() string {
+    var value string
+    switch operation {
+    case OpNone:    value = "Opera"
+    case OpCreate:  value = "Create"
+    case OpFind:    value = "Find"
+    case OpFindAll: value = "FindAll"
+    case OpSelect:  value = "Select"
+    default:        value = fmt.Sprintf("Unknown(%d)", operation)
+    }
+    return fmt.Sprintf("<Operation{%s}>", value)
+}
 
 /*
  * Global and init
@@ -77,6 +100,7 @@ func (store *persistentStore) start() {
             var response interface{}
             request := <- store.Request
             collection := store.collections[request.Kind]
+
             switch request.Operation {
             case OpCreate:
                 response = collection.New(request.args[0].(A))
@@ -94,6 +118,7 @@ func (store *persistentStore) start() {
             default:
                 panic(fmt.Errorf("Unknown operation %v\n", request.Operation))
             }
+
             store.Response <- response
         }
     }()
