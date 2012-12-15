@@ -13,6 +13,8 @@ const (
     OpNone Operation = iota
     OpCreate
     OpFind
+    OpFindAll
+    OpSelect
 )
 
 /*
@@ -61,6 +63,14 @@ func newPersistentStore() (store *persistentStore) {
     return store
 }
 
+func copyModels(models []Model) []Model {
+    copied := make([]Model, 0, len(models))
+    for _, model := range models {
+        copied = append(copied, model.Copy())
+    }
+    return copied
+}
+
 func (store *persistentStore) start() {
     go func() {
         for {
@@ -71,7 +81,16 @@ func (store *persistentStore) start() {
             case OpCreate:
                 response = collection.New(request.args[0].(A))
             case OpFind:
-                response = collection.Find(request.args[0].(string)).Copy()
+                if model := collection.Find(request.args[0].(string)); model != nil {
+                    response = model.Copy()
+                }
+            case OpFindAll:
+                models := collection.FindAll(request.args[0].([]string))
+                response = copyModels(models)
+            case OpSelect:
+                tester := request.args[0].(func(interface{}) bool)
+                models := collection.Select(tester)
+                response = copyModels(models)
             default:
                 panic(fmt.Errorf("Unknown operation %v\n", request.Operation))
             }
@@ -110,15 +129,24 @@ func (store *Store) Find(kind Kind, uid string) Model {
     return nil
 }
 
-type TeamStoreProxy struct {
-    store *Store
+func (store *Store) FindAll(kind Kind, uids []string) []Model {
+    args := []interface{}{uids}
+    persisted.Request <- request{kind, OpFindAll, args}
+    values := <- persisted.Response
+    models := make([]Model, 0, len(values.([]Model)))
+    for _, value := range values.([]Model) {
+        models = append(models, value.(Model))
+    }
+    return models
 }
 
-func (proxy *TeamStoreProxy) Create(attributes A) *Team {
-    return proxy.store.Create(KindTeam, attributes).(*Team)
-}
-
-func (proxy *TeamStoreProxy) Find(uid string) *Team {
-    if value := proxy.store.Find(KindTeam, uid); value != nil { return value.(*Team) }
-    return nil
+func (store *Store) Select(kind Kind, tester func(interface{}) bool) []Model {
+    args := []interface{}{tester}
+    persisted.Request <- request{kind, OpSelect, args}
+    values := <- persisted.Response
+    models := make([]Model, 0, len(values.([]Model)))
+    for _, value := range values.([]Model) {
+        models = append(models, value.(Model))
+    }
+    return models
 }

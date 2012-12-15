@@ -28,20 +28,16 @@ func (team *Team) Copy() Model {
 func NewTeam(attributes A) (team *Team) {
     team = newModel(&Team{}, &attributes).(*Team)
     team.Identity = event.NewIdentity("Team")
-    // team.Teammates = NewTeammates(*team.identity)
-    // team.Queues = NewQueues(*team.identity)
-    // team.Skills = NewSkills(*team.identity)
-    // team.Tasks = NewTasks(*team.identity)
     return team
 }
 
 
 /*
- * Teams
+ * TeamStoreProxy
  */
 
-type Teams struct {
-    *Collection
+type TeamStoreProxy struct {
+    store *Store
 }
 
 func toTeamSlice(source []Model) []*Team {
@@ -52,34 +48,21 @@ func toTeamSlice(source []Model) []*Team {
     return teams
 }
 
-func NewTeams() (teams *Teams) {
-    teams = new(Teams)
-    teams.Collection = NewCollection(func(attributes A) Model {
-        team := NewTeam(attributes)
-        return team
-    }, nil)
-    return teams
+func (proxy *TeamStoreProxy) Create(attributes A) *Team {
+    return proxy.store.Create(KindTeam, attributes).(*Team)
 }
 
-func (teams *Teams) New(attributes A) (team *Team) {
-    return teams.Collection.New(attributes).(*Team)
-}
-
-func (teams Teams) Slice() []*Team {
-    return toTeamSlice(teams.Collection.Slice())
-}
-
-func (teams Teams) Find(uid string) *Team {
-    if found := teams.Collection.Find(uid); found != nil {
-        return found.(*Team)
-    }
+func (proxy *TeamStoreProxy) Find(uid string) *Team {
+    if value := proxy.store.Find(KindTeam, uid); value != nil { return value.(*Team) }
     return nil
 }
 
-func (teams Teams) FindAll(uids []string) []*Team {
-    return toTeamSlice(teams.Collection.FindAll(uids))
+func (proxy *TeamStoreProxy) FindAll(uids []string) []*Team {
+    values := proxy.store.FindAll(KindTeam, uids)
+    return toTeamSlice(values)
 }
 
-func (teams Teams) Select(tester func(interface{}) bool) (result []*Team) {
-    return toTeamSlice(teams.Collection.Select(tester))
+func (proxy *TeamStoreProxy) Select(tester func(interface{}) bool) []*Team {
+    values := proxy.store.Select(KindTeam, tester)
+    return toTeamSlice(values)
 }
