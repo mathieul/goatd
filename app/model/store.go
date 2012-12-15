@@ -1,8 +1,7 @@
-package store
+package model
 
 import (
     "fmt"
-    "goatd/app/model"
 )
 
 const (
@@ -47,16 +46,16 @@ type request struct {
 type persistentStore struct {
     Request chan request
     Response chan interface{}
-    collections map[Kind]*model.Collection
+    collections map[Kind]*Collection
 }
 
 func newPersistentStore() (store *persistentStore) {
     store = new(persistentStore)
     store.Request = make(chan request, 0)
     store.Response = make(chan interface{}, 0)
-    store.collections = make(map[Kind]*model.Collection)
-    store.collections[KindTeam] = model.NewCollection(func(attributes model.A) model.Model {
-        team := model.NewTeam(attributes)
+    store.collections = make(map[Kind]*Collection)
+    store.collections[KindTeam] = NewCollection(func(attributes A) Model {
+        team := NewTeam(attributes)
         return team
     }, nil)
     return store
@@ -70,7 +69,7 @@ func (store *persistentStore) start() {
             collection := store.collections[request.Kind]
             switch request.Operation {
             case OpCreate:
-                response = collection.New(request.args[0].(model.A))
+                response = collection.New(request.args[0].(A))
             case OpFind:
                 response = collection.Find(request.args[0].(string)).Copy()
             default:
@@ -91,29 +90,29 @@ func NewStore() *Store {
     return &Store{}
 }
 
-func (store *Store) Create(kind Kind, attributes model.A) model.Model {
+func (store *Store) Create(kind Kind, attributes A) Model {
     args := []interface{}{attributes}
     persisted.Request <- request{kind, OpCreate, args}
     value := <- persisted.Response
-    return value.(model.Model)
+    return value.(Model)
 }
 
-func (store *Store) Find(kind Kind, uid string) model.Model {
+func (store *Store) Find(kind Kind, uid string) Model {
     args := []interface{}{uid}
     persisted.Request <- request{kind, OpFind, args}
     if value := <- persisted.Response; value != nil {
-        return value.(model.Model)
+        return value.(Model)
     }
     return nil
 }
 
-func (store *Store) CreateTeam(attributes model.A) *model.Team {
-    return store.Create(KindTeam, attributes).(*model.Team)
+func (store *Store) CreateTeam(attributes A) *Team {
+    return store.Create(KindTeam, attributes).(*Team)
 }
 
-func (store *Store) FindTeam(uid string) *model.Team {
+func (store *Store) FindTeam(uid string) *Team {
     if value := store.Find(KindTeam, uid); value != nil {
-        return value.(*model.Team)
+        return value.(*Team)
     }
     return nil
 }

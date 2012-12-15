@@ -1,23 +1,18 @@
-package store_test
+package model_test
 
 import (
     . "launchpad.net/gocheck"
-    "testing"
     "goatd/app/model"
-    "goatd/app/store"
 )
 
-func Test(t *testing.T) { TestingT(t) }
-
-
 type StoreSuite struct{
-    store *store.Store
+    store *model.Store
 }
 
 var _ = Suite(&StoreSuite{})
 
 func (s *StoreSuite) SetUpTest(c *C) {
-    s.store = store.NewStore()
+    s.store = model.NewStore()
 }
 
 func (s *StoreSuite) TestCreateTeam(c *C) {
@@ -26,6 +21,7 @@ func (s *StoreSuite) TestCreateTeam(c *C) {
     c.Assert(team.Name(), Equals, "Aria & Tyrion")
 
     teamFound := s.store.FindTeam(team.Uid())
+    // teamFound := s.store.Tenants.Find(team.Uid())
     c.Assert(teamFound.Uid(), Equals, team.Uid())
     c.Assert(teamFound.Name(), Equals, "Aria & Tyrion")
     c.Assert(teamFound, Not(Equals), team)
