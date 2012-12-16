@@ -2,6 +2,7 @@ package model
 
 import (
     "fmt"
+    "log"
 )
 
 const (
@@ -59,7 +60,7 @@ func init() {
 type Kind int
 type Operation int
 
-type request struct {
+type Request struct {
     Kind
     Operation
     args []interface{}
@@ -71,19 +72,21 @@ type request struct {
  */
 
 type persistentStore struct {
-    Request chan request
+    Request chan Request
     Response chan interface{}
     collections map[Kind]*Collection
 }
 
 func newPersistentStore() (store *persistentStore) {
     store = new(persistentStore)
-    store.Request = make(chan request, 0)
+    store.Request = make(chan Request, 0)
     store.Response = make(chan interface{}, 0)
     store.collections = make(map[Kind]*Collection)
     store.collections[KindTeam] = NewCollection(func(attributes A) Model {
-        team := NewTeam(attributes)
-        return team
+        return NewTeam(attributes)
+    }, nil)
+    store.collections[KindTeammate] = NewCollection(func(attributes A) Model {
+        return NewTeammate(attributes)
     }, nil)
     return store
 }
@@ -96,34 +99,41 @@ func copyModels(models []Model) []Model {
     return copied
 }
 
-func (store *persistentStore) start() {
-    go func() {
-        for {
-            var response interface{}
-            request := <- store.Request
-            collection := store.collections[request.Kind]
-
-            switch request.Operation {
-            case OpCreate:
-                response = collection.New(request.args[0].(A))
-            case OpFind:
-                if model := collection.Find(request.args[0].(string)); model != nil {
-                    response = model.Copy()
-                }
-            case OpFindAll:
-                models := collection.FindAll(request.args[0].([]string))
-                response = copyModels(models)
-            case OpSelect:
-                tester := request.args[0].(func(interface{}) bool)
-                models := collection.Select(tester)
-                response = copyModels(models)
-            default:
-                panic(fmt.Errorf("Unknown operation %v\n", request.Operation))
-            }
-
-            store.Response <- response
+func (store *persistentStore) processRequest(request Request, collection *Collection) (response interface{}) {
+    switch request.Operation {
+    case OpCreate:
+        response = collection.New(request.args[0].(A))
+    case OpFind:
+        if model := collection.Find(request.args[0].(string)); model != nil {
+            response = model.Copy()
         }
-    }()
+    case OpFindAll:
+        models := collection.FindAll(request.args[0].([]string))
+        response = copyModels(models)
+    case OpSelect:
+        tester := request.args[0].(func(interface{}) bool)
+        models := collection.Select(tester)
+        response = copyModels(models)
+    default:
+        log.Printf("Unknown operation %v\n", request.Operation)
+    }
+    return response
+}
+
+func (store *persistentStore) respondToRequests() {
+    for {
+        request := <- store.Request
+        if collection := store.collections[request.Kind]; collection != nil {
+            store.Response <- store.processRequest(request, collection)
+        } else {
+            log.Printf("No collection found for kind %v\n", request.Kind)
+            store.Response <- nil
+        }
+    }
+}
+
+func (store *persistentStore) start() {
+    go store.respondToRequests()
 }
 
 /*
@@ -144,14 +154,16 @@ func NewStore() (store *Store) {
 
 func (store *Store) Create(kind Kind, attributes A) Model {
     args := []interface{}{attributes}
-    persisted.Request <- request{kind, OpCreate, args}
-    value := <- persisted.Response
-    return value.(Model)
+    persisted.Request <- Request{kind, OpCreate, args}
+    if value := <- persisted.Response; value != nil {
+        return value.(Model)
+    }
+    return nil
 }
 
 func (store *Store) Find(kind Kind, uid string) Model {
     args := []interface{}{uid}
-    persisted.Request <- request{kind, OpFind, args}
+    persisted.Request <- Request{kind, OpFind, args}
     if value := <- persisted.Response; value != nil {
         return value.(Model)
     }
@@ -160,7 +172,7 @@ func (store *Store) Find(kind Kind, uid string) Model {
 
 func (store *Store) FindAll(kind Kind, uids []string) []Model {
     args := []interface{}{uids}
-    persisted.Request <- request{kind, OpFindAll, args}
+    persisted.Request <- Request{kind, OpFindAll, args}
     values := <- persisted.Response
     models := make([]Model, 0, len(values.([]Model)))
     for _, value := range values.([]Model) {
@@ -171,7 +183,7 @@ func (store *Store) FindAll(kind Kind, uids []string) []Model {
 
 func (store *Store) Select(kind Kind, tester func(interface{}) bool) []Model {
     args := []interface{}{tester}
-    persisted.Request <- request{kind, OpSelect, args}
+    persisted.Request <- Request{kind, OpSelect, args}
     values := <- persisted.Response
     models := make([]Model, 0, len(values.([]Model)))
     for _, value := range values.([]Model) {
