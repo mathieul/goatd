@@ -152,7 +152,7 @@ type TeammateStoreProxy struct {
     store *Store
 }
 
-func toTeammateSlice(source []interface{}) []*Teammate {
+func toTeammateSlice(source []Model) []*Teammate {
     teammates := make([]*Teammate, 0, len(source))
     for _, teammate := range source {
         teammates = append(teammates, teammate.(*Teammate))
@@ -163,4 +163,19 @@ func toTeammateSlice(source []interface{}) []*Teammate {
 func (proxy *TeammateStoreProxy) Create(attributes A, owners ...event.Identified) *Teammate {
     for _, owner := range owners { attributes = owner.AddToAttributes(attributes) }
     return proxy.store.Create(KindTeammate, attributes).(*Teammate)
+}
+
+func (proxy *TeammateStoreProxy) Find(uid string) *Teammate {
+    if value := proxy.store.Find(KindTeammate, uid); value != nil { return value.(*Teammate) }
+    return nil
+}
+
+func (proxy *TeammateStoreProxy) FindAll(uids []string) []*Teammate {
+    values := proxy.store.FindAll(KindTeammate, uids)
+    return toTeammateSlice(values)
+}
+
+func (proxy *TeammateStoreProxy) Select(tester func(interface{}) bool) []*Teammate {
+    values := proxy.store.Select(KindTeammate, tester)
+    return toTeammateSlice(values)
 }
