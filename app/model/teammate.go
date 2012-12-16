@@ -44,8 +44,8 @@ func setupTeammateStateMachine(teammate *Teammate) fsm.StateMachine {
     return sm
 }
 
-func NewTeammate(attributes A) *Teammate {
-    teammate := newModel(&Teammate{}, &attributes).(*Teammate)
+func NewTeammate(attributes A) (teammate *Teammate) {
+    teammate = newModel(&Teammate{}, &attributes).(*Teammate)
     teammate.Identity = event.NewIdentity("Teammate")
     teammate.sm = setupTeammateStateMachine(teammate)
     return teammate
@@ -55,12 +55,6 @@ func (teammate *Teammate) Copy() Model {
     return &Teammate{teammate.Identity, teammate.sm, teammate.AttrName,
         teammate.AttrTeamUid, teammate.AttrTaskUid}
 }
-
-// func CreateTeammate(attributes Attrs) *Teammate {
-//     teammate := NewTeammate(attributes)
-//     teammate.Save()
-//     return teammate
-// }
 
 func (teammate *Teammate) StateMachineCallback(action string, args []interface{}) {
     // switch action {
@@ -145,7 +139,7 @@ func (teammate Teammate) TeamUid() string { return teammate.AttrTeamUid }
 
 
 /*
- * TeamStoreProxy
+ * TeammateStoreProxy
  */
 
 type TeammateStoreProxy struct {

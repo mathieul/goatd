@@ -9,6 +9,7 @@ const (
     KindNone Kind = iota
     KindTeam
     KindTeammate
+    KindTask
 )
 
 func (kind Kind) String() string {
@@ -17,6 +18,7 @@ func (kind Kind) String() string {
     case KindNone:      value = "None"
     case KindTeam:      value = "Team"
     case KindTeammate:  value = "Teammate"
+    case KindTask:      value = "Task"
     default:            value = fmt.Sprintf("Unknown(%d)", kind)
     }
     return fmt.Sprintf("<Kind{%s}>", value)
@@ -88,6 +90,9 @@ func newPersistentStore() (store *persistentStore) {
     store.collections[KindTeammate] = NewCollection(func(attributes A) Model {
         return NewTeammate(attributes)
     }, nil)
+    store.collections[KindTask] = NewCollection(func(attributes A) Model {
+        return NewTask(attributes)
+    }, nil)
     return store
 }
 
@@ -141,14 +146,16 @@ func (store *persistentStore) start() {
  */
 
 type Store struct {
-    Teams *TeamStoreProxy
+    Teams     *TeamStoreProxy
     Teammates *TeammateStoreProxy
+    Tasks     *TaskStoreProxy
 }
 
 func NewStore() (store *Store) {
     store = new(Store)
     store.Teams = &TeamStoreProxy{store}
     store.Teammates = &TeammateStoreProxy{store}
+    store.Tasks = &TaskStoreProxy{store}
     return store
 }
 
