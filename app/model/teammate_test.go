@@ -22,19 +22,14 @@ var _ = Suite(&TeammateSuite{})
 func (s *TeammateSuite) SetUpTest(c *C) {
     s.store = model.NewStore()
     s.owner = &TeammateOwner{event.NewIdentity("Team")}
-    // s.teammate = s.store.Teammates.Create(model.A{"Name": "Agent"}, s.owner)
+    s.teammate = s.store.Teammates.Create(model.A{"Name": "Agent"}, s.owner)
 }
 
 func (s *TeammateSuite) TestCreateTeammate(c *C) {
     teammate := s.store.Teammates.Create(model.A{"Name": "Jon"}, s.owner)
     c.Assert(teammate.Name(), Equals, "Jon")
-    // c.Assert(teammate.TeamUid(), Equals, s.owner.Uid())
+    c.Assert(teammate.TeamUid(), Equals, s.owner.Uid())
 }
-
-// func (s *TeammateSuite) TestCreateTeammateWithTeam(c *C) {
-//     teammate := s.store.Teammates.Create(model.A{"Name": "Egret"}, s.owner)
-//     c.Assert(teammate.Team(), DeepEquals, s.team)
-// }
 
 // func (s *TeammateSuite) TestFindTeammate(c *C) {
 //     s.store.Teammates.Create(model.A{"Name": "Jon"}, s.owner)

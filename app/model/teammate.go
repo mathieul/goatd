@@ -160,7 +160,7 @@ func toTeammateSlice(source []interface{}) []*Teammate {
     return teammates
 }
 
-func (proxy *TeammateStoreProxy) Create(attributes A, owner event.Identified) *Teammate {
-    // attributes = owner.AddToAttributes(attributes)
+func (proxy *TeammateStoreProxy) Create(attributes A, owners ...event.Identified) *Teammate {
+    for _, owner := range owners { attributes = owner.AddToAttributes(attributes) }
     return proxy.store.Create(KindTeammate, attributes).(*Teammate)
 }
