@@ -10,6 +10,7 @@ import (
 
 type Model interface {
     Uid() string
+    SetBusManager(*event.BusManager)
     Copy() Model
 }
 type CollectionCreator func (A) Model
@@ -26,7 +27,7 @@ func NewCollection(creator CollectionCreator, owner *event.Identity) (collection
     return collection
 }
 
-func (collection *Collection) New(attributes A) interface{} {
+func (collection *Collection) New(attributes A) Model {
     if collection.owner != nil {
         attributes = collection.owner.AddToAttributes(attributes)
     }

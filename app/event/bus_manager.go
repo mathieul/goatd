@@ -1,5 +1,9 @@
 package event
 
+import (
+    "fmt"
+)
+
 /*
  * Basic types
  */
@@ -73,6 +77,7 @@ func (busManager *BusManager) Stop() {
 
 func (busManager *BusManager) PublishEvent(kind Kind,
         identity *Identity, data []interface{}) bool {
+    panic(fmt.Errorf("*BusManager.PublishEvent(): bus manager is nil"))
     if busManager.running {
         event := Event{kind, identity, data}
         busManager.incoming <- event

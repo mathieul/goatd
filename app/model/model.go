@@ -10,11 +10,65 @@ const (
     attributePrefix = "Attr"
 )
 
+const (
+    StatusNone Status = iota
+    StatusSignedOut
+    StatusOnBreak
+    StatusWaiting
+    StatusOffered
+    StatusBusy
+    StatusWrappingUp
+    StatusCompleted
+    StatusOtherWork
+
+    StatusCreated
+    StatusQueued
+    StatusAssigned
+)
+
+
+/*
+ * Init
+ */
+var statusFromString map[string]Status
+var statusToString map[Status]string
+
+func init() {
+    statusFromString = map[string]Status{
+        "signed-out": StatusSignedOut,
+        "on-break": StatusOnBreak,
+        "waiting": StatusWaiting,
+        "offered": StatusOffered,
+        "busy": StatusBusy,
+        "assigned": StatusAssigned,
+        "wrapping-up": StatusWrappingUp,
+        "completed": StatusCompleted,
+        "other-work": StatusOtherWork,
+        "created": StatusCreated,
+        "queued": StatusQueued,
+    }
+    statusToString = map[Status]string{
+        StatusNone: "None",
+        StatusSignedOut: "SignedOut",
+        StatusOnBreak: "OnBreak",
+        StatusWaiting: "Waiting",
+        StatusOffered: "Offered",
+        StatusBusy: "Busy",
+        StatusWrappingUp: "WrappingUp",
+        StatusOtherWork: "OtherWork",
+        StatusCreated: "Created",
+        StatusQueued: "Queued",
+        StatusAssigned: "Assigned",
+        StatusCompleted: "Completed",
+    }
+}
+
 
 /*
  * Basic types
  */
 type A map[string]interface{}
+type Status int
 
 
 /*

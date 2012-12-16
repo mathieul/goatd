@@ -2,7 +2,6 @@ package model
 
 import (
     // "strings"
-    // "fmt"
     "github.com/sdegutis/fsm"
     "goatd/app/event"
 )
@@ -13,6 +12,7 @@ import (
 
 type Teammate struct {
     *event.Identity
+    busManager *event.BusManager
     sm fsm.StateMachine
     AttrName string
     AttrTeamUid string
@@ -40,8 +40,7 @@ func setupTeammateStateMachine(teammate *Teammate) fsm.StateMachine {
         {From: "waiting", Event: "start-other-work", To: "other-work"},
         {From: "wrapping-up", Event: "start-other-work", To: "other-work"},
     }
-    sm := fsm.NewStateMachine(rules, teammate)
-    return sm
+    return fsm.NewStateMachine(rules, teammate)
 }
 
 func NewTeammate(attributes A) (teammate *Teammate) {
@@ -52,80 +51,85 @@ func NewTeammate(attributes A) (teammate *Teammate) {
 }
 
 func (teammate *Teammate) Copy() Model {
-    return &Teammate{teammate.Identity, teammate.sm, teammate.AttrName,
-        teammate.AttrTeamUid, teammate.AttrTaskUid}
+    return &Teammate{teammate.Identity, teammate.busManager, teammate.sm,
+        teammate.AttrName, teammate.AttrTeamUid, teammate.AttrTaskUid}
+}
+
+func (teammate *Teammate) SetBusManager(busManager *event.BusManager) {
+    teammate.busManager = busManager
 }
 
 func (teammate *Teammate) StateMachineCallback(action string, args []interface{}) {
-    // switch action {
-    // case "setTaskUid":
-    //     teammate.AttrTaskUid = args[0].(string)
-    // case "resetTaskUid":
-    //     teammate.AttrTaskUid = ""
-    //     event.Manager().PublishEvent(event.KindCompleteTask, *teammate.identity,
-    //         []string{teammate.Uid(), args[0].(*Task).Uid()})
-    // case "publishWaiting":
-    //     event.Manager().PublishEvent(event.KindTeammateAvailable, *teammate.identity, nil)
-    // case "publishAcceptTask":
-    //     event.Manager().PublishEvent(event.KindAcceptTask, *teammate.identity,
-    //         []string{teammate.Uid(), args[0].(*Task).Uid()})
+    switch action {
+    case "setTaskUid":
+        teammate.AttrTaskUid = args[0].(string)
+    case "resetTaskUid":
+        teammate.AttrTaskUid = ""
+        teammate.busManager.PublishEvent(event.CompleteTask, teammate.Identity,
+            []interface{}{teammate.Uid(), args[0].(*Task).Uid()})
+    case "publishWaiting":
+        teammate.busManager.PublishEvent(event.TeammateAvailable, teammate.Identity,
+            []interface{}{})
+    case "publishAcceptTask":
+        teammate.busManager.PublishEvent(event.AcceptTask, teammate.Identity,
+            []interface{}{teammate.Uid(), args[0].(*Task).Uid()})
 
-    // }
+    }
 }
 
 func (teammate Teammate) Name() string { return teammate.AttrName }
 
 func (teammate Teammate) TeamUid() string { return teammate.AttrTeamUid }
 
-// func (teammate Teammate) Status() Status { return statusFromString[teammate.sm.CurrentState] }
+func (teammate Teammate) Status() Status { return statusFromString[teammate.sm.CurrentState] }
 
-// func (teammate *Teammate) SignIn() bool {
-//     if error := teammate.sm.Process("sign-in"); error != nil { return false }
-//     return true
-// }
+func (teammate *Teammate) SignIn() bool {
+    if error := teammate.sm.Process("sign-in"); error != nil { return false }
+    return true
+}
 
-// func (teammate *Teammate) GoOnBreak() bool {
-//     if error := teammate.sm.Process("go-on-break"); error != nil { return false }
-//     return true
-// }
+func (teammate *Teammate) GoOnBreak() bool {
+    if error := teammate.sm.Process("go-on-break"); error != nil { return false }
+    return true
+}
 
-// func (teammate *Teammate) MakeAvailable() bool {
-//     if error := teammate.sm.Process("make-available"); error != nil { return false }
-//     return true
-// }
+func (teammate *Teammate) MakeAvailable() bool {
+    if error := teammate.sm.Process("make-available"); error != nil { return false }
+    return true
+}
 
-// func (teammate *Teammate) OfferTask(task *Task) bool {
-//     if error := teammate.sm.Process("offer-task", task.Uid()); error != nil { return false }
-//     return true
-// }
+func (teammate *Teammate) OfferTask(task *Task) bool {
+    if error := teammate.sm.Process("offer-task", task.Uid()); error != nil { return false }
+    return true
+}
 
-// func (teammate *Teammate) AcceptTask(task *Task) bool {
-//     if task.Uid() != teammate.AttrTaskUid { return false }
-//     if error := teammate.sm.Process("accept-task", task); error != nil { return false }
-//     return true
-// }
+func (teammate *Teammate) AcceptTask(task *Task) bool {
+    if task.Uid() != teammate.AttrTaskUid { return false }
+    if error := teammate.sm.Process("accept-task", task); error != nil { return false }
+    return true
+}
 
-// func (teammate *Teammate) RejectTask(task *Task) bool {
-//     if task.Uid() != teammate.AttrTaskUid { return false }
-//     if error := teammate.sm.Process("reject-task"); error != nil { return false }
-//     return true
-// }
+func (teammate *Teammate) RejectTask(task *Task) bool {
+    if task.Uid() != teammate.AttrTaskUid { return false }
+    if error := teammate.sm.Process("reject-task"); error != nil { return false }
+    return true
+}
 
-// func (teammate *Teammate) FinishTask(task *Task) bool {
-//     if task.Uid() != teammate.AttrTaskUid { return false }
-//     if error := teammate.sm.Process("finish-task", task); error != nil { return false }
-//     return true
-// }
+func (teammate *Teammate) FinishTask(task *Task) bool {
+    if task.Uid() != teammate.AttrTaskUid { return false }
+    if error := teammate.sm.Process("finish-task", task); error != nil { return false }
+    return true
+}
 
-// func (teammate *Teammate) StartOtherWork() bool {
-//     if error := teammate.sm.Process("start-other-work"); error != nil { return false }
-//     return true
-// }
+func (teammate *Teammate) StartOtherWork() bool {
+    if error := teammate.sm.Process("start-other-work"); error != nil { return false }
+    return true
+}
 
-// func (teammate *Teammate) SignOut() bool {
-//     if error := teammate.sm.Process("sign-out"); error != nil { return false }
-//     return true
-// }
+func (teammate *Teammate) SignOut() bool {
+    if error := teammate.sm.Process("sign-out"); error != nil { return false }
+    return true
+}
 
 // func (teammate Teammate) CurrentTask() *Task {
 //     if teammate.AttrTaskUid == "" { return nil }

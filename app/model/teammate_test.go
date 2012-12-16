@@ -15,14 +15,21 @@ type TeammateSuite struct{
     store *model.Store
     teammate *model.Teammate
     owner *TeammateOwner
+    busManager *event.BusManager
 }
 
 var _ = Suite(&TeammateSuite{})
 
 func (s *TeammateSuite) SetUpTest(c *C) {
-    s.store = model.NewStore()
+    s.busManager = event.NewBusManager()
+    s.busManager.Start()
+    s.store = model.NewStore(s.busManager)
     s.owner = &TeammateOwner{event.NewIdentity("Team")}
     s.teammate = s.store.Teammates.Create(model.A{"Name": "Agent"}, s.owner)
+}
+
+func (s *TeammateSuite) TearDownTest(c *C) {
+    s.busManager.Stop()
 }
 
 func (s *TeammateSuite) TestCreateTeammate(c *C) {
@@ -59,51 +66,51 @@ func (s *TeammateSuite) TestSelectTeammates(c *C) {
         []*model.Teammate{tyrion, jamie})
 }
 
-// func (s *TeammateSuite) TestSignInSignOutTeammate(c *C) {
-//     c.Assert(s.teammate.Status(), Equals, model.StatusSignedOut)
-//     c.Assert(s.teammate.SignIn(), Equals, true)
-//     c.Assert(s.teammate.Status(), Equals, model.StatusOnBreak)
-//     c.Assert(s.teammate.SignOut(), Equals, true)
-//     c.Assert(s.teammate.Status(), Equals, model.StatusSignedOut)
-// }
+func (s *TeammateSuite) TestSignInSignOutTeammate(c *C) {
+    c.Assert(s.teammate.Status(), Equals, model.StatusSignedOut)
+    c.Assert(s.teammate.SignIn(), Equals, true)
+    c.Assert(s.teammate.Status(), Equals, model.StatusOnBreak)
+    c.Assert(s.teammate.SignOut(), Equals, true)
+    c.Assert(s.teammate.Status(), Equals, model.StatusSignedOut)
+}
 
-// func (s *TeammateSuite) TestChangingAvailability(c *C) {
-//     s.teammate.SignIn()
-//     c.Assert(s.teammate.MakeAvailable(), Equals, true)
-//     c.Assert(s.teammate.Status(), Equals, model.StatusWaiting)
-//     task := s.team.Tasks.Create(model.A{"Title": "Do It"}, s.owner)
-//     c.Assert(s.teammate.OfferTask(task), Equals, true)
-//     c.Assert(s.teammate.Status(), Equals, model.StatusOffered)
-//     c.Assert(s.teammate.CurrentTask(), DeepEquals, task)
-// }
+func (s *TeammateSuite) TestChangingAvailability(c *C) {
+    s.teammate.SignIn()
+    c.Assert(s.teammate.MakeAvailable(), Equals, true)
+    c.Assert(s.teammate.Status(), Equals, model.StatusWaiting)
+    task := s.store.Tasks.Create(model.A{"Title": "Do It"}, s.owner)
+    c.Assert(s.teammate.OfferTask(task), Equals, true)
+    c.Assert(s.teammate.Status(), Equals, model.StatusOffered)
+    // c.Assert(s.teammate.CurrentTask(), DeepEquals, task)
+}
 
-// func (s *TeammateSuite) TestAcceptFinishTask(c *C) {
-//     s.teammate.SignIn()
-//     s.teammate.MakeAvailable()
-//     task := s.team.Tasks.Create(model.A{"Title": "Do It"}, s.owner)
-//     s.teammate.OfferTask(task)
-//     c.Assert(s.teammate.AcceptTask(task), Equals, true)
-//     c.Assert(s.teammate.Status(), Equals, model.StatusBusy)
-//     c.Assert(s.teammate.CurrentTask(), DeepEquals, task)
+func (s *TeammateSuite) TestAcceptFinishTask(c *C) {
+    s.teammate.SignIn()
+    s.teammate.MakeAvailable()
+    task := s.store.Tasks.Create(model.A{"Title": "Do It"}, s.owner)
+    s.teammate.OfferTask(task)
+    c.Assert(s.teammate.AcceptTask(task), Equals, true)
+    c.Assert(s.teammate.Status(), Equals, model.StatusBusy)
+    // c.Assert(s.teammate.CurrentTask(), DeepEquals, task)
 
-//     c.Assert(s.teammate.FinishTask(task), Equals, true)
-//     c.Assert(s.teammate.Status(), Equals, model.StatusWrappingUp)
-//     c.Assert(s.teammate.CurrentTask(), IsNil)
-// }
+    c.Assert(s.teammate.FinishTask(task), Equals, true)
+    c.Assert(s.teammate.Status(), Equals, model.StatusWrappingUp)
+    // c.Assert(s.teammate.CurrentTask(), IsNil)
+}
 
-// func (s *TeammateSuite) TestOtherWorkOnBreakTask(c *C) {
-//     s.teammate.SignIn()
-//     s.teammate.MakeAvailable()
-//     task := s.team.Tasks.Create(model.A{"Title": "Do It"}, s.owner)
-//     s.teammate.OfferTask(task)
-//     s.teammate.AcceptTask(task)
-//     c.Assert(s.teammate.StartOtherWork(), Equals, false)
-//     s.teammate.FinishTask(task)
+func (s *TeammateSuite) TestOtherWorkOnBreakTask(c *C) {
+    s.teammate.SignIn()
+    s.teammate.MakeAvailable()
+    task := s.store.Tasks.Create(model.A{"Title": "Do It"}, s.owner)
+    s.teammate.OfferTask(task)
+    s.teammate.AcceptTask(task)
+    c.Assert(s.teammate.StartOtherWork(), Equals, false)
+    s.teammate.FinishTask(task)
 
-//     c.Assert(s.teammate.StartOtherWork(), Equals, true)
-//     c.Assert(s.teammate.Status(), Equals, model.StatusOtherWork)
-//     c.Assert(s.teammate.GoOnBreak(), Equals, true)
-//     c.Assert(s.teammate.Status(), Equals, model.StatusOnBreak)
-//     c.Assert(s.teammate.StartOtherWork(), Equals, true)
-//     c.Assert(s.teammate.Status(), Equals, model.StatusOtherWork)
-// }
+    c.Assert(s.teammate.StartOtherWork(), Equals, true)
+    c.Assert(s.teammate.Status(), Equals, model.StatusOtherWork)
+    c.Assert(s.teammate.GoOnBreak(), Equals, true)
+    c.Assert(s.teammate.Status(), Equals, model.StatusOnBreak)
+    c.Assert(s.teammate.StartOtherWork(), Equals, true)
+    c.Assert(s.teammate.Status(), Equals, model.StatusOtherWork)
+}

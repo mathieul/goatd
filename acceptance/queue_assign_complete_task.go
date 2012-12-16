@@ -7,7 +7,6 @@ import (
     "time"
     "goatd/app/event"
     "goatd/app/model"
-    "goatd/app/store"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -22,7 +21,7 @@ var _ = Suite(&AcceptanceSuite{})
 func (s *AcceptanceSuite) SetUpTest(c *C) {
     s.busManager = event.NewBusManager()
     s.busManager.Start()
-    s.store = store.NewStore(s.busManager)
+    s.store = model.NewStore(s.busManager)
     s.store.Start()
 }
 

@@ -11,6 +11,7 @@ import (
 
 type Task struct {
     *event.Identity
+    busManager *event.BusManager
     sm fsm.StateMachine
     AttrTitle string
     AttrTeamUid string
@@ -25,8 +26,7 @@ func setupTaksStateMachine(task *Task) fsm.StateMachine {
         {From: "offered", Event: "assign", To: "assigned"},
         {From: "assigned", Event: "complete", To: "completed"},
     }
-    sm := fsm.NewStateMachine(rules, task)
-    return sm
+    return fsm.NewStateMachine(rules, task)
 }
 
 func NewTask(attributes A) (task *Task) {
@@ -37,7 +37,12 @@ func NewTask(attributes A) (task *Task) {
 }
 
 func (task *Task) Copy() Model {
-    return &Task{task.Identity, task.sm, task.AttrTitle, task.AttrTeamUid, task.AttrQueueUid}
+    return &Task{task.Identity, task.busManager, task.sm,
+        task.AttrTitle, task.AttrTeamUid, task.AttrQueueUid}
+}
+
+func (task *Task) SetBusManager(busManager *event.BusManager) {
+    task.busManager = busManager
 }
 
 func (task *Task) StateMachineCallback(action string, args []interface{}) {

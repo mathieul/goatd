@@ -15,7 +15,7 @@ type TeamSuite struct{
 var _ = Suite(&TeamSuite{})
 
 func (s *TeamSuite) SetUpTest(c *C) {
-    s.store = model.NewStore()
+    s.store = model.NewStore(nil)
     s.team = s.store.Teams.Create(model.A{"Name": "Jon Snow & Egret"})
 }
 

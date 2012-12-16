@@ -12,7 +12,7 @@ type StoreSuite struct{
 var _ = Suite(&StoreSuite{})
 
 func (s *StoreSuite) SetUpTest(c *C) {
-    s.store = model.NewStore()
+    s.store = model.NewStore(nil)
 }
 
 func (s *StoreSuite) TestCreateTeam(c *C) {

@@ -3,6 +3,7 @@ package model
 import (
     "fmt"
     "log"
+    "goatd/app/event"
 )
 
 const (
@@ -107,7 +108,9 @@ func copyModels(models []Model) []Model {
 func (store *persistentStore) processRequest(request Request, collection *Collection) (response interface{}) {
     switch request.Operation {
     case OpCreate:
-        response = collection.New(request.args[0].(A))
+        model := collection.New(request.args[0].(A))
+        // model.SetBusManager(store.busManager)
+        response = model
     case OpFind:
         if model := collection.Find(request.args[0].(string)); model != nil {
             response = model.Copy()
@@ -146,13 +149,15 @@ func (store *persistentStore) start() {
  */
 
 type Store struct {
-    Teams     *TeamStoreProxy
-    Teammates *TeammateStoreProxy
-    Tasks     *TaskStoreProxy
+    busManager  *event.BusManager
+    Teams       *TeamStoreProxy
+    Teammates   *TeammateStoreProxy
+    Tasks       *TaskStoreProxy
 }
 
-func NewStore() (store *Store) {
+func NewStore(busManager *event.BusManager) (store *Store) {
     store = new(Store)
+    store.busManager = busManager
     store.Teams = &TeamStoreProxy{store}
     store.Teammates = &TeammateStoreProxy{store}
     store.Tasks = &TaskStoreProxy{store}
