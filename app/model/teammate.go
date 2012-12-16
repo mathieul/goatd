@@ -1,7 +1,6 @@
 package model
 
 import (
-    "strings"
     "github.com/sdegutis/fsm"
     "goatd/app/event"
 )
@@ -89,6 +88,8 @@ func (teammate Teammate) Name() string { return teammate.AttrName }
 
 func (teammate Teammate) TeamUid() string { return teammate.AttrTeamUid }
 
+func (teammate Teammate) TaskUid() string { return teammate.AttrTaskUid }
+
 func (teammate Teammate) Status() Status {
     if teammate.sm == nil {
         return teammate.AttrStatus
@@ -147,8 +148,7 @@ func (teammate *Teammate) SignOut() bool {
 func (teammate Teammate) CurrentTask() *Task {
     if teammate.AttrTaskUid == "" { return nil }
     found := teammate.store.Tasks.Select(func (item interface{}) bool {
-        task := item.(*Task)
-        return strings.Contains(task.Uid(), teammate.AttrTaskUid)
+        return item.(*Task).Uid() == teammate.AttrTaskUid
     })
     if len(found) == 0 { return nil }
     return found[0]
