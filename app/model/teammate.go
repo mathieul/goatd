@@ -1,7 +1,8 @@
 package model
 
 import (
-    "strings"
+    // "strings"
+    // "fmt"
     "github.com/sdegutis/fsm"
     "goatd/app/event"
 )
@@ -43,111 +44,112 @@ func setupTeammateStateMachine(teammate *Teammate) fsm.StateMachine {
     return sm
 }
 
-func NewTeammate(attributes Attrs) *Teammate {
+func NewTeammate(attributes A) *Teammate {
     teammate := newModel(&Teammate{}, &attributes).(*Teammate)
-    teammate.identity = identification.NewIdentity("Teammate", teammate.Uid(), teammate)
+    teammate.Identity = event.NewIdentity("Teammate")
     teammate.sm = setupTeammateStateMachine(teammate)
     return teammate
 }
 
-func CreateTeammate(attributes Attrs) *Teammate {
-    teammate := NewTeammate(attributes)
-    teammate.Save()
-    return teammate
+func (teammate *Teammate) Copy() Model {
+    return &Teammate{teammate.Identity, teammate.sm, teammate.AttrName,
+        teammate.AttrTeamUid, teammate.AttrTaskUid}
 }
 
-func (teammate *Teammate) StateMachineCallback(action string, args []interface{}) {
-    switch action {
-    case "setTaskUid":
-        teammate.AttrTaskUid = args[0].(string)
-    case "resetTaskUid":
-        teammate.AttrTaskUid = ""
-        event.Manager().PublishEvent(event.KindCompleteTask, *teammate.identity,
-            []string{teammate.Uid(), args[0].(*Task).Uid()})
-    case "publishWaiting":
-        event.Manager().PublishEvent(event.KindTeammateAvailable, *teammate.identity, nil)
-    case "publishAcceptTask":
-        event.Manager().PublishEvent(event.KindAcceptTask, *teammate.identity,
-            []string{teammate.Uid(), args[0].(*Task).Uid()})
+// func CreateTeammate(attributes Attrs) *Teammate {
+//     teammate := NewTeammate(attributes)
+//     teammate.Save()
+//     return teammate
+// }
 
-    }
+func (teammate *Teammate) StateMachineCallback(action string, args []interface{}) {
+    // switch action {
+    // case "setTaskUid":
+    //     teammate.AttrTaskUid = args[0].(string)
+    // case "resetTaskUid":
+    //     teammate.AttrTaskUid = ""
+    //     event.Manager().PublishEvent(event.KindCompleteTask, *teammate.identity,
+    //         []string{teammate.Uid(), args[0].(*Task).Uid()})
+    // case "publishWaiting":
+    //     event.Manager().PublishEvent(event.KindTeammateAvailable, *teammate.identity, nil)
+    // case "publishAcceptTask":
+    //     event.Manager().PublishEvent(event.KindAcceptTask, *teammate.identity,
+    //         []string{teammate.Uid(), args[0].(*Task).Uid()})
+
+    // }
 }
 
 func (teammate Teammate) Name() string { return teammate.AttrName }
 
 func (teammate Teammate) TeamUid() string { return teammate.AttrTeamUid }
 
-func (teammate *Teammate) SetTeam(team *Team) { teammate.team = team }
+// func (teammate Teammate) Status() Status { return statusFromString[teammate.sm.CurrentState] }
 
-func (teammate Teammate) Team() (team *Team) { return teammate.team }
+// func (teammate *Teammate) SignIn() bool {
+//     if error := teammate.sm.Process("sign-in"); error != nil { return false }
+//     return true
+// }
 
-func (teammate Teammate) Status() Status { return statusFromString[teammate.sm.CurrentState] }
+// func (teammate *Teammate) GoOnBreak() bool {
+//     if error := teammate.sm.Process("go-on-break"); error != nil { return false }
+//     return true
+// }
 
-func (teammate *Teammate) SignIn() bool {
-    if error := teammate.sm.Process("sign-in"); error != nil { return false }
-    return true
-}
+// func (teammate *Teammate) MakeAvailable() bool {
+//     if error := teammate.sm.Process("make-available"); error != nil { return false }
+//     return true
+// }
 
-func (teammate *Teammate) GoOnBreak() bool {
-    if error := teammate.sm.Process("go-on-break"); error != nil { return false }
-    return true
-}
+// func (teammate *Teammate) OfferTask(task *Task) bool {
+//     if error := teammate.sm.Process("offer-task", task.Uid()); error != nil { return false }
+//     return true
+// }
 
-func (teammate *Teammate) MakeAvailable() bool {
-    if error := teammate.sm.Process("make-available"); error != nil { return false }
-    return true
-}
+// func (teammate *Teammate) AcceptTask(task *Task) bool {
+//     if task.Uid() != teammate.AttrTaskUid { return false }
+//     if error := teammate.sm.Process("accept-task", task); error != nil { return false }
+//     return true
+// }
 
-func (teammate *Teammate) OfferTask(task *Task) bool {
-    if error := teammate.sm.Process("offer-task", task.Uid()); error != nil { return false }
-    return true
-}
+// func (teammate *Teammate) RejectTask(task *Task) bool {
+//     if task.Uid() != teammate.AttrTaskUid { return false }
+//     if error := teammate.sm.Process("reject-task"); error != nil { return false }
+//     return true
+// }
 
-func (teammate *Teammate) AcceptTask(task *Task) bool {
-    if task.Uid() != teammate.AttrTaskUid { return false }
-    if error := teammate.sm.Process("accept-task", task); error != nil { return false }
-    return true
-}
+// func (teammate *Teammate) FinishTask(task *Task) bool {
+//     if task.Uid() != teammate.AttrTaskUid { return false }
+//     if error := teammate.sm.Process("finish-task", task); error != nil { return false }
+//     return true
+// }
 
-func (teammate *Teammate) RejectTask(task *Task) bool {
-    if task.Uid() != teammate.AttrTaskUid { return false }
-    if error := teammate.sm.Process("reject-task"); error != nil { return false }
-    return true
-}
+// func (teammate *Teammate) StartOtherWork() bool {
+//     if error := teammate.sm.Process("start-other-work"); error != nil { return false }
+//     return true
+// }
 
-func (teammate *Teammate) FinishTask(task *Task) bool {
-    if task.Uid() != teammate.AttrTaskUid { return false }
-    if error := teammate.sm.Process("finish-task", task); error != nil { return false }
-    return true
-}
+// func (teammate *Teammate) SignOut() bool {
+//     if error := teammate.sm.Process("sign-out"); error != nil { return false }
+//     return true
+// }
 
-func (teammate *Teammate) StartOtherWork() bool {
-    if error := teammate.sm.Process("start-other-work"); error != nil { return false }
-    return true
-}
-
-func (teammate *Teammate) SignOut() bool {
-    if error := teammate.sm.Process("sign-out"); error != nil { return false }
-    return true
-}
-
-func (teammate Teammate) CurrentTask() *Task {
-    if teammate.AttrTaskUid == "" { return nil }
-    found := teammate.team.Tasks.Select(func (item interface{}) bool {
-        task := item.(*Task)
-        return strings.Contains(task.Uid(), teammate.AttrTaskUid)
-    })
-    if len(found) == 0 { return nil }
-    return found[0]
-}
+// func (teammate Teammate) CurrentTask() *Task {
+//     if teammate.AttrTaskUid == "" { return nil }
+//     found := teammate.team.Tasks.Select(func (item interface{}) bool {
+//         task := item.(*Task)
+//         return strings.Contains(task.Uid(), teammate.AttrTaskUid)
+//     })
+//     if len(found) == 0 { return nil }
+//     return found[0]
+// }
 
 
 /*
- * Teammates
+ * TeamStoreProxy
  */
 
-type Teammates struct {
-    Collection
+type TeammateStoreProxy struct {
+    store *Store
 }
 
 func toTeammateSlice(source []interface{}) []*Teammate {
@@ -158,35 +160,7 @@ func toTeammateSlice(source []interface{}) []*Teammate {
     return teammates
 }
 
-func NewTeammates(owner identification.Identity) (teammates *Teammates) {
-    teammates = new(Teammates)
-    teammates.Collection = NewCollection(func(attributes Attrs, owner interface{}) interface{} {
-        teammate := CreateTeammate(attributes)
-        teammate.SetTeam(owner.(*Team))
-        return teammate
-    }, owner)
-    return teammates
-}
-
-func (teammates *Teammates) Create(attributes Attrs) (teammate *Teammate) {
-    return teammates.Collection.Create(attributes).(*Teammate)
-}
-
-func (teammates Teammates) Slice() []*Teammate {
-    return toTeammateSlice(teammates.Collection.Slice())
-}
-
-func (teammates Teammates) Find(uid string) *Teammate {
-    if found := teammates.Collection.Find(uid); found != nil {
-        return found.(*Teammate)
-    }
-    return nil
-}
-
-func (teammates Teammates) FindAll(uids []string) []*Teammate {
-    return toTeammateSlice(teammates.Collection.FindAll(uids))
-}
-
-func (teammates Teammates) Select(tester func(interface{}) bool) (result []*Teammate) {
-    return toTeammateSlice(teammates.Collection.Select(tester))
+func (proxy *TeammateStoreProxy) Create(attributes A, owner event.Identified) *Teammate {
+    // attributes = owner.AddToAttributes(attributes)
+    return proxy.store.Create(KindTeammate, attributes).(*Teammate)
 }

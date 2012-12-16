@@ -7,14 +7,16 @@ import (
 const (
     KindNone Kind = iota
     KindTeam
+    KindTeammate
 )
 
 func (kind Kind) String() string {
     var value string
     switch kind {
-    case KindNone:  value = "Opera"
-    case KindTeam:  value = "Create"
-    default:        value = fmt.Sprintf("Unknown(%d)", kind)
+    case KindNone:      value = "None"
+    case KindTeam:      value = "Team"
+    case KindTeammate:  value = "Teammate"
+    default:            value = fmt.Sprintf("Unknown(%d)", kind)
     }
     return fmt.Sprintf("<Kind{%s}>", value)
 }
@@ -30,7 +32,7 @@ const (
 func (operation Operation) String() string {
     var value string
     switch operation {
-    case OpNone:    value = "Opera"
+    case OpNone:    value = "None"
     case OpCreate:  value = "Create"
     case OpFind:    value = "Find"
     case OpFindAll: value = "FindAll"
@@ -130,11 +132,13 @@ func (store *persistentStore) start() {
 
 type Store struct {
     Teams *TeamStoreProxy
+    Teammates *TeammateStoreProxy
 }
 
 func NewStore() (store *Store) {
     store = new(Store)
     store.Teams = &TeamStoreProxy{store}
+    store.Teammates = &TeammateStoreProxy{store}
     return store
 }
 

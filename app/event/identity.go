@@ -15,6 +15,10 @@ const (
     randomDevice = "/dev/urandom"
 )
 
+type Identified interface {
+    AddToAttributes(map[string]interface{}) map[string]interface{}
+}
+
 /*
  * Helpers
  */
