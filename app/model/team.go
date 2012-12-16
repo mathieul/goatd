@@ -11,6 +11,7 @@ import (
 type Team struct {
     *event.Identity
     busManager *event.BusManager
+    store *Store
     AttrName string
 }
 
@@ -19,11 +20,12 @@ func (team *Team) Name() string {
 }
 
 func (team *Team) Copy() Model {
-    return &Team{team.Identity, team.busManager, team.AttrName}
+    return &Team{team.Identity, team.busManager, team.store, team.AttrName}
 }
 
-func (team *Team) MakeActive(busManager *event.BusManager) {
+func (team *Team) SetActive(busManager *event.BusManager, store *Store) {
     team.busManager = busManager
+    team.store = store
 }
 
 func NewTeam(attributes A) (team *Team) {

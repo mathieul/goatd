@@ -12,6 +12,7 @@ import (
 type Task struct {
     *event.Identity
     busManager *event.BusManager
+    store *Store
     sm fsm.StateMachine
     AttrTitle string
     AttrTeamUid string
@@ -37,12 +38,13 @@ func NewTask(attributes A) (task *Task) {
 }
 
 func (task *Task) Copy() Model {
-    return &Task{task.Identity, task.busManager, task.sm,
+    return &Task{task.Identity, task.busManager, task.store, task.sm,
         task.AttrTitle, task.AttrTeamUid, task.AttrQueueUid}
 }
 
-func (task *Task) MakeActive(busManager *event.BusManager) {
+func (task *Task) SetActive(busManager *event.BusManager, store *Store) {
     task.busManager = busManager
+    task.store = store
 }
 
 func (task *Task) StateMachineCallback(action string, args []interface{}) {

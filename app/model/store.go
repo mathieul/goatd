@@ -168,7 +168,7 @@ func (store *Store) Create(kind Kind, attributes A) Model {
     persisted.Request <- Request{kind, OpCreate, args}
     if value := <- persisted.Response; value != nil {
         model := value.(Model)
-        model.MakeActive(store.busManager)
+        model.SetActive(store.busManager, store)
         return model
     }
     return nil
@@ -179,7 +179,7 @@ func (store *Store) Find(kind Kind, uid string) Model {
     persisted.Request <- Request{kind, OpFind, args}
     if value := <- persisted.Response; value != nil {
         model := value.(Model)
-        model.MakeActive(store.busManager)
+        model.SetActive(store.busManager, store)
         return model
     }
     return nil
@@ -192,7 +192,7 @@ func (store *Store) FindAll(kind Kind, uids []string) []Model {
     models := make([]Model, 0, len(values.([]Model)))
     for _, value := range values.([]Model) {
         model := value.(Model)
-        model.MakeActive(store.busManager)
+        model.SetActive(store.busManager, store)
         models = append(models, model)
     }
     return models
@@ -205,7 +205,7 @@ func (store *Store) Select(kind Kind, tester func(interface{}) bool) []Model {
     models := make([]Model, 0, len(values.([]Model)))
     for _, value := range values.([]Model) {
         model := value.(Model)
-        model.MakeActive(store.busManager)
+        model.SetActive(store.busManager, store)
         models = append(models, model)
     }
     return models

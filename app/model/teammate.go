@@ -1,7 +1,7 @@
 package model
 
 import (
-    // "strings"
+    "strings"
     "github.com/sdegutis/fsm"
     "goatd/app/event"
 )
@@ -13,6 +13,7 @@ import (
 type Teammate struct {
     *event.Identity
     busManager *event.BusManager
+    store *Store
     sm *fsm.StateMachine
     AttrName string
     AttrStatus Status
@@ -54,13 +55,14 @@ func NewTeammate(attributes A) (teammate *Teammate) {
 }
 
 func (teammate *Teammate) Copy() Model {
-    return &Teammate{teammate.Identity, teammate.busManager,
+    return &Teammate{teammate.Identity, teammate.busManager, teammate.store,
         nil, teammate.AttrName, teammate.AttrStatus, teammate.AttrTeamUid,
         teammate.AttrTaskUid}
 }
 
-func (teammate *Teammate) MakeActive(busManager *event.BusManager) {
+func (teammate *Teammate) SetActive(busManager *event.BusManager, store *Store) {
     teammate.busManager = busManager
+    teammate.store = store
     teammate.sm = setupTeammateStateMachine(teammate, teammate.AttrStatus)
     teammate.AttrStatus = StatusNone
 }
@@ -142,15 +144,15 @@ func (teammate *Teammate) SignOut() bool {
     return true
 }
 
-// func (teammate Teammate) CurrentTask() *Task {
-//     if teammate.AttrTaskUid == "" { return nil }
-//     found := teammate.team.Tasks.Select(func (item interface{}) bool {
-//         task := item.(*Task)
-//         return strings.Contains(task.Uid(), teammate.AttrTaskUid)
-//     })
-//     if len(found) == 0 { return nil }
-//     return found[0]
-// }
+func (teammate Teammate) CurrentTask() *Task {
+    if teammate.AttrTaskUid == "" { return nil }
+    found := teammate.store.Tasks.Select(func (item interface{}) bool {
+        task := item.(*Task)
+        return strings.Contains(task.Uid(), teammate.AttrTaskUid)
+    })
+    if len(found) == 0 { return nil }
+    return found[0]
+}
 
 
 /*

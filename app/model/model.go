@@ -77,7 +77,7 @@ func (status Status) String() string {
 
 type Model interface {
     Uid() string
-    MakeActive(*event.BusManager)
+    SetActive(*event.BusManager, *Store)
     Copy() Model
 }
 
