@@ -13,13 +13,14 @@ import (
 type Teammate struct {
     *event.Identity
     busManager *event.BusManager
-    sm fsm.StateMachine
+    sm *fsm.StateMachine
     AttrName string
+    AttrStatus Status
     AttrTeamUid string
     AttrTaskUid string
 }
 
-func setupTeammateStateMachine(teammate *Teammate) fsm.StateMachine {
+func setupTeammateStateMachine(teammate *Teammate, status Status) *fsm.StateMachine {
     rules := []fsm.Rule{
         {From: "signed-out", Event: "sign-in", To: "on-break"},
         {From: "waiting", Event: "go-on-break", To: "on-break"},
@@ -40,23 +41,28 @@ func setupTeammateStateMachine(teammate *Teammate) fsm.StateMachine {
         {From: "waiting", Event: "start-other-work", To: "other-work"},
         {From: "wrapping-up", Event: "start-other-work", To: "other-work"},
     }
-    return fsm.NewStateMachine(rules, teammate)
+    sm := fsm.NewStateMachine(rules, teammate)
+    sm.CurrentState = statusToString[status]
+    return &sm
 }
 
 func NewTeammate(attributes A) (teammate *Teammate) {
     teammate = newModel(&Teammate{}, &attributes).(*Teammate)
+    if teammate.AttrStatus == StatusNone { teammate.AttrStatus = StatusSignedOut }
     teammate.Identity = event.NewIdentity("Teammate")
-    teammate.sm = setupTeammateStateMachine(teammate)
     return teammate
 }
 
 func (teammate *Teammate) Copy() Model {
-    return &Teammate{teammate.Identity, teammate.busManager, teammate.sm,
-        teammate.AttrName, teammate.AttrTeamUid, teammate.AttrTaskUid}
+    return &Teammate{teammate.Identity, teammate.busManager,
+        nil, teammate.AttrName, teammate.AttrStatus, teammate.AttrTeamUid,
+        teammate.AttrTaskUid}
 }
 
-func (teammate *Teammate) SetBusManager(busManager *event.BusManager) {
+func (teammate *Teammate) MakeActive(busManager *event.BusManager) {
     teammate.busManager = busManager
+    teammate.sm = setupTeammateStateMachine(teammate, teammate.AttrStatus)
+    teammate.AttrStatus = StatusNone
 }
 
 func (teammate *Teammate) StateMachineCallback(action string, args []interface{}) {
@@ -81,7 +87,12 @@ func (teammate Teammate) Name() string { return teammate.AttrName }
 
 func (teammate Teammate) TeamUid() string { return teammate.AttrTeamUid }
 
-func (teammate Teammate) Status() Status { return statusFromString[teammate.sm.CurrentState] }
+func (teammate Teammate) Status() Status {
+    if teammate.sm == nil {
+        return teammate.AttrStatus
+    }
+    return statusFromString[teammate.sm.CurrentState]
+}
 
 func (teammate *Teammate) SignIn() bool {
     if error := teammate.sm.Process("sign-in"); error != nil { return false }

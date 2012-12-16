@@ -36,6 +36,7 @@ func (s *TeammateSuite) TestCreateTeammate(c *C) {
     teammate := s.store.Teammates.Create(model.A{"Name": "Jon"}, s.owner)
     c.Assert(teammate.Name(), Equals, "Jon")
     c.Assert(teammate.TeamUid(), Equals, s.owner.Uid())
+    c.Assert(teammate.Status(), Equals, model.StatusSignedOut)
 }
 
 func (s *TeammateSuite) TestFindTeammate(c *C) {

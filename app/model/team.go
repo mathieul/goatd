@@ -22,7 +22,7 @@ func (team *Team) Copy() Model {
     return &Team{team.Identity, team.busManager, team.AttrName}
 }
 
-func (team *Team) SetBusManager(busManager *event.BusManager) {
+func (team *Team) MakeActive(busManager *event.BusManager) {
     team.busManager = busManager
 }
 

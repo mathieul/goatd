@@ -4,6 +4,7 @@ import (
     "reflect"
     "log"
     "fmt"
+    "goatd/app/event"
 )
 
 const (
@@ -48,27 +49,37 @@ func init() {
         "queued": StatusQueued,
     }
     statusToString = map[Status]string{
-        StatusNone: "None",
-        StatusSignedOut: "SignedOut",
-        StatusOnBreak: "OnBreak",
-        StatusWaiting: "Waiting",
-        StatusOffered: "Offered",
-        StatusBusy: "Busy",
-        StatusWrappingUp: "WrappingUp",
-        StatusOtherWork: "OtherWork",
-        StatusCreated: "Created",
-        StatusQueued: "Queued",
-        StatusAssigned: "Assigned",
-        StatusCompleted: "Completed",
+        StatusNone: "none",
+        StatusSignedOut: "signed-out",
+        StatusOnBreak: "on-break",
+        StatusWaiting: "waiting",
+        StatusOffered: "offered",
+        StatusBusy: "busy",
+        StatusWrappingUp: "wrapping-up",
+        StatusOtherWork: "other-work",
+        StatusCreated: "created",
+        StatusQueued: "queued",
+        StatusAssigned: "assigned",
+        StatusCompleted: "completed",
     }
 }
 
 
 /*
- * Basic types
+ * Basic types and interfaces
  */
 type A map[string]interface{}
 type Status int
+
+func (status Status) String() string {
+    return fmt.Sprintf("Status{%s}", statusToString[status])
+}
+
+type Model interface {
+    Uid() string
+    MakeActive(*event.BusManager)
+    Copy() Model
+}
 
 
 /*

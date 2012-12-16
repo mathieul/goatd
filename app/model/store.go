@@ -109,8 +109,7 @@ func (store *persistentStore) processRequest(request Request, collection *Collec
     switch request.Operation {
     case OpCreate:
         model := collection.New(request.args[0].(A))
-        // model.SetBusManager(store.busManager)
-        response = model
+        response = model.Copy()
     case OpFind:
         if model := collection.Find(request.args[0].(string)); model != nil {
             response = model.Copy()
@@ -168,7 +167,9 @@ func (store *Store) Create(kind Kind, attributes A) Model {
     args := []interface{}{attributes}
     persisted.Request <- Request{kind, OpCreate, args}
     if value := <- persisted.Response; value != nil {
-        return value.(Model)
+        model := value.(Model)
+        model.MakeActive(store.busManager)
+        return model
     }
     return nil
 }
@@ -177,7 +178,9 @@ func (store *Store) Find(kind Kind, uid string) Model {
     args := []interface{}{uid}
     persisted.Request <- Request{kind, OpFind, args}
     if value := <- persisted.Response; value != nil {
-        return value.(Model)
+        model := value.(Model)
+        model.MakeActive(store.busManager)
+        return model
     }
     return nil
 }
@@ -188,7 +191,9 @@ func (store *Store) FindAll(kind Kind, uids []string) []Model {
     values := <- persisted.Response
     models := make([]Model, 0, len(values.([]Model)))
     for _, value := range values.([]Model) {
-        models = append(models, value.(Model))
+        model := value.(Model)
+        model.MakeActive(store.busManager)
+        models = append(models, model)
     }
     return models
 }
@@ -199,7 +204,9 @@ func (store *Store) Select(kind Kind, tester func(interface{}) bool) []Model {
     values := <- persisted.Response
     models := make([]Model, 0, len(values.([]Model)))
     for _, value := range values.([]Model) {
-        models = append(models, value.(Model))
+        model := value.(Model)
+        model.MakeActive(store.busManager)
+        models = append(models, model)
     }
     return models
 }

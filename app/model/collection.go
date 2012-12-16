@@ -8,11 +8,6 @@ import (
  * Collection
  */
 
-type Model interface {
-    Uid() string
-    SetBusManager(*event.BusManager)
-    Copy() Model
-}
 type CollectionCreator func (A) Model
 type Collection struct {
     creator CollectionCreator

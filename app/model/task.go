@@ -41,7 +41,7 @@ func (task *Task) Copy() Model {
         task.AttrTitle, task.AttrTeamUid, task.AttrQueueUid}
 }
 
-func (task *Task) SetBusManager(busManager *event.BusManager) {
+func (task *Task) MakeActive(busManager *event.BusManager) {
     task.busManager = busManager
 }
 
