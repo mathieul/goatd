@@ -33,14 +33,14 @@ func (s *AcceptanceSuite) TearDownTest(c *C) {
 func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
     aLittleBit := 100 * time.Millisecond
 
-    # provisioning
+    // provisioning
     team := s.store.Teams.Create(model.A{"Name": "Jones Household"})
     distributor := dispatch.NewDistributor(team, s.busManager, s.store)
     mate := s.store.Teammates.Create(model.A{"Name": "Jack"}, team)
     queue := s.store.Queues.Create(model.A{"Name": "Duties"}, team)
     skill := s.store.Skills.Create(model.A{}, team, mate, queue)
 
-    # keep track of events received
+    // keep track of events received
     var eventOne, eventTwo, eventThree event.Event
     go func() {
         incoming := event.Manager().SubscribeTo([]event.Kind{
@@ -51,7 +51,7 @@ func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
         eventThree = <-incoming; fmt.Println("eventThree:", eventThree)
     }()
 
-    # create task and get have the teammate process it
+    // create task and get have the teammate process it
     c.Assert(mate.Status(), Equals, model.StatusSignedOut)
     mate.SignIn()
     c.Assert(mate.Status(), Equals, model.StatusOnBreak)
