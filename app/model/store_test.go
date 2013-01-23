@@ -5,7 +5,7 @@ import (
     "goatd/app/model"
 )
 
-type StoreSuite struct{
+type StoreSuite struct {
     store *model.Store
 }
 

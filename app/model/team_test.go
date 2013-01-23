@@ -7,7 +7,7 @@ import (
 )
 
 
-type TeamSuite struct{
+type TeamSuite struct {
     store *model.Store
     team *model.Team
 }

@@ -11,7 +11,7 @@ type TeammateOwner struct {
     *event.Identity
 }
 
-type TeammateSuite struct{
+type TeammateSuite struct {
     store *model.Store
     teammate *model.Teammate
     owner *TeammateOwner

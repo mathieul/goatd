@@ -11,7 +11,7 @@ type TaskOwner struct {
     *event.Identity
 }
 
-type TaskSuite struct{
+type TaskSuite struct {
     store *model.Store
     owner *TaskOwner
 }

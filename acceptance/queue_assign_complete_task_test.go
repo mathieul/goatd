@@ -11,7 +11,7 @@ import (
 
 func Test(t *testing.T) { TestingT(t) }
 
-type AcceptanceSuite struct{
+type AcceptanceSuite struct {
     busManager *event.BusManager
     store *model.Store
 }
