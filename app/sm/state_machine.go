@@ -21,9 +21,12 @@ type Action func ([]interface{}) bool
  */
 type StateMachine struct {}
 type Builder struct {}
+type Transitioner struct {}
 
-func (builder Builder) Event(event Event, from Status, to Status, callback Action) {
+func (builder Builder) Event(event Event, args ...interface{}) {
+}
 
+func (transitioner Transitioner) Transition(from, to Status, callback Action) {
 }
 
 func (stateMachine StateMachine) Status() Status {

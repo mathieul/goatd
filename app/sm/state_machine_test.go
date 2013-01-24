@@ -64,7 +64,7 @@ func (s *StateMachineSuite) TestUniTransitionEventsWithAction(c *C) {
 }
 
 func (s *StateMachineSuite) TestMultiTransitionEvents(c *C) {
-    sm := sm.NewStateMachine(statusDraft, func (b sm.Builder) {
+    sm := sm.NewStateMachine(statusClosed, func (b sm.Builder) {
         b.Event(eventOpen, statusClosed, statusOpened, sm.NoAction)
         b.Event(eventClose, statusOpened, statusClosed, sm.NoAction)
         b.Event(eventLock, func (t sm.Transitioner) {
@@ -73,5 +73,5 @@ func (s *StateMachineSuite) TestMultiTransitionEvents(c *C) {
         })
     })
     c.Assert(sm.Trigger(eventLock), Equals, true)
-    c.Assert(sm.Status(), Equals, statusLockedOpened)
+    c.Assert(sm.Status(), Equals, statusLockedOpen)
 }
