@@ -52,10 +52,8 @@ func (builder Builder) EventMultiTransitions(event Event, callback func(Builder)
 func (builder Builder) Transition(from, to Status, action func ([]interface{}) bool) {
     target := statusTarget{to, action}
     if transitions, found := builder.stateMachine.eventTransitions[builder.event]; found {
-        fmt.Println("EventSingleTransition(", builder.event, "): found => set ", from)
         transitions[from] = target
     } else {
-        fmt.Println("EventSingleTransition(", builder.event, "): not found - allocate")
         transitions = make(statusTargetMap, 1)
         transitions[from] = target
         builder.stateMachine.eventTransitions[builder.event] = transitions

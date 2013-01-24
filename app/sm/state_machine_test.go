@@ -80,15 +80,15 @@ func (s *StateMachineSuite) TestTriggeringWithArguments(c *C) {
     c.Assert(fortyTwo, Equals, 42)
 }
 
-// func (s *StateMachineSuite) TestMultiTransitionEvents(c *C) {
-//     sm := sm.NewStateMachine(statusClosed, func (b sm.Builder) {
-//         b.Event(eventOpen, statusClosed, statusOpened, sm.NoAction)
-//         b.Event(eventClose, statusOpened, statusClosed, sm.NoAction)
-//         b.Event(eventLock, func (b sm.Builder) {
-//             b.Transition(statusClosed, statusLocked, sm.NoAction)
-//             b.Transition(statusOpened, statusLockedOpen, sm.NoAction)
-//         })
-//     })
-//     c.Assert(sm.Trigger(eventLock), Equals, true)
-//     c.Assert(sm.Status(), Equals, statusLockedOpen)
-// }
+func (s *StateMachineSuite) TestMultiTransitionEvents(c *C) {
+    sm := sm.NewStateMachine(statusClosed, func (b sm.Builder) {
+        b.Event(eventOpen, statusClosed, statusOpened, sm.NoAction)
+        b.Event(eventClose, statusOpened, statusClosed, sm.NoAction)
+        b.Event(eventLock, func (b sm.Builder) {
+            b.Transition(statusClosed, statusLocked, sm.NoAction)
+            b.Transition(statusOpened, statusLockedOpen, sm.NoAction)
+        })
+    })
+    c.Assert(sm.Trigger(eventLock), Equals, true)
+    c.Assert(sm.Status(), Equals, statusLocked)
+}
