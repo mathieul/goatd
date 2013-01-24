@@ -11,7 +11,7 @@ import (
 var NoAction func ([]interface{}) bool
 
 func init() {
-    NoAction = func (args []interface{}) bool { return true }
+    NoAction = func ([]interface{}) bool { return true }
 }
 
 /*
@@ -35,18 +35,20 @@ type Builder struct {
     event Event
 }
 
-func newBuilder(stateMachine *StateMachine) *Builder {
-    return &Builder{stateMachine, 0}
+func newBuilder(stateMachine *StateMachine, events ...Event) *Builder {
+    builder := Builder{stateMachine, 0}
+    if len(events) > 0 {
+        builder.event = events[0]
+    }
+    return &builder
 }
 
 func (builder Builder) EventSingleTransition(event Event, from, to Status, action func ([]interface{}) bool) {
-    newBuilder := Builder{builder.stateMachine, event}
-    newBuilder.Transition(from, to, action)
+    newBuilder(builder.stateMachine, event).Transition(from, to, action)
 }
 
 func (builder Builder) EventMultiTransitions(event Event, callback func(Builder)) {
-    newBuilder := Builder{builder.stateMachine, event}
-    callback(newBuilder)
+    callback(*newBuilder(builder.stateMachine, event))
 }
 
 func (builder Builder) Transition(from, to Status, action func ([]interface{}) bool) {
