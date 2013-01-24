@@ -1,5 +1,9 @@
 package sm
 
+// import (
+//     "fmt"
+// )
+
 /*
  * Constants and initialized vars
  */
@@ -19,7 +23,9 @@ type Action func ([]interface{}) bool
 /*
  * StateMachine
  */
-type StateMachine struct {}
+type StateMachine struct {
+    status Status
+}
 type Builder struct {}
 type Transitioner struct {}
 
@@ -30,14 +36,14 @@ func (transitioner Transitioner) Transition(from, to Status, callback Action) {
 }
 
 func (stateMachine StateMachine) Status() Status {
-    return 1
+    return stateMachine.status
 }
 
 func (stateMachine *StateMachine) Trigger(event Event) bool {
     return true
 }
 
-
-func NewStateMachine(status Status, callback func (Builder)) *StateMachine {
-    return new(StateMachine)
+func NewStateMachine(status Status, callback func (Builder)) (stateMachine *StateMachine) {
+    stateMachine = &StateMachine{status}
+    return stateMachine
 }
