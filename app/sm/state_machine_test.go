@@ -36,7 +36,7 @@ func (s *StateMachineSuite) TestCreateStateMachineSetsInitialStatus(c *C) {
     c.Assert(sm.Status(), Equals, statusClosed)
 }
 
-func (s *StateMachineSuite) TestUniTransitionEventsNoAction(c *C) {
+func (s *StateMachineSuite) TestSingleTransitionEventsNoAction(c *C) {
     sm := sm.NewStateMachine(statusClosed, func (b sm.Builder) {
         b.Event(eventOpen, statusClosed, statusOpened, sm.NoAction)
         b.Event(eventClose, statusOpened, statusClosed, sm.NoAction)
