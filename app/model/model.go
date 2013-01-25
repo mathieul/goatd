@@ -13,22 +13,6 @@ const (
 )
 
 const (
-    StatusNone sm.Status = iota
-    StatusSignedOut
-    StatusOnBreak
-    StatusWaiting
-    StatusOffered
-    StatusBusy
-    StatusWrappingUp
-    StatusCompleted
-    StatusOtherWork
-
-    StatusCreated
-    StatusQueued
-    StatusAssigned
-)
-
-const (
     EventNone sm.Event = iota
     EventSignIn
     EventGoOnBreak
@@ -46,6 +30,56 @@ const (
     EventComplete
 )
 
+const (
+    StatusNone sm.Status = iota
+    StatusSignedOut
+    StatusOnBreak
+    StatusWaiting
+    StatusOffered
+    StatusBusy
+    StatusWrappingUp
+    StatusCompleted
+    StatusOtherWork
+    StatusCreated
+    StatusQueued
+    StatusAssigned
+)
+
+
+/*
+ * Init
+ */
+func init() {
+    sm.RegisterEvent(EventNone, "None")
+    sm.RegisterEvent(EventSignIn, "Sign-in")
+    sm.RegisterEvent(EventGoOnBreak, "Go on break")
+    sm.RegisterEvent(EventSignOut, "Sign-out")
+    sm.RegisterEvent(EventMakeAvailable, "Make available")
+    sm.RegisterEvent(EventOfferTask, "Offer task")
+    sm.RegisterEvent(EventAcceptTask, "Accept task")
+    sm.RegisterEvent(EventRejectTask, "Reject task")
+    sm.RegisterEvent(EventFinishTask, "Finish task")
+    sm.RegisterEvent(EventStartOtherWork, "Start other work")
+    sm.RegisterEvent(EventEnqueue, "Enqueue")
+    sm.RegisterEvent(EventDequeue, "Dequeue")
+    sm.RegisterEvent(EventOffer, "Offer")
+    sm.RegisterEvent(EventAssign, "Assign")
+    sm.RegisterEvent(EventComplete, "Complete")
+
+    sm.RegisterStatus(StatusNone, "None")
+    sm.RegisterStatus(StatusSignedOut, "Signed out")
+    sm.RegisterStatus(StatusOnBreak, "On break")
+    sm.RegisterStatus(StatusWaiting, "Waiting")
+    sm.RegisterStatus(StatusOffered, "Offered")
+    sm.RegisterStatus(StatusBusy, "Busy")
+    sm.RegisterStatus(StatusWrappingUp, "Wrapping up")
+    sm.RegisterStatus(StatusCompleted, "Completed")
+    sm.RegisterStatus(StatusOtherWork, "Other work")
+    sm.RegisterStatus(StatusCreated, "Created")
+    sm.RegisterStatus(StatusQueued, "Queued")
+    sm.RegisterStatus(StatusAssigned, "Assigned")
+}
+
 
 /*
  * Basic types and interfaces
@@ -56,6 +90,7 @@ type Model interface {
     Uid() string
     SetActive(*event.BusManager, *Store)
     Copy() Model
+    IsCopy() bool
 }
 
 
