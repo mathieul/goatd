@@ -23,7 +23,7 @@ func (team *Team) Copy() Model {
     return &Team{team.Identity, team.busManager, team.store, team.AttrName}
 }
 
-func (team *Team) SetActive(busManager *event.BusManager, store *Store) {
+func (team *Team) ActivateAsCopy(busManager *event.BusManager, store *Store) {
     team.busManager = busManager
     team.store = store
 }

@@ -84,16 +84,15 @@ func NewTeammate(attributes A) (teammate *Teammate) {
 }
 
 func (teammate *Teammate) Copy() Model {
-    return &Teammate{teammate.Identity, teammate.busManager, teammate.store,
-        nil, teammate.status, teammate.AttrName, teammate.AttrTeamUid,
-        teammate.AttrTaskUid}
+    stateMachine := setupTeammateStateMachine(teammate, teammate.status)
+    identity := teammate.Identity.Copy()
+    return &Teammate{identity, nil, nil, stateMachine, StatusNone,
+        teammate.AttrName, teammate.AttrTeamUid, teammate.AttrTaskUid}
 }
 
-func (teammate *Teammate) SetActive(busManager *event.BusManager, store *Store) {
+func (teammate *Teammate) ActivateAsCopy(busManager *event.BusManager, store *Store) {
     teammate.busManager = busManager
     teammate.store = store
-    teammate.stateMachine = setupTeammateStateMachine(teammate, teammate.status)
-    teammate.status = StatusNone
 }
 
 func (teammate Teammate) Name() string { return teammate.AttrName }
@@ -103,10 +102,10 @@ func (teammate Teammate) TeamUid() string { return teammate.AttrTeamUid }
 func (teammate Teammate) TaskUid() string { return teammate.AttrTaskUid }
 
 func (teammate Teammate) Status() sm.Status {
-    if teammate.stateMachine == nil {
-        return teammate.status
+    if teammate.IsCopy() && teammate.stateMachine != nil {
+        return teammate.stateMachine.Status()
     }
-    return teammate.stateMachine.Status()
+    return teammate.status    
 }
 
 func (teammate *Teammate) SignIn() bool {

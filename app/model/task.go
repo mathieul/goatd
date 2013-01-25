@@ -14,6 +14,7 @@ type Task struct {
     busManager *event.BusManager
     store *Store
     stateMachine *sm.StateMachine
+    status sm.Status
     AttrTitle string
     AttrTeamUid string
     AttrQueueUid string
@@ -41,16 +42,17 @@ func setupTaksStateMachine(task *Task, status sm.Status) *sm.StateMachine {
 func NewTask(attributes A) (task *Task) {
     task = newModel(&Task{}, &attributes).(*Task)
     task.Identity = event.NewIdentity("Task")
-    task.stateMachine = setupTaksStateMachine(task, StatusCreated)
     return task
 }
 
 func (task *Task) Copy() Model {
-    return &Task{task.Identity, task.busManager, task.store, task.stateMachine,
+    stateMachine := setupTaksStateMachine(task, task.status)
+    identity := task.Identity.Copy()
+    return &Task{identity, nil, nil, stateMachine, task.status,
         task.AttrTitle, task.AttrTeamUid, task.AttrQueueUid}
 }
 
-func (task *Task) SetActive(busManager *event.BusManager, store *Store) {
+func (task *Task) ActivateAsCopy(busManager *event.BusManager, store *Store) {
     task.busManager = busManager
     task.store = store
 }
