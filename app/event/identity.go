@@ -40,8 +40,9 @@ func generateUid() string {
  */
 
 type Identity struct {
-    kind string
-    uid string
+    kind    string
+    uid     string
+    isCopy  bool
 }
 
 func NewIdentity(values ...string) (identity *Identity) {
@@ -86,8 +87,12 @@ func (identity *Identity) SetUid(value string) {
     identity.uid = value
 }
 
-func (identity *Identity) Copy(original *Identity) *Identity {
-    return &Identity{original.kind, original.uid}
+func (identity Identity) IsCopy() bool {
+    return identity.isCopy
+}
+
+func (identity *Identity) Copy() *Identity {
+    return &Identity{identity.kind, identity.uid, true}
 }
 
 func (identity Identity) AddToAttributes(attributes map[string]interface{}) map[string]interface{} {

@@ -23,9 +23,11 @@ func (s *IdentitySuite) TestGenerateUid(c *C) {
 
 func (s *IdentitySuite) TestCopyIdentity(c *C) {
     original := event.NewIdentity("Team")
-    copy := original.Copy(original)
+    copy := original.Copy()
     c.Assert(copy.Kind(), Equals, original.Kind())
     c.Assert(copy.Uid(), Equals, original.Uid())
+    c.Assert(original.IsCopy(), Equals, false)
+    c.Assert(copy.IsCopy(), Equals, true)
     copy.SetKind("Teammate")
     copy.SetUid("blah-blah")
     c.Assert(copy.Kind(), Not(Equals), original.Kind())
