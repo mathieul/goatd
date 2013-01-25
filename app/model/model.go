@@ -4,6 +4,7 @@ import (
     "reflect"
     "log"
     "fmt"
+    "goatd/app/sm"
     "goatd/app/event"
 )
 
@@ -12,7 +13,7 @@ const (
 )
 
 const (
-    StatusNone Status = iota
+    StatusNone sm.Status = iota
     StatusSignedOut
     StatusOnBreak
     StatusWaiting
@@ -27,53 +28,24 @@ const (
     StatusAssigned
 )
 
-
-/*
- * Init
- */
-var statusFromString map[string]Status
-var statusToString map[Status]string
-
-func init() {
-    statusFromString = map[string]Status{
-        "signed-out": StatusSignedOut,
-        "on-break": StatusOnBreak,
-        "waiting": StatusWaiting,
-        "offered": StatusOffered,
-        "busy": StatusBusy,
-        "assigned": StatusAssigned,
-        "wrapping-up": StatusWrappingUp,
-        "completed": StatusCompleted,
-        "other-work": StatusOtherWork,
-        "created": StatusCreated,
-        "queued": StatusQueued,
-    }
-    statusToString = map[Status]string{
-        StatusNone: "none",
-        StatusSignedOut: "signed-out",
-        StatusOnBreak: "on-break",
-        StatusWaiting: "waiting",
-        StatusOffered: "offered",
-        StatusBusy: "busy",
-        StatusWrappingUp: "wrapping-up",
-        StatusOtherWork: "other-work",
-        StatusCreated: "created",
-        StatusQueued: "queued",
-        StatusAssigned: "assigned",
-        StatusCompleted: "completed",
-    }
-}
+const (
+    EventNone sm.Event = iota
+    EventSignIn
+    EventGoOnBreak
+    EventSignOut
+    EventMakeAvailable
+    EventOfferTask
+    EventAcceptTask
+    EventRejectTask
+    EventFinishTask
+    EventStartOtherWork
+)
 
 
 /*
  * Basic types and interfaces
  */
 type A map[string]interface{}
-type Status int
-
-func (status Status) String() string {
-    return fmt.Sprintf("Status{%s}", statusToString[status])
-}
 
 type Model interface {
     Uid() string

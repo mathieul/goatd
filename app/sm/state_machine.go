@@ -22,6 +22,10 @@ type Status uint
 type statusTargetMap map[Status]statusTarget
 type transitionMap map[Event]statusTargetMap
 
+// func (status Status) String() string {
+//     return fmt.Sprintf("Status{%s}", statusToString[status])
+// }
+
 /*
  * Builder
  */

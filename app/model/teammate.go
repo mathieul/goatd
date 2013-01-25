@@ -1,8 +1,8 @@
 package model
 
 import (
-    "github.com/sdegutis/fsm"
     "goatd/app/event"
+    "goatd/app/sm"
 )
 
 /*
@@ -13,37 +13,67 @@ type Teammate struct {
     *event.Identity
     busManager *event.BusManager
     store *Store
-    sm *fsm.StateMachine
+    stateMachine *sm.StateMachine
     AttrName string
-    AttrStatus Status
+    AttrStatus sm.Status
     AttrTeamUid string
     AttrTaskUid string
 }
 
-func setupTeammateStateMachine(teammate *Teammate, status Status) *fsm.StateMachine {
-    rules := []fsm.Rule{
-        {From: "signed-out", Event: "sign-in", To: "on-break"},
-        {From: "waiting", Event: "go-on-break", To: "on-break"},
-        {From: "wrapping-up", Event: "go-on-break", To: "on-break"},
-        {From: "offered", Event: "go-on-break", To: "on-break"},
-        {From: "other-work", Event: "go-on-break", To: "on-break"},
-
-        {From: "on-break", Event: "sign-out", To: "signed-out"},
-        {From: "waiting", Event: "sign-out", To: "signed-out"},
-
-        {From: "on-break", Event: "make-available", To: "waiting", Action: "publishWaiting"},
-        {From: "waiting", Event: "offer-task", To: "offered", Action: "setTaskUid"},
-        {From: "offered", Event: "accept-task", To: "busy", Action: "publishAcceptTask"},
-        {From: "offered", Event: "reject-task", To: "waiting", Action: "resetTaskUid"},
-        {From: "busy", Event: "finish-task", To: "wrapping-up", Action: "resetTaskUid"},
-
-        {From: "on-break", Event: "start-other-work", To: "other-work"},
-        {From: "waiting", Event: "start-other-work", To: "other-work"},
-        {From: "wrapping-up", Event: "start-other-work", To: "other-work"},
-    }
-    sm := fsm.NewStateMachine(rules, teammate)
-    sm.CurrentState = statusToString[status]
-    return &sm
+func setupTeammateStateMachine(teammate *Teammate, status sm.Status) *sm.StateMachine {
+    stateMachine := sm.NewStateMachine(status, func (b sm.Builder) {
+        b.Event(EventSignIn, StatusSignedOut, StatusOnBreak, sm.NoAction)
+        b.Event(EventGoOnBreak, func (b sm.Builder) {
+            b.Transition(StatusWaiting, StatusOnBreak, sm.NoAction)
+            b.Transition(StatusWrappingUp, StatusOnBreak, sm.NoAction)
+            b.Transition(StatusOffered, StatusOnBreak, sm.NoAction)
+            b.Transition(StatusOtherWork, StatusOnBreak, sm.NoAction)
+        })
+        b.Event(EventSignOut, func (b sm.Builder) {
+            b.Transition(StatusOnBreak, StatusSignedOut, sm.NoAction)
+            b.Transition(StatusWaiting, StatusSignedOut, sm.NoAction)
+        })
+        b.Event(EventMakeAvailable, StatusOnBreak, StatusWaiting, func (args []interface{}) bool {
+            teammate := args[0].(*Teammate)
+            teammate.busManager.PublishEvent(event.TeammateAvailable,
+                teammate.Identity, []interface{}{})
+            return true
+        })
+        b.Event(EventOfferTask, StatusWaiting, StatusOffered, func (args []interface{}) bool {
+            teammate, taskUid := args[0].(*Teammate), args[1].(string)
+            teammate.AttrTaskUid = taskUid
+            return true
+        })
+        b.Event(EventAcceptTask, StatusOffered, StatusBusy, func (args []interface{}) bool {
+            teammate, task := args[0].(*Teammate), args[1].(*Task)
+            if task.Uid() != teammate.AttrTaskUid { return false }
+            teammate.busManager.PublishEvent(event.AcceptTask, teammate.Identity,
+                []interface{}{teammate.Uid(), task.Uid()})
+            return true
+        })
+        b.Event(EventRejectTask, StatusOffered, StatusWaiting, func (args []interface{}) bool {
+            teammate, task := args[0].(*Teammate), args[1].(*Task)
+            if task.Uid() != teammate.AttrTaskUid { return false }
+            teammate.AttrTaskUid = ""
+            teammate.busManager.PublishEvent(event.CompleteTask, teammate.Identity,
+                []interface{}{teammate.Uid(), task.Uid()})
+            return true
+        })
+        b.Event(EventFinishTask, StatusBusy, StatusWrappingUp, func (args []interface{}) bool {
+            teammate, task := args[0].(*Teammate), args[1].(*Task)
+            if task.Uid() != teammate.AttrTaskUid { return false }
+            teammate.AttrTaskUid = ""
+            teammate.busManager.PublishEvent(event.CompleteTask, teammate.Identity,
+                []interface{}{teammate.Uid(), task.Uid()})
+            return true
+        })
+        b.Event(EventStartOtherWork, func (b sm.Builder) {
+            b.Transition(StatusOnBreak, StatusOtherWork, sm.NoAction)
+            b.Transition(StatusWaiting, StatusOtherWork, sm.NoAction)
+            b.Transition(StatusWrappingUp, StatusOtherWork, sm.NoAction)
+        })
+    })
+    return stateMachine
 }
 
 func NewTeammate(attributes A) (teammate *Teammate) {
@@ -62,26 +92,8 @@ func (teammate *Teammate) Copy() Model {
 func (teammate *Teammate) SetActive(busManager *event.BusManager, store *Store) {
     teammate.busManager = busManager
     teammate.store = store
-    teammate.sm = setupTeammateStateMachine(teammate, teammate.AttrStatus)
+    teammate.stateMachine = setupTeammateStateMachine(teammate, teammate.AttrStatus)
     teammate.AttrStatus = StatusNone
-}
-
-func (teammate *Teammate) StateMachineCallback(action string, args []interface{}) {
-    switch action {
-    case "setTaskUid":
-        teammate.AttrTaskUid = args[0].(string)
-    case "resetTaskUid":
-        teammate.AttrTaskUid = ""
-        teammate.busManager.PublishEvent(event.CompleteTask, teammate.Identity,
-            []interface{}{teammate.Uid(), args[0].(*Task).Uid()})
-    case "publishWaiting":
-        teammate.busManager.PublishEvent(event.TeammateAvailable, teammate.Identity,
-            []interface{}{})
-    case "publishAcceptTask":
-        teammate.busManager.PublishEvent(event.AcceptTask, teammate.Identity,
-            []interface{}{teammate.Uid(), args[0].(*Task).Uid()})
-
-    }
 }
 
 func (teammate Teammate) Name() string { return teammate.AttrName }
@@ -90,59 +102,47 @@ func (teammate Teammate) TeamUid() string { return teammate.AttrTeamUid }
 
 func (teammate Teammate) TaskUid() string { return teammate.AttrTaskUid }
 
-func (teammate Teammate) Status() Status {
-    if teammate.sm == nil {
+func (teammate Teammate) Status() sm.Status {
+    if teammate.stateMachine == nil {
         return teammate.AttrStatus
     }
-    return statusFromString[teammate.sm.CurrentState]
+    return teammate.stateMachine.Status()
 }
 
 func (teammate *Teammate) SignIn() bool {
-    if error := teammate.sm.Process("sign-in"); error != nil { return false }
-    return true
+    return teammate.stateMachine.Trigger(EventSignIn)
 }
 
 func (teammate *Teammate) GoOnBreak() bool {
-    if error := teammate.sm.Process("go-on-break"); error != nil { return false }
-    return true
+    return teammate.stateMachine.Trigger(EventGoOnBreak)
 }
 
 func (teammate *Teammate) MakeAvailable() bool {
-    if error := teammate.sm.Process("make-available"); error != nil { return false }
-    return true
+    return teammate.stateMachine.Trigger(EventMakeAvailable, teammate)
 }
 
 func (teammate *Teammate) OfferTask(task *Task) bool {
-    if error := teammate.sm.Process("offer-task", task.Uid()); error != nil { return false }
-    return true
+    return teammate.stateMachine.Trigger(EventOfferTask, teammate, task.Uid())
 }
 
 func (teammate *Teammate) AcceptTask(task *Task) bool {
-    if task.Uid() != teammate.AttrTaskUid { return false }
-    if error := teammate.sm.Process("accept-task", task); error != nil { return false }
-    return true
+    return teammate.stateMachine.Trigger(EventAcceptTask, teammate, task)
 }
 
 func (teammate *Teammate) RejectTask(task *Task) bool {
-    if task.Uid() != teammate.AttrTaskUid { return false }
-    if error := teammate.sm.Process("reject-task"); error != nil { return false }
-    return true
+    return teammate.stateMachine.Trigger(EventRejectTask, teammate, task)
 }
 
 func (teammate *Teammate) FinishTask(task *Task) bool {
-    if task.Uid() != teammate.AttrTaskUid { return false }
-    if error := teammate.sm.Process("finish-task", task); error != nil { return false }
-    return true
+    return teammate.stateMachine.Trigger(EventFinishTask, teammate, task)
 }
 
 func (teammate *Teammate) StartOtherWork() bool {
-    if error := teammate.sm.Process("start-other-work"); error != nil { return false }
-    return true
+    return teammate.stateMachine.Trigger(EventStartOtherWork)
 }
 
 func (teammate *Teammate) SignOut() bool {
-    if error := teammate.sm.Process("sign-out"); error != nil { return false }
-    return true
+    return teammate.stateMachine.Trigger(EventSignOut)
 }
 
 func (teammate Teammate) CurrentTask() *Task {

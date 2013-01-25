@@ -7,6 +7,13 @@ import (
     "goatd/app/model"
 )
 
+func teammateNames(teammates []*model.Teammate) (names []string) {
+    for _, teammate := range(teammates) {
+        names = append(names, teammate.Name())
+    }
+    return names
+}
+
 type TeammateOwner struct {
     *event.Identity
 }
@@ -42,7 +49,8 @@ func (s *TeammateSuite) TestCreateTeammate(c *C) {
 func (s *TeammateSuite) TestFindTeammate(c *C) {
     s.store.Teammates.Create(model.A{"Name": "Jon"}, s.owner)
     egret := s.store.Teammates.Create(model.A{"Name": "Egret"}, s.owner)
-    c.Assert(s.store.Teammates.Find(egret.Uid()), DeepEquals, egret)
+    found := s.store.Teammates.Find(egret.Uid())
+    c.Assert(found.Name(), DeepEquals, "Egret")
     c.Assert(s.store.Teammates.Find("unknown"), IsNil)
 }
 
@@ -50,21 +58,19 @@ func (s *TeammateSuite) TestFindAllTeammates(c *C) {
     t1 := s.store.Teammates.Create(model.A{"Name": "One"}, s.owner)
     s.store.Teammates.Create(model.A{"Name": "Two"}, s.owner)
     t3 := s.store.Teammates.Create(model.A{"Name": "Three"}, s.owner)
-    c.Assert(s.store.Teammates.FindAll([]string{t1.Uid(), t3.Uid()}),
-             DeepEquals,
-             []*model.Teammate{t1, t3})
+    foundTeammates := s.store.Teammates.FindAll([]string{t1.Uid(), t3.Uid()})
+    c.Assert(teammateNames(foundTeammates), DeepEquals, []string{"One", "Three"})
 }
 
 func (s *TeammateSuite) TestSelectTeammates(c *C) {
-    tyrion := s.store.Teammates.Create(model.A{"Name": "Tyrion Lannister"}, s.owner)
+    s.store.Teammates.Create(model.A{"Name": "Tyrion Lannister"}, s.owner)
     s.store.Teammates.Create(model.A{"Name": "Jon Snow"}, s.owner)
-    jamie := s.store.Teammates.Create(model.A{"Name": "Jamie Lannister"}, s.owner)
-    c.Assert(s.store.Teammates.Select(func (item interface{}) bool {
-            teammate := item.(*model.Teammate)
-            return strings.Contains(teammate.Name(), "Lannister")
-        }),
-        DeepEquals,
-        []*model.Teammate{tyrion, jamie})
+    s.store.Teammates.Create(model.A{"Name": "Jamie Lannister"}, s.owner)
+    selectedTeammates := s.store.Teammates.Select(func (item interface{}) bool {
+        teammate := item.(*model.Teammate)
+        return strings.Contains(teammate.Name(), "Lannister")
+    })
+    c.Assert(teammateNames(selectedTeammates), DeepEquals, []string{"Tyrion Lannister", "Jamie Lannister"})
 }
 
 func (s *TeammateSuite) TestSignInSignOutTeammate(c *C) {
