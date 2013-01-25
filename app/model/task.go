@@ -1,8 +1,8 @@
 package model
 
 import (
-    "github.com/sdegutis/fsm"
     "goatd/app/event"
+    "goatd/app/sm"
 )
 
 /*
@@ -13,47 +13,46 @@ type Task struct {
     *event.Identity
     busManager *event.BusManager
     store *Store
-    sm fsm.StateMachine
+    stateMachine *sm.StateMachine
     AttrTitle string
     AttrTeamUid string
     AttrQueueUid string
 }
 
-func setupTaksStateMachine(task *Task) fsm.StateMachine {
-    rules := []fsm.Rule{
-        {From: "created", Event: "enqueue", To: "queued", Action: "setQueueUid"},
-        {From: "queued", Event: "dequeue", To: "created", Action: "resetQueueUid"},
-        {From: "queued", Event: "offer", To: "offered"},
-        {From: "offered", Event: "assign", To: "assigned"},
-        {From: "assigned", Event: "complete", To: "completed"},
-    }
-    return fsm.NewStateMachine(rules, task)
+func setupTaksStateMachine(task *Task, status sm.Status) *sm.StateMachine {
+    stateMachine := sm.NewStateMachine(status, func (b sm.Builder) {
+        b.Event(EventEnqueue, StatusCreated, StatusQueued, func (args []interface{}) bool {
+            task, queueUid := args[0].(*Task), args[1].(string)
+            task.AttrQueueUid = queueUid
+            return true
+        })
+        b.Event(EventDequeue, StatusQueued, StatusCreated, func (args []interface{}) bool {
+            task := args[0].(*Task)
+            task.AttrQueueUid = ""
+            return true
+        })
+        b.Event(EventOffer, StatusQueued, StatusOffered, sm.NoAction)
+        b.Event(EventAssign, StatusOffered, StatusAssigned, sm.NoAction)
+        b.Event(EventComplete, StatusAssigned, StatusCompleted, sm.NoAction)
+    })
+    return stateMachine
 }
 
 func NewTask(attributes A) (task *Task) {
     task = newModel(&Task{}, &attributes).(*Task)
     task.Identity = event.NewIdentity("Task")
-    task.sm = setupTaksStateMachine(task)
+    task.stateMachine = setupTaksStateMachine(task, StatusCreated)
     return task
 }
 
 func (task *Task) Copy() Model {
-    return &Task{task.Identity, task.busManager, task.store, task.sm,
+    return &Task{task.Identity, task.busManager, task.store, task.stateMachine,
         task.AttrTitle, task.AttrTeamUid, task.AttrQueueUid}
 }
 
 func (task *Task) SetActive(busManager *event.BusManager, store *Store) {
     task.busManager = busManager
     task.store = store
-}
-
-func (task *Task) StateMachineCallback(action string, args []interface{}) {
-    switch action {
-    case "setQueueUid":
-        task.AttrQueueUid = args[0].(string)
-    case "resetQueueUid":
-        task.AttrQueueUid = ""
-    }
 }
 
 func (task Task) Title() string { return task.AttrTitle }

@@ -39,6 +39,11 @@ const (
     EventRejectTask
     EventFinishTask
     EventStartOtherWork
+    EventEnqueue
+    EventDequeue
+    EventOffer
+    EventAssign
+    EventComplete
 )
 
 
