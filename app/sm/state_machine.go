@@ -103,8 +103,9 @@ func (builder Builder) Event(event Event, args ...interface{}) {
  * StateMachine
  */
 type StateMachine struct {
-    status Status
+    status           Status
     eventTransitions transitionMap
+    validator        func (...interface{}) bool
 }
 
 func (stateMachine StateMachine) Status() Status {
@@ -112,21 +113,29 @@ func (stateMachine StateMachine) Status() Status {
 }
 
 func (stateMachine *StateMachine) Trigger(event Event, args ...interface{}) bool {
+    commit := true
     if transitions, found := stateMachine.eventTransitions[event]; found {
         if target, listed := transitions[stateMachine.status]; listed {
-            stateMachine.status = target.value
-            if target.action != nil {
-                target.action(args)
+            if commit && target.action != nil {
+                commit = target.action(args)
             }
-            return true
+            if commit && stateMachine.validator != nil {
+                commit = stateMachine.validator(args...)
+            }
+            if commit { stateMachine.status = target.value }
+            return commit
         }
     }
     return false
 }
 
+func (stateMachine *StateMachine) SetTriggerValidator(validator func (...interface{}) bool) {
+    stateMachine.validator = validator
+}
+
 func NewStateMachine(status Status, callback func (Builder)) (stateMachine *StateMachine) {
     eventTransitions := make(transitionMap, 5)
-    stateMachine = &StateMachine{status, eventTransitions}
+    stateMachine = &StateMachine{status, eventTransitions, nil}
     builder := *newBuilder(stateMachine)
     callback(builder)
     return stateMachine

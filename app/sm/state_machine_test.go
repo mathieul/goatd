@@ -75,6 +75,15 @@ func (s *StateMachineSuite) TestUniTransitionEventsWithAction(c *C) {
     c.Assert(state, Equals, "closed")
 }
 
+func (s *StateMachineSuite) TestActionPreventingStatusChange(c *C) {
+    stateMachine := sm.NewStateMachine(statusClosed, func (b sm.Builder) {
+        b.Event(eventOpen, statusClosed, statusOpened, func (args []interface{}) bool {
+            return false
+        })
+    })
+    c.Assert(stateMachine.Trigger(eventOpen), Equals, false)
+}
+
 func (s *StateMachineSuite) TestTriggeringWithArguments(c *C) {
     var hello string
     var fortyTwo int
@@ -101,4 +110,17 @@ func (s *StateMachineSuite) TestMultiTransitionEvents(c *C) {
     })
     c.Assert(stateMachine.Trigger(eventLock), Equals, true)
     c.Assert(stateMachine.Status(), Equals, statusLocked)
+}
+
+func (s *StateMachineSuite) TestSetTriggerValidator(c *C) {
+    stateMachine := sm.NewStateMachine(statusClosed, func (b sm.Builder) {
+        b.Event(eventOpen, statusClosed, statusOpened, sm.NoAction)
+        b.Event(eventClose, statusOpened, statusClosed, sm.NoAction)
+    })
+    stateMachine.SetTriggerValidator(func (args ...interface{}) bool {
+        return args[0].(bool)
+    })
+    c.Assert(stateMachine.Trigger(eventOpen, false), Equals, false)
+    c.Assert(stateMachine.Status(), Equals, statusClosed)
+    c.Assert(stateMachine.Trigger(eventClose, true), Equals, false)
 }
