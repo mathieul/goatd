@@ -90,7 +90,7 @@ func (teammate *Teammate) Copy() Model {
         teammate.AttrName, teammate.AttrTeamUid, teammate.AttrTaskUid}
 }
 
-func (teammate *Teammate) ActivateAsCopy(busManager *event.BusManager, store *Store) {
+func (teammate *Teammate) SetupComs(busManager *event.BusManager, store *Store) {
     teammate.busManager = busManager
     teammate.store = store
 }

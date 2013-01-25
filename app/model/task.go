@@ -52,7 +52,7 @@ func (task *Task) Copy() Model {
         task.AttrTitle, task.AttrTeamUid, task.AttrQueueUid}
 }
 
-func (task *Task) ActivateAsCopy(busManager *event.BusManager, store *Store) {
+func (task *Task) SetupComs(busManager *event.BusManager, store *Store) {
     task.busManager = busManager
     task.store = store
 }

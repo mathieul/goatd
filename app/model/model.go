@@ -88,7 +88,7 @@ type A map[string]interface{}
 
 type Model interface {
     Uid() string
-    ActivateAsCopy(*event.BusManager, *Store)
+    SetupComs(*event.BusManager, *Store)
     Copy() Model
     IsCopy() bool
 }
