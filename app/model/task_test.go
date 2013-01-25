@@ -7,6 +7,13 @@ import (
     "goatd/app/model"
 )
 
+func taskTitles(tasks []*model.Task) (names []string) {
+    for _, task := range(tasks) {
+        names = append(names, task.Title())
+    }
+    return names
+}
+
 type TaskOwner struct {
     *event.Identity
 }
@@ -32,7 +39,8 @@ func (s *TaskSuite) TestCreateTask(c *C) {
 func (s *TaskSuite) TestFindTask(c *C) {
     s.store.Tasks.Create(model.A{"Title": "One"}, s.owner)
     q2 := s.store.Tasks.Create(model.A{"Title": "Two"}, s.owner)
-    c.Assert(s.store.Tasks.Find(q2.Uid()), DeepEquals, q2)
+    found := s.store.Tasks.Find(q2.Uid())
+    c.Assert(found.Title(), DeepEquals, q2.Title())
     c.Assert(s.store.Tasks.Find("unknown"), IsNil)
 }
 
@@ -40,21 +48,19 @@ func (s *TaskSuite) TestFindTaskSlice(c *C) {
     q1 := s.store.Tasks.Create(model.A{"Title": "One"}, s.owner)
     s.store.Tasks.Create(model.A{"Title": "Two"}, s.owner)
     q3 := s.store.Tasks.Create(model.A{"Title": "Three"}, s.owner)
-    c.Assert(s.store.Tasks.FindAll([]string{q1.Uid(), q3.Uid()}),
-             DeepEquals,
-             []*model.Task{q1, q3})
+    foundTasks := s.store.Tasks.FindAll([]string{q1.Uid(), q3.Uid()})
+    c.Assert(taskTitles(foundTasks), DeepEquals, []string{"One", "Three"})
 }
 
 func (s *TaskSuite) TestSelectTasks(c *C) {
-    tyrion := s.store.Tasks.Create(model.A{"Title": "Tyrion Lannister"}, s.owner)
+    s.store.Tasks.Create(model.A{"Title": "Tyrion Lannister"}, s.owner)
     s.store.Tasks.Create(model.A{"Title": "Jon Snow"}, s.owner)
-    jamie := s.store.Tasks.Create(model.A{"Title": "Jamie Lannister"}, s.owner)
-    c.Assert(s.store.Tasks.Select(func (item interface{}) bool {
-            task := item.(*model.Task)
-            return strings.Contains(task.Title(), "Lannister")
-        }),
-        DeepEquals,
-        []*model.Task{tyrion, jamie})
+    s.store.Tasks.Create(model.A{"Title": "Jamie Lannister"}, s.owner)
+    selectedTasks := s.store.Tasks.Select(func (item interface{}) bool {
+        task := item.(*model.Task)
+        return strings.Contains(task.Title(), "Lannister")
+    })
+    c.Assert(taskTitles(selectedTasks), DeepEquals, []string{"Tyrion Lannister", "Jamie Lannister"})
 }
 
 // func (s *TaskSuite) TestEnqueueTask(c *C) {
