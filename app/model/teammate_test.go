@@ -8,7 +8,7 @@ import (
 )
 
 func teammateNames(teammates []*model.Teammate) (names []string) {
-    for _, teammate := range(teammates) {
+    for _, teammate := range teammates {
         names = append(names, teammate.Name())
     }
     return names

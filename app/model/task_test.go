@@ -8,7 +8,7 @@ import (
 )
 
 func taskTitles(tasks []*model.Task) (names []string) {
-    for _, task := range(tasks) {
+    for _, task := range tasks {
         names = append(names, task.Title())
     }
     return names
