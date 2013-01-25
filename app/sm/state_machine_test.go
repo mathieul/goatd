@@ -34,6 +34,18 @@ func (s *StateMachineSuite) TestCreateStateMachineSetsInitialStatus(c *C) {
     c.Assert(stateMachine.Status(), Equals, statusClosed)
 }
 
+func (s *StateMachineSuite) TestRegisterEvent(c *C) {
+    c.Assert(eventOpen.String(), Equals, "Event{?Unknown?}")
+    sm.RegisterEvent(eventOpen, "Open")
+    c.Assert(eventOpen.String(), Equals, "Event{Open}")
+}
+
+func (s *StateMachineSuite) TestRegisterStatus(c *C) {
+    c.Assert(statusLocked.String(), Equals, "Status{?Unknown?}")
+    sm.RegisterStatus(statusLocked, "Locked")
+    c.Assert(statusLocked.String(), Equals, "Status{Locked}")
+}
+
 func (s *StateMachineSuite) TestSingleTransitionEventsNoAction(c *C) {
     stateMachine := sm.NewStateMachine(statusClosed, func (b sm.Builder) {
         b.Event(eventOpen, statusClosed, statusOpened, sm.NoAction)

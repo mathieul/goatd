@@ -9,22 +9,44 @@ import (
  * Constants and initialized vars
  */
 var NoAction func ([]interface{}) bool
+var eventToString map[Event]string
+var statusToString map[Status]string
 
 func init() {
     NoAction = func ([]interface{}) bool { return true }
+    eventToString = make(map[Event]string, 20)
+    statusToString = make(map[Status]string, 20)
 }
 
 /*
- * Basic types and interfaces
+ * Event and Status
  */
 type Event uint
 type Status uint
 type statusTargetMap map[Status]statusTarget
 type transitionMap map[Event]statusTargetMap
 
-// func (status Status) String() string {
-//     return fmt.Sprintf("Status{%s}", statusToString[status])
-// }
+func (event Event) String() string {
+    if label, found := eventToString[event]; found {
+        return fmt.Sprintf("Event{%s}", label)
+    }
+    return "Event{?Unknown?}"
+}
+
+func (status Status) String() string {
+    if label, found := statusToString[status]; found {
+        return fmt.Sprintf("Status{%s}", label)
+    }
+    return "Status{?Unknown?}"
+}
+
+func RegisterEvent(event Event, label string) {
+    eventToString[event] = label
+}
+
+func RegisterStatus(status Status, label string) {
+    statusToString[status] = label
+}
 
 /*
  * Builder
