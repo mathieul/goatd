@@ -14,8 +14,8 @@ type Teammate struct {
     busManager *event.BusManager
     store *Store
     stateMachine *sm.StateMachine
+    status sm.Status
     AttrName string
-    AttrStatus sm.Status
     AttrTeamUid string
     AttrTaskUid string
 }
@@ -78,22 +78,22 @@ func setupTeammateStateMachine(teammate *Teammate, status sm.Status) *sm.StateMa
 
 func NewTeammate(attributes A) (teammate *Teammate) {
     teammate = newModel(&Teammate{}, &attributes).(*Teammate)
-    if teammate.AttrStatus == StatusNone { teammate.AttrStatus = StatusSignedOut }
+    if teammate.status == StatusNone { teammate.status = StatusSignedOut }
     teammate.Identity = event.NewIdentity("Teammate")
     return teammate
 }
 
 func (teammate *Teammate) Copy() Model {
     return &Teammate{teammate.Identity, teammate.busManager, teammate.store,
-        nil, teammate.AttrName, teammate.AttrStatus, teammate.AttrTeamUid,
+        nil, teammate.status, teammate.AttrName, teammate.AttrTeamUid,
         teammate.AttrTaskUid}
 }
 
 func (teammate *Teammate) SetActive(busManager *event.BusManager, store *Store) {
     teammate.busManager = busManager
     teammate.store = store
-    teammate.stateMachine = setupTeammateStateMachine(teammate, teammate.AttrStatus)
-    teammate.AttrStatus = StatusNone
+    teammate.stateMachine = setupTeammateStateMachine(teammate, teammate.status)
+    teammate.status = StatusNone
 }
 
 func (teammate Teammate) Name() string { return teammate.AttrName }
@@ -104,7 +104,7 @@ func (teammate Teammate) TaskUid() string { return teammate.AttrTaskUid }
 
 func (teammate Teammate) Status() sm.Status {
     if teammate.stateMachine == nil {
-        return teammate.AttrStatus
+        return teammate.status
     }
     return teammate.stateMachine.Status()
 }
