@@ -27,6 +27,7 @@ func (kind Kind) String() string {
 const (
     OpNone Operation = iota
     OpCreate
+    OpUpdate
     OpFind
     OpFindAll
     OpSelect
@@ -37,6 +38,7 @@ func (operation Operation) String() string {
     switch operation {
     case OpNone:    value = "None"
     case OpCreate:  value = "Create"
+    case OpUpdate:  value = "Update"
     case OpFind:    value = "Find"
     case OpFindAll: value = "FindAll"
     case OpSelect:  value = "Select"
@@ -109,6 +111,15 @@ func (store *Store) Find(kind Kind, uid string) Model {
         return model
     }
     return nil
+}
+
+func (store *Store) Update(kind Kind, uid, name string, value interface{}) bool {
+    args := []interface{}{uid, name, value}
+    persisted.Request <- Request{kind, OpUpdate, args}
+    if value := <- persisted.Response; value != nil {
+        return value.(bool)
+    }
+    return false
 }
 
 func (store *Store) FindAll(kind Kind, uids []string) []Model {

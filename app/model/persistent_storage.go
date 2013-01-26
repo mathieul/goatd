@@ -42,18 +42,30 @@ func copyModels(models []Model) []Model {
 func (storage *persistentStorage) processRequest(request Request, collection *Collection) (response interface{}) {
     switch request.Operation {
     case OpCreate:
-        model := collection.New(request.args[0].(A))
+        attributes := request.args[0].(A)
+        model := collection.New(attributes)
         response = model.Copy()
+    case OpUpdate:
+        uid := request.args[0].(string)
+        name, value := request.args[1].(string), request.args[2]
+        if model := collection.Find(uid); model != nil {
+            setAttributeValue(model, name, value)
+            response = true
+        } else {
+            response = false
+        }
     case OpFind:
-        if model := collection.Find(request.args[0].(string)); model != nil {
+        uid := request.args[0].(string)
+        if model := collection.Find(uid); model != nil {
             response = model.Copy()
         }
     case OpFindAll:
-        models := collection.FindAll(request.args[0].([]string))
+        uids := request.args[0].([]string)
+        models := collection.FindAll(uids)
         response = copyModels(models)
     case OpSelect:
-        tester := request.args[0].(func (interface{}) bool)
-        models := collection.Select(tester)
+        selector := request.args[0].(func (interface{}) bool)
+        models := collection.Select(selector)
         response = copyModels(models)
     default:
         log.Printf("Unknown operation %v\n", request.Operation)

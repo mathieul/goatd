@@ -57,6 +57,11 @@ func (task *Task) SetupComs(busManager *event.BusManager, store *Store) {
     task.store = store
 }
 
+func (task *Task) Update(name string, value interface{}) bool {
+    setAttributeValue(task, name, value)
+    return task.store.Update(KindTask, task.Uid(), name, value)
+}
+
 func (task Task) Title() string { return task.AttrTitle }
 
 func (task Task) TeamUid() string { return task.AttrTeamUid }

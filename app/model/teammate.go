@@ -95,6 +95,11 @@ func (teammate *Teammate) SetupComs(busManager *event.BusManager, store *Store) 
     teammate.store = store
 }
 
+func (teammate *Teammate) Update(name string, value interface{}) bool {
+    setAttributeValue(teammate, name, value)
+    return teammate.store.Update(KindTeammate, teammate.Uid(), name, value)
+}
+
 func (teammate Teammate) Name() string { return teammate.AttrName }
 
 func (teammate Teammate) TeamUid() string { return teammate.AttrTeamUid }
