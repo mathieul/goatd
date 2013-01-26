@@ -105,7 +105,7 @@ func (builder Builder) Event(event Event, args ...interface{}) {
 type StateMachine struct {
     status           Status
     eventTransitions transitionMap
-    validator        func (...interface{}) bool
+    validator        func (Status, Status, ...interface{}) bool
 }
 
 func (stateMachine StateMachine) Status() Status {
@@ -120,7 +120,7 @@ func (stateMachine *StateMachine) Trigger(event Event, args ...interface{}) bool
                 commit = target.action(args)
             }
             if commit && stateMachine.validator != nil {
-                commit = stateMachine.validator(args...)
+                commit = stateMachine.validator(stateMachine.status, target.value, args...)
             }
             if commit { stateMachine.status = target.value }
             return commit
@@ -129,7 +129,7 @@ func (stateMachine *StateMachine) Trigger(event Event, args ...interface{}) bool
     return false
 }
 
-func (stateMachine *StateMachine) SetTriggerValidator(validator func (...interface{}) bool) {
+func (stateMachine *StateMachine) SetTriggerValidator(validator func (Status, Status, ...interface{}) bool) {
     stateMachine.validator = validator
 }
 

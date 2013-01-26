@@ -3,6 +3,7 @@ package model
 import (
     "fmt"
     "goatd/app/event"
+    "goatd/app/sm"
 )
 
 const (
@@ -28,6 +29,7 @@ const (
     OpNone Operation = iota
     OpCreate
     OpUpdate
+    OpSetStatus
     OpFind
     OpFindAll
     OpSelect
@@ -36,13 +38,14 @@ const (
 func (operation Operation) String() string {
     var value string
     switch operation {
-    case OpNone:    value = "None"
-    case OpCreate:  value = "Create"
-    case OpUpdate:  value = "Update"
-    case OpFind:    value = "Find"
-    case OpFindAll: value = "FindAll"
-    case OpSelect:  value = "Select"
-    default:        value = fmt.Sprintf("Unknown(%d)", operation)
+    case OpNone:        value = "None"
+    case OpCreate:      value = "Create"
+    case OpUpdate:      value = "Update"
+    case OpSetStatus:   value = "Set status"
+    case OpFind:        value = "Find"
+    case OpFindAll:     value = "Find all"
+    case OpSelect:      value = "Select"
+    default:            value = fmt.Sprintf("Unknown(%d)", operation)
     }
     return fmt.Sprintf("<Operation{%s}>", value)
 }
@@ -116,6 +119,15 @@ func (store *Store) Find(kind Kind, uid string) Model {
 func (store *Store) Update(kind Kind, uid, name string, value interface{}) bool {
     args := []interface{}{uid, name, value}
     persisted.Request <- Request{kind, OpUpdate, args}
+    if value := <- persisted.Response; value != nil {
+        return value.(bool)
+    }
+    return false
+}
+
+func (store *Store) SetStatus(kind Kind, uid string, oldStatus, newStatus sm.Status) bool {
+    args := []interface{}{uid, oldStatus, newStatus}
+    persisted.Request <- Request{kind, OpSetStatus, args}
     if value := <- persisted.Response; value != nil {
         return value.(bool)
     }

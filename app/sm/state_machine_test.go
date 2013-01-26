@@ -117,7 +117,7 @@ func (s *StateMachineSuite) TestSetTriggerValidator(c *C) {
         b.Event(eventOpen, statusClosed, statusOpened, sm.NoAction)
         b.Event(eventClose, statusOpened, statusClosed, sm.NoAction)
     })
-    stateMachine.SetTriggerValidator(func (args ...interface{}) bool {
+    stateMachine.SetTriggerValidator(func (oldStatus, newStatus sm.Status, args ...interface{}) bool {
         return args[0].(bool)
     })
     c.Assert(stateMachine.Trigger(eventOpen, false), Equals, false)

@@ -2,6 +2,7 @@ package model
 
 import (
     "log"
+    "goatd/app/sm"
 )
 
 /*
@@ -53,6 +54,17 @@ func (storage *persistentStorage) processRequest(request Request, collection *Co
             response = true
         } else {
             response = false
+        }
+    case OpSetStatus:
+        uid := request.args[0].(string)
+        oldStatus, newStatus := request.args[1].(sm.Status), request.args[2].(sm.Status)
+        response = false
+        if model := collection.Find(uid); model != nil {
+            currentStatus := model.Status()
+            if currentStatus == oldStatus {
+                model.Status(newStatus)
+                response = true
+            }
         }
     case OpFind:
         uid := request.args[0].(string)

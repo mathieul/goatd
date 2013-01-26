@@ -2,6 +2,7 @@ package model
 
 import (
     "goatd/app/event"
+    "goatd/app/sm"
 )
 
 /*
@@ -15,8 +16,12 @@ type Team struct {
     AttrName string
 }
 
-func (team *Team) Name() string {
+func (team Team) Name() string {
     return team.AttrName
+}
+
+func (team Team) Status(_ ...sm.Status) sm.Status {
+    return StatusNone
 }
 
 func (team *Team) Copy() Model {

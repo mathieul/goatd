@@ -14,7 +14,7 @@ type Teammate struct {
     busManager *event.BusManager
     store *Store
     stateMachine *sm.StateMachine
-    status sm.Status
+    InternalStatus sm.Status
     AttrName string
     AttrTeamUid string
     AttrTaskUid string
@@ -73,18 +73,23 @@ func setupTeammateStateMachine(teammate *Teammate, status sm.Status) *sm.StateMa
             b.Transition(StatusWrappingUp, StatusOtherWork, sm.NoAction)
         })
     })
+    stateMachine.SetTriggerValidator(func (oldStatus, newStatus sm.Status, args ...interface{}) bool {
+        teammate := args[0].(*Teammate)
+        accepted := teammate.store.SetStatus(KindTeammate, teammate.Uid(), oldStatus, newStatus)
+        return accepted
+    })
     return stateMachine
 }
 
 func NewTeammate(attributes A) (teammate *Teammate) {
     teammate = newModel(&Teammate{}, &attributes).(*Teammate)
-    if teammate.status == StatusNone { teammate.status = StatusSignedOut }
+    if teammate.InternalStatus == StatusNone { teammate.InternalStatus = StatusSignedOut }
     teammate.Identity = event.NewIdentity("Teammate")
     return teammate
 }
 
 func (teammate *Teammate) Copy() Model {
-    stateMachine := setupTeammateStateMachine(teammate, teammate.status)
+    stateMachine := setupTeammateStateMachine(teammate, teammate.InternalStatus)
     identity := teammate.Identity.Copy()
     return &Teammate{identity, nil, nil, stateMachine, StatusNone,
         teammate.AttrName, teammate.AttrTeamUid, teammate.AttrTaskUid}
@@ -106,19 +111,22 @@ func (teammate Teammate) TeamUid() string { return teammate.AttrTeamUid }
 
 func (teammate Teammate) TaskUid() string { return teammate.AttrTaskUid }
 
-func (teammate Teammate) Status() sm.Status {
+func (teammate *Teammate) Status(newStatus ...sm.Status) sm.Status {
+    if len(newStatus) > 0 {
+        teammate.InternalStatus = newStatus[0]
+    }
     if teammate.IsCopy() && teammate.stateMachine != nil {
         return teammate.stateMachine.Status()
     }
-    return teammate.status    
+    return teammate.InternalStatus    
 }
 
 func (teammate *Teammate) SignIn() bool {
-    return teammate.stateMachine.Trigger(EventSignIn)
+    return teammate.stateMachine.Trigger(EventSignIn, teammate)
 }
 
 func (teammate *Teammate) GoOnBreak() bool {
-    return teammate.stateMachine.Trigger(EventGoOnBreak)
+    return teammate.stateMachine.Trigger(EventGoOnBreak, teammate)
 }
 
 func (teammate *Teammate) MakeAvailable() bool {
@@ -142,11 +150,11 @@ func (teammate *Teammate) FinishTask(task *Task) bool {
 }
 
 func (teammate *Teammate) StartOtherWork() bool {
-    return teammate.stateMachine.Trigger(EventStartOtherWork)
+    return teammate.stateMachine.Trigger(EventStartOtherWork, teammate)
 }
 
 func (teammate *Teammate) SignOut() bool {
-    return teammate.stateMachine.Trigger(EventSignOut)
+    return teammate.stateMachine.Trigger(EventSignOut, teammate)
 }
 
 func (teammate Teammate) CurrentTask() *Task {

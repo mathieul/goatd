@@ -91,18 +91,19 @@ type Model interface {
     SetupComs(*event.BusManager, *Store)
     Copy() Model
     IsCopy() bool
+    Status(...sm.Status) sm.Status
 }
 
 
 /*
  * Helpers
  */
-func setAttributeValue(destination Model, name string, value interface{}) {
-    destValue := reflect.ValueOf(destination).Elem()
+func setFieldValue(model Model, name string, value interface{}) {
+    destValue := reflect.ValueOf(model).Elem()
     if destValue.Type().Kind() != reflect.Struct {
-        log.Fatal(fmt.Errorf("setAttributeValue(): destination must be a pointer to a Struct, not %v", destValue.Type().Kind()))
+        log.Fatal(fmt.Errorf("setAttributeValue(): model must be a pointer to a Struct, not %v", destValue.Type().Kind()))
     }
-    field := destValue.FieldByName(attributePrefix + name)
+    field := destValue.FieldByName(name)
     if field.IsValid() {
         switch field.Type().Kind() {
         case reflect.String:
@@ -113,6 +114,10 @@ func setAttributeValue(destination Model, name string, value interface{}) {
             field.SetBool(value.(bool))
         }
     }
+}
+
+func setAttributeValue(model Model, name string, value interface{}) {
+    setFieldValue(model, attributePrefix + name, value)
 }
 
 func newModel(model Model, attributes *A) interface{} {

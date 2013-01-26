@@ -14,7 +14,7 @@ type Task struct {
     busManager *event.BusManager
     store *Store
     stateMachine *sm.StateMachine
-    status sm.Status
+    InternalStatus sm.Status
     AttrTitle string
     AttrTeamUid string
     AttrQueueUid string
@@ -36,6 +36,11 @@ func setupTaksStateMachine(task *Task, status sm.Status) *sm.StateMachine {
         b.Event(EventAssign, StatusOffered, StatusAssigned, sm.NoAction)
         b.Event(EventComplete, StatusAssigned, StatusCompleted, sm.NoAction)
     })
+    stateMachine.SetTriggerValidator(func (oldStatus, newStatus sm.Status, args ...interface{}) bool {
+        task := args[0].(*Task)
+        accepted := task.store.SetStatus(KindTask, task.Uid(), oldStatus, newStatus)
+        return accepted
+    })
     return stateMachine
 }
 
@@ -46,9 +51,9 @@ func NewTask(attributes A) (task *Task) {
 }
 
 func (task *Task) Copy() Model {
-    stateMachine := setupTaksStateMachine(task, task.status)
+    stateMachine := setupTaksStateMachine(task, task.InternalStatus)
     identity := task.Identity.Copy()
-    return &Task{identity, nil, nil, stateMachine, task.status,
+    return &Task{identity, nil, nil, stateMachine, task.InternalStatus,
         task.AttrTitle, task.AttrTeamUid, task.AttrQueueUid}
 }
 
@@ -68,7 +73,15 @@ func (task Task) TeamUid() string { return task.AttrTeamUid }
 
 func (task Task) QueueUid() string { return task.AttrQueueUid }
 
-// func (task Task) Status() Status { return statusFromString[task.sm.CurrentState] }
+func (task *Task) Status(newStatus ...sm.Status) sm.Status {
+    if len(newStatus) > 0 {
+        task.InternalStatus = newStatus[0]
+    }
+    if task.IsCopy() && task.stateMachine != nil {
+        return task.stateMachine.Status()
+    }
+    return task.InternalStatus    
+}
 
 // func (task *Task) Enqueue(queue *Queue) bool {
 //     if error := task.sm.Process("enqueue", queue.Uid()); error != nil { return false }
