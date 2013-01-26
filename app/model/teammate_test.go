@@ -63,6 +63,14 @@ func (s *TeammateSuite) TestFindTeammate(c *C) {
     c.Assert(s.store.Teammates.Find("unknown"), IsNil)
 }
 
+func (s *TeammateSuite) TestUpdateTeammate(c *C) {
+    teammate := s.store.Teammates.Create(model.A{"Name": "Jon"}, s.owner)
+    teammate.Update("Name", "Egret")
+    c.Assert(teammate.Name(), Equals, "Egret")
+    found := s.store.Teammates.Find(teammate.Uid())
+    c.Assert(found.Name(), Equals, "Egret")
+}
+
 func (s *TeammateSuite) TestFindAllTeammates(c *C) {
     t1 := s.store.Teammates.Create(model.A{"Name": "One"}, s.owner)
     s.store.Teammates.Create(model.A{"Name": "Two"}, s.owner)
@@ -129,4 +137,11 @@ func (s *TeammateSuite) TestOtherWorkOnBreakTask(c *C) {
     c.Assert(s.teammate.Status(), Equals, model.StatusOnBreak)
     c.Assert(s.teammate.StartOtherWork(), Equals, true)
     c.Assert(s.teammate.Status(), Equals, model.StatusOtherWork)
+}
+
+func (s *TeammateSuite) TestStatusUpdateIsPersistent(c *C) {
+    s.teammate.SignIn()
+    s.teammate.MakeAvailable()
+    found := s.store.Teammates.Find(s.teammate.Uid())
+    c.Assert(found.Status(), Equals, model.StatusWaiting)
 }

@@ -44,12 +44,20 @@ func (s *TaskSuite) TestFindTask(c *C) {
     c.Assert(s.store.Tasks.Find("unknown"), IsNil)
 }
 
-func (s *TaskSuite) TestFindTaskSlice(c *C) {
+func (s *TaskSuite) TestFindAllTasks(c *C) {
     q1 := s.store.Tasks.Create(model.A{"Title": "One"}, s.owner)
     s.store.Tasks.Create(model.A{"Title": "Two"}, s.owner)
     q3 := s.store.Tasks.Create(model.A{"Title": "Three"}, s.owner)
     foundTasks := s.store.Tasks.FindAll([]string{q1.Uid(), q3.Uid()})
     c.Assert(taskTitles(foundTasks), DeepEquals, []string{"One", "Three"})
+}
+
+func (s *TaskSuite) TestUpdateTask(c *C) {
+    task := s.store.Tasks.Create(model.A{"Title": "Jamie Lannister"}, s.owner)
+    task.Update("Title", "Tyrion Lannister")
+    c.Assert(task.Title(), Equals, "Tyrion Lannister")
+    found := s.store.Tasks.Find(task.Uid())
+    c.Assert(found.Title(), Equals, "Tyrion Lannister")
 }
 
 func (s *TaskSuite) TestSelectTasks(c *C) {
