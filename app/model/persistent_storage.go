@@ -29,6 +29,9 @@ func newPersistentStorage() (storage *persistentStorage) {
     storage.collections[KindTask] = NewCollection(func(attributes A) Model {
         return NewTask(attributes)
     }, nil)
+    storage.collections[KindQueue] = NewCollection(func(attributes A) Model {
+        return NewQueue(attributes)
+    }, nil)
     return storage
 }
 
