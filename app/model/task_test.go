@@ -71,14 +71,23 @@ func (s *TaskSuite) TestSelectTasks(c *C) {
     c.Assert(taskTitles(selectedTasks), DeepEquals, []string{"Tyrion Lannister", "Jamie Lannister"})
 }
 
-// func (s *TaskSuite) TestEnqueueTask(c *C) {
-//     queue := s.team.Queues.Create(model.A{"Name": "My TODOs"})
-//     task := s.store.Tasks.Create(model.A{"Title": "Clean-up my room"}, s.owner)
-//     c.Assert(task.Status(), Equals, model.StatusCreated)
-//     c.Assert(task.Enqueue(queue), Equals, true)
-//     c.Assert(task.Status(), Equals, model.StatusQueued)
-//     c.Assert(task.QueueUid(), Equals, queue.Uid())
-//     c.Assert(queue.QueuedTasks(), DeepEquals, []*model.Task{task})
+func (s *TaskSuite) TestEnqueueTask(c *C) {
+    queueUid := "abcd1234"
+    task := s.store.Tasks.Create(model.A{"Title": "Clean-up my room"}, s.owner)
+    c.Assert(task.Status(), Equals, model.StatusCreated)
+    c.Assert(task.Enqueue(queueUid), Equals, true)
+    c.Assert(task.Status(), Equals, model.StatusQueued)
+    c.Assert(task.QueueUid(), Equals, queueUid)
+    c.Assert(task.Enqueue(queueUid), Equals, false)
+}
 
-//     c.Assert(task.Enqueue(queue), Equals, false)
-// }
+func (s *TaskSuite) TestDequeueTask(c *C) {
+    queueUid := "abcd1234"
+    task := s.store.Tasks.Create(model.A{"Title": "Clean-up my room"}, s.owner)
+    task.Enqueue(queueUid)
+    c.Assert(task.Dequeue("blah"), Equals, false)
+    c.Assert(task.Dequeue(queueUid), Equals, true)
+    c.Assert(task.Status(), Equals, model.StatusCreated)
+    c.Assert(task.QueueUid(), Equals, "")
+    c.Assert(task.Enqueue(queueUid), Equals, true)
+}

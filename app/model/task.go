@@ -24,12 +24,13 @@ func setupTaksStateMachine(task *Task, status sm.Status) *sm.StateMachine {
     stateMachine := sm.NewStateMachine(status, func (b sm.Builder) {
         b.Event(EventEnqueue, StatusCreated, StatusQueued, func (args []interface{}) bool {
             task, queueUid := args[0].(*Task), args[1].(string)
-            task.AttrQueueUid = queueUid
+            task.Update("QueueUid", queueUid)
             return true
         })
         b.Event(EventDequeue, StatusQueued, StatusCreated, func (args []interface{}) bool {
-            task := args[0].(*Task)
-            task.AttrQueueUid = ""
+            task, queueUid := args[0].(*Task), args[1].(string)
+            if queueUid != task.QueueUid() { return false }
+            task.Update("QueueUid", "")
             return true
         })
         b.Event(EventOffer, StatusQueued, StatusOffered, sm.NoAction)
@@ -46,6 +47,7 @@ func setupTaksStateMachine(task *Task, status sm.Status) *sm.StateMachine {
 
 func NewTask(attributes A) (task *Task) {
     task = newModel(&Task{}, &attributes).(*Task)
+    if task.InternalStatus == StatusNone { task.InternalStatus = StatusCreated }
     task.Identity = event.NewIdentity("Task")
     return task
 }
@@ -83,29 +85,13 @@ func (task *Task) Status(newStatus ...sm.Status) sm.Status {
     return task.InternalStatus    
 }
 
-// func (task *Task) Enqueue(queue *Queue) bool {
-//     if error := task.sm.Process("enqueue", queue.Uid()); error != nil { return false }
-//     if !queue.InsertTask(task) {
-//         task.sm.Process("dequeue", queue.Uid())
-//         return false
-//     }
-//     return true
-// }
+func (task *Task) Enqueue(queueUid string) bool {
+    return task.stateMachine.Trigger(EventEnqueue, task, queueUid)
+}
 
-// func (task *Task) Offer() bool {
-//     if error := task.sm.Process("offer"); error != nil { return false }
-//     return true
-// }
-
-// func (task *Task) Assign() bool {
-//     if error := task.sm.Process("assign"); error != nil { return false }
-//     return true
-// }
-
-// func (task *Task) Complete() bool {
-//     if error := task.sm.Process("complete"); error != nil { return false }
-//     return true
-// }
+func (task *Task) Dequeue(queueUid string) bool {
+    return task.stateMachine.Trigger(EventDequeue, task, queueUid)
+}
 
 
 /*
