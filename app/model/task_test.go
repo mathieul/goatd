@@ -91,3 +91,28 @@ func (s *TaskSuite) TestDequeueTask(c *C) {
     c.Assert(task.QueueUid(), Equals, "")
     c.Assert(task.Enqueue(queueUid), Equals, true)
 }
+
+func (s *TaskSuite) TestOfferAndRequeueTask(c *C) {
+    task := s.store.Tasks.Create(model.A{"Title": "Clean-up my room"}, s.owner)
+    task.Enqueue("queueabc123")
+    c.Assert(task.Offer("teammatedef456"), Equals, true)
+    c.Assert(task.Status(), Equals, model.StatusOffered)
+    c.Assert(task.TeammateUid(), Equals, "teammatedef456")
+    c.Assert(task.Requeue(), Equals, true)
+    c.Assert(task.Status(), Equals, model.StatusQueued)
+    c.Assert(task.TeammateUid(), Equals, "")
+}
+
+func (s *TaskSuite) TestAssignAndCompleteTask(c *C) {
+    task := s.store.Tasks.Create(model.A{"Title": "Clean-up my room"}, s.owner)
+    task.Enqueue("queueabc123")
+    task.Offer("teammatedef456")
+    c.Assert(task.Assign("other"), Equals, false)
+    c.Assert(task.Status(), Equals, model.StatusOffered)
+    c.Assert(task.Assign("teammatedef456"), Equals, true)
+    c.Assert(task.Status(), Equals, model.StatusAssigned)
+    c.Assert(task.Complete(), Equals, true)
+    c.Assert(task.Status(), Equals, model.StatusCompleted)
+    c.Assert(task.QueueUid(), Equals, "")
+    c.Assert(task.TeammateUid(), Equals, "")
+}

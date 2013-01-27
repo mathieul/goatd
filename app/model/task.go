@@ -18,6 +18,7 @@ type Task struct {
     AttrTitle string
     AttrTeamUid string
     AttrQueueUid string
+    AttrTeammateUid string
 }
 
 func setupTaksStateMachine(task *Task, status sm.Status) *sm.StateMachine {
@@ -33,9 +34,27 @@ func setupTaksStateMachine(task *Task, status sm.Status) *sm.StateMachine {
             task.Update("QueueUid", "")
             return true
         })
-        b.Event(EventOffer, StatusQueued, StatusOffered, sm.NoAction)
-        b.Event(EventAssign, StatusOffered, StatusAssigned, sm.NoAction)
-        b.Event(EventComplete, StatusAssigned, StatusCompleted, sm.NoAction)
+        b.Event(EventOffer, StatusQueued, StatusOffered, func (args []interface{}) bool {
+            task, teammateUid := args[0].(*Task), args[1].(string)
+            task.Update("TeammateUid", teammateUid)
+            return true
+        })
+        b.Event(EventRequeue, StatusOffered, StatusQueued, func (args []interface{}) bool {
+            task := args[0].(*Task)
+            task.Update("TeammateUid", "")
+            return true
+        })
+        b.Event(EventAssign, StatusOffered, StatusAssigned, func (args []interface{}) bool {
+            task, teammateUid := args[0].(*Task), args[1].(string)
+            if teammateUid != task.TeammateUid() { return false }
+            return true
+        })
+        b.Event(EventComplete, StatusAssigned, StatusCompleted, func (args []interface{}) bool {
+            task := args[0].(*Task)
+            task.Update("QueueUid", "")
+            task.Update("TeammateUid", "")
+            return true
+        })
     })
     stateMachine.SetTriggerValidator(func (oldStatus, newStatus sm.Status, args ...interface{}) bool {
         task := args[0].(*Task)
@@ -56,7 +75,7 @@ func (task *Task) Copy() Model {
     stateMachine := setupTaksStateMachine(task, task.InternalStatus)
     identity := task.Identity.Copy()
     return &Task{identity, nil, nil, stateMachine, task.InternalStatus,
-        task.AttrTitle, task.AttrTeamUid, task.AttrQueueUid}
+        task.AttrTitle, task.AttrTeamUid, task.AttrQueueUid, task.AttrTeammateUid}
 }
 
 func (task *Task) SetupComs(busManager *event.BusManager, store *Store) {
@@ -75,6 +94,8 @@ func (task Task) TeamUid() string { return task.AttrTeamUid }
 
 func (task Task) QueueUid() string { return task.AttrQueueUid }
 
+func (task Task) TeammateUid() string { return task.AttrTeammateUid }
+
 func (task *Task) Status(newStatus ...sm.Status) sm.Status {
     if len(newStatus) > 0 {
         task.InternalStatus = newStatus[0]
@@ -91,6 +112,22 @@ func (task *Task) Enqueue(queueUid string) bool {
 
 func (task *Task) Dequeue(queueUid string) bool {
     return task.stateMachine.Trigger(EventDequeue, task, queueUid)
+}
+
+func (task *Task) Offer(teammateUid string) bool {
+    return task.stateMachine.Trigger(EventOffer, task, teammateUid)
+}
+
+func (task *Task) Requeue() bool {
+    return task.stateMachine.Trigger(EventRequeue, task)
+}
+
+func (task *Task) Assign(teammateUid string) bool {
+    return task.stateMachine.Trigger(EventAssign, task, teammateUid)
+}
+
+func (task *Task) Complete() bool {
+    return task.stateMachine.Trigger(EventComplete, task)
 }
 
 

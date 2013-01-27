@@ -26,6 +26,7 @@ const (
     EventEnqueue
     EventDequeue
     EventOffer
+    EventRequeue
     EventAssign
     EventComplete
 )
@@ -63,6 +64,7 @@ func init() {
     sm.RegisterEvent(EventEnqueue, "Enqueue")
     sm.RegisterEvent(EventDequeue, "Dequeue")
     sm.RegisterEvent(EventOffer, "Offer")
+    sm.RegisterEvent(EventRequeue, "Requeue")
     sm.RegisterEvent(EventAssign, "Assign")
     sm.RegisterEvent(EventComplete, "Complete")
 
