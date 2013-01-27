@@ -7,11 +7,11 @@ import (
     "goatd/app/model"
 )
 
-func taskTitles(tasks []*model.Task) (names []string) {
+func taskTitles(tasks []*model.Task) (titles []string) {
     for _, task := range tasks {
-        names = append(names, task.Title())
+        titles = append(titles, task.Title())
     }
-    return names
+    return titles
 }
 
 type TaskOwner struct {
