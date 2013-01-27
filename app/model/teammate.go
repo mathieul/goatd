@@ -21,6 +21,7 @@ type Teammate struct {
 }
 
 func setupTeammateStateMachine(teammate *Teammate, status sm.Status) *sm.StateMachine {
+    // trigger arguments: <teammate>, [taskUid]
     stateMachine := sm.NewStateMachine(status, func (b sm.Builder) {
         b.Event(EventSignIn, StatusSignedOut, StatusOnBreak, sm.NoAction)
         b.Event(EventGoOnBreak, func (b sm.Builder) {
@@ -41,30 +42,30 @@ func setupTeammateStateMachine(teammate *Teammate, status sm.Status) *sm.StateMa
         })
         b.Event(EventOfferTask, StatusWaiting, StatusOffered, func (args []interface{}) bool {
             teammate, taskUid := args[0].(*Teammate), args[1].(string)
-            teammate.AttrTaskUid = taskUid
+            teammate.Update("TaskUid", taskUid)
             return true
         })
         b.Event(EventAcceptTask, StatusOffered, StatusBusy, func (args []interface{}) bool {
-            teammate, task := args[0].(*Teammate), args[1].(*Task)
-            if task.Uid() != teammate.AttrTaskUid { return false }
+            teammate, taskUid := args[0].(*Teammate), args[1].(string)
+            if taskUid != teammate.TaskUid() { return false }
             teammate.busManager.PublishEvent(event.AcceptTask, teammate.Identity,
-                []interface{}{teammate.Uid(), task.Uid()})
+                []interface{}{teammate.Uid(), taskUid})
             return true
         })
         b.Event(EventRejectTask, StatusOffered, StatusWaiting, func (args []interface{}) bool {
-            teammate, task := args[0].(*Teammate), args[1].(*Task)
-            if task.Uid() != teammate.AttrTaskUid { return false }
-            teammate.AttrTaskUid = ""
+            teammate, taskUid := args[0].(*Teammate), args[1].(string)
+            if taskUid != teammate.TaskUid() { return false }
+            teammate.Update("TaskUid", "")
             teammate.busManager.PublishEvent(event.CompleteTask, teammate.Identity,
-                []interface{}{teammate.Uid(), task.Uid()})
+                []interface{}{teammate.Uid(), taskUid})
             return true
         })
         b.Event(EventFinishTask, StatusBusy, StatusWrappingUp, func (args []interface{}) bool {
-            teammate, task := args[0].(*Teammate), args[1].(*Task)
-            if task.Uid() != teammate.AttrTaskUid { return false }
-            teammate.AttrTaskUid = ""
+            teammate, taskUid := args[0].(*Teammate), args[1].(string)
+            if taskUid != teammate.TaskUid() { return false }
+            teammate.Update("TaskUid", "")
             teammate.busManager.PublishEvent(event.CompleteTask, teammate.Identity,
-                []interface{}{teammate.Uid(), task.Uid()})
+                []interface{}{teammate.Uid(), taskUid})
             return true
         })
         b.Event(EventStartOtherWork, func (b sm.Builder) {
@@ -133,20 +134,20 @@ func (teammate *Teammate) MakeAvailable() bool {
     return teammate.stateMachine.Trigger(EventMakeAvailable, teammate)
 }
 
-func (teammate *Teammate) OfferTask(task *Task) bool {
-    return teammate.stateMachine.Trigger(EventOfferTask, teammate, task.Uid())
+func (teammate *Teammate) OfferTask(taskUid string) bool {
+    return teammate.stateMachine.Trigger(EventOfferTask, teammate, taskUid)
 }
 
-func (teammate *Teammate) AcceptTask(task *Task) bool {
-    return teammate.stateMachine.Trigger(EventAcceptTask, teammate, task)
+func (teammate *Teammate) AcceptTask(taskUid string) bool {
+    return teammate.stateMachine.Trigger(EventAcceptTask, teammate, taskUid)
 }
 
-func (teammate *Teammate) RejectTask(task *Task) bool {
-    return teammate.stateMachine.Trigger(EventRejectTask, teammate, task)
+func (teammate *Teammate) RejectTask(taskUid string) bool {
+    return teammate.stateMachine.Trigger(EventRejectTask, teammate, taskUid)
 }
 
-func (teammate *Teammate) FinishTask(task *Task) bool {
-    return teammate.stateMachine.Trigger(EventFinishTask, teammate, task)
+func (teammate *Teammate) FinishTask(taskUid string) bool {
+    return teammate.stateMachine.Trigger(EventFinishTask, teammate, taskUid)
 }
 
 func (teammate *Teammate) StartOtherWork() bool {
