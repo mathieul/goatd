@@ -34,6 +34,13 @@ func (s *SkillSuite) TestCreateSkill(c *C) {
     c.Assert(skill.QueueUid(), Equals, "queue123")
     c.Assert(skill.TeammateUid(), Equals, "teammate456")
     c.Assert(skill.TeamUid(), Equals, s.owner.Uid())
+
+    queue := SkillOwner{event.NewIdentity("Queue")}
+    teammate := SkillOwner{event.NewIdentity("Teammate")}
+    alternative := s.store.Skills.Create(model.A{}, s.owner, queue, teammate)
+    c.Assert(alternative.QueueUid(), Equals, queue.Uid())
+    c.Assert(alternative.TeammateUid(), Equals, teammate.Uid())
+    c.Assert(alternative.TeamUid(), Equals, s.owner.Uid())
 }
 
 func (s *SkillSuite) TestFindSkill(c *C) {
