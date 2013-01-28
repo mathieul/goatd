@@ -72,22 +72,20 @@ func (s *QueueSuite) TestSelectQueues(c *C) {
     c.Assert(queueNames(selectedQueues), DeepEquals, []string{"Tyrion Lannister", "Jamie Lannister"})
 }
 
-// func (s *QueueSuite) TestInsertTask(c *C) {
-//     caller := s.queues.Create(models.Attrs{"Name": "Caller"})
-//     c.Assert(caller.IsReady(), Equals, false)
-//     task := s.team.Tasks.Create(models.Attrs{"Title": "Do It"})
-//     c.Assert(caller.InsertTask(task), Equals, true)
-//     c.Assert(caller.IsReady(), Equals, true)
-//     c.Assert(caller.QueuedTasks(), DeepEquals, []*models.Task{task})
-// }
+func (s *QueueSuite) TestAddTask(c *C) {
+    caller := s.store.Queues.Create(model.A{"Name": "Caller"})
+    c.Assert(caller.AddTask("task1"), Equals, true)
+    c.Assert(caller.QueuedTaskUids(), DeepEquals, []string{"task1"})
+    c.Assert(caller.AddTask("task2"), Equals, true)
+    c.Assert(caller.AddTask("task3"), Equals, true)
+    c.Assert(caller.QueuedTaskUids(), DeepEquals, []string{"task1", "task2", "task3"})
+}
 
-// func (s *QueueSuite) TestInsertAndKeepTasksOrdered(c *C) {
-//     caller := s.queues.Create(models.Attrs{"Name": "Caller"})
-//     tasks := make([]*models.Task, 0, 10)
-//     for i := 0; i < 10; i++ {
-//         task := s.team.Tasks.Create(models.Attrs{"Title": fmt.Sprintf("#%02d", i)})
-//         caller.InsertTask(task)
-//         tasks = append(tasks, task)
-//     }
-//     c.Assert(caller.QueuedTasks(), DeepEquals, tasks)
-// }
+func (s *QueueSuite) TestRemoveTask(c *C) {
+    caller := s.store.Queues.Create(model.A{"Name": "Caller"})
+    caller.AddTask("task1")
+    caller.AddTask("task2")
+    caller.AddTask("task3")
+    caller.RemoveTask("task2")
+    c.Assert(caller.QueuedTaskUids(), DeepEquals, []string{"task1", "task3"})
+}

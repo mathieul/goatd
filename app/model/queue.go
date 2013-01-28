@@ -21,8 +21,7 @@ type Queue struct {
     *event.Identity
     busManager *event.BusManager
     store *Store
-    queuedTasks []*Task
-    isReady bool
+    queuedTaskUids []string
     AttrName string
     AttrTeamUid string
 }
@@ -30,16 +29,15 @@ type Queue struct {
 func NewQueue(attributes A) (queue *Queue) {
     queue = newModel(&Queue{}, &attributes).(*Queue)
     queue.Identity = event.NewIdentity("Queue")
-    queue.queuedTasks = make([]*Task, 0, initialQueueLength)
-    queue.isReady = false
+    queue.queuedTaskUids = make([]string, 0, initialQueueLength)
     return queue
 }
 
 func (queue *Queue) Copy() Model {
     identity := queue.Identity.Copy()
-    var queuedTasks []*Task
-    copy(queuedTasks, queue.queuedTasks)
-    return &Queue{identity, nil, nil, queuedTasks, queue.isReady,
+    var queuedTaskUids []string
+    copy(queuedTaskUids, queue.queuedTaskUids)
+    return &Queue{identity, nil, nil, queuedTaskUids,
         queue.AttrName, queue.AttrTeamUid}
 }
 
@@ -65,34 +63,26 @@ func (queue Queue) TeamUid() string {
     return queue.AttrTeamUid
 }
 
-func (queue Queue) IsReady() bool {
-    return queue.isReady
+func (queue Queue) QueuedTaskUids() []string {
+    return queue.queuedTaskUids
 }
 
-func (queue Queue) QueuedTasks() []*Task {
-    return queue.queuedTasks
+func (queue *Queue) AddTask(taskUid string) bool {
+    queue.queuedTaskUids = append(queue.queuedTaskUids, taskUid)
+    return true
 }
 
-// func (queue *Queue) InsertTask(task *Task) bool {
-//     queue.queuedTasks = append(queue.queuedTasks, task)
-//     queue.isReady = true
-//     return true
-// }
-
-// func (queue *Queue) RemoveTask(taskToRemove *Task) bool {
-//     index, uid := -1, taskToRemove.Uid()
-//     for i, task := range queue.queuedTasks {
-//         if task.Uid() == uid {
-//             index = i
-//             break
-//         }
-//     }
-//     queue.queuedTasks = append(queue.queuedTasks[:index], queue.queuedTasks[index + 1:]...)
-//     if len(queue.queuedTasks) == 0 {
-//         queue.isReady = false
-//     }
-//     return true
-// }
+func (queue *Queue) RemoveTask(taskUid string) bool {
+    index := -1
+    for i, uid := range queue.queuedTaskUids {
+        if uid == taskUid {
+            index = i
+            break
+        }
+    }
+    queue.queuedTaskUids = append(queue.queuedTaskUids[:index], queue.queuedTaskUids[index + 1:]...)
+    return true
+}
 
 
 /*
