@@ -12,6 +12,7 @@ const (
     KindTeammate
     KindTask
     KindQueue
+    KindSkill
 )
 
 func (kind Kind) String() string {
@@ -22,6 +23,7 @@ func (kind Kind) String() string {
     case KindTeammate:  value = "Teammate"
     case KindTask:      value = "Task"
     case KindQueue:     value = "Queue"
+    case KindSkill:     value = "Skill"
     default:            value = fmt.Sprintf("Unknown(%d)", kind)
     }
     return fmt.Sprintf("<Kind{%s}>", value)
@@ -86,6 +88,7 @@ type Store struct {
     Teammates   *TeammateStoreProxy
     Tasks       *TaskStoreProxy
     Queues      *QueueStoreProxy
+    Skills      *SkillStoreProxy
 }
 
 func NewStore(busManager *event.BusManager) (store *Store) {
@@ -95,6 +98,7 @@ func NewStore(busManager *event.BusManager) (store *Store) {
     store.Teammates = &TeammateStoreProxy{store}
     store.Tasks = &TaskStoreProxy{store}
     store.Queues = &QueueStoreProxy{store}
+    store.Skills = &SkillStoreProxy{store}
     return store
 }
 
