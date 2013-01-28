@@ -3,7 +3,6 @@ package model_test
 import (
     . "launchpad.net/gocheck"
     "strings"
-    // "fmt"
     "goatd/app/event"
     "goatd/app/model"
 )

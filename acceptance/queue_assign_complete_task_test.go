@@ -7,6 +7,7 @@ import (
     "time"
     "goatd/app/event"
     "goatd/app/model"
+    "goatd/app/dispatch"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -34,9 +35,10 @@ func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
     // provisioning
     team := s.store.Teams.Create(model.A{"Name": "Jones Household"})
     distributor := dispatch.NewDistributor(s.store)
-    mate := s.store.Teammates.Create(model.A{"Name": "Jack"}, team)
+    teammate := s.store.Teammates.Create(model.A{"Name": "Jack"}, team)
     queue := s.store.Queues.Create(model.A{"Name": "Duties"}, team)
-    skill := s.store.Skills.Create(model.A{}, team, mate, queue)
+    skill := s.store.Skills.Create(model.A{"TeammateUid": teammate.Uid(),
+        "QueueUid": queue.Uid()}, team)
 
     // keep track of events received
     var eventOne, eventTwo, eventThree event.Event
@@ -50,53 +52,53 @@ func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
     }()
 
     // create task and get have the teammate process it
-    c.Assert(mate.Status(), Equals, model.StatusSignedOut)
-    mate.SignIn()
-    c.Assert(mate.Status(), Equals, model.StatusOnBreak)
+    c.Assert(teammate.Status(), Equals, model.StatusSignedOut)
+    teammate.SignIn()
+    c.Assert(teammate.Status(), Equals, model.StatusOnBreak)
 
     task := team.Tasks.Create(model.A{"Title": "take out the trash"})
     c.Assert(task.Status(), Equals, model.StatusCreated)
     task.Enqueue(queue)
     c.Assert(task.Status(), Equals, model.StatusQueued)
 
-    mate.MakeAvailable()
+    teammate.MakeAvailable()
     time.Sleep(aLittleBit)
-    c.Assert(mate.Status(), Equals, model.StatusOffered)
-    c.Assert(mate.CurrentTask(), DeepEquals, task)
+    c.Assert(teammate.Status(), Equals, model.StatusOffered)
+    c.Assert(teammate.CurrentTask(), DeepEquals, task)
     c.Assert(task.Status(), Equals, model.StatusOffered)
 
     c.Assert(eventOne.Kind, Equals, event.EventOfferTask)
-    c.Assert(eventOne.Data[0], Equals, mate.Uid())
+    c.Assert(eventOne.Data[0], Equals, teammate.Uid())
     c.Assert(eventOne.Data[1], Equals, task.Uid())
 
-    mate.AcceptTask(task)
+    teammate.AcceptTask(task)
     time.Sleep(aLittleBit)
-    c.Assert(mate.Status(), Equals, model.StatusBusy)
-    c.Assert(mate.CurrentTask(), DeepEquals, task)
+    c.Assert(teammate.Status(), Equals, model.StatusBusy)
+    c.Assert(teammate.CurrentTask(), DeepEquals, task)
     c.Assert(task.Status(), Equals, model.StatusAssigned)
     c.Assert(queue.QueuedTasks(), DeepEquals, []*model.Task{task})
 
     c.Assert(eventTwo.Kind, Equals, event.EventAcceptTask)
-    c.Assert(eventTwo.Data[0], Equals, mate.Uid())
+    c.Assert(eventTwo.Data[0], Equals, teammate.Uid())
     c.Assert(eventTwo.Data[1], Equals, task.Uid())
 
-    mate.FinishTask(task)
+    teammate.FinishTask(task)
     time.Sleep(aLittleBit)
-    c.Assert(model.StatusWrappingUp, Equals, mate.Status())
-    c.Assert(mate.CurrentTask(), IsNil)
+    c.Assert(model.StatusWrappingUp, Equals, teammate.Status())
+    c.Assert(teammate.CurrentTask(), IsNil)
     c.Assert(task.Status(), Equals, model.StatusCompleted)
     c.Assert(queue.QueuedTasks(), DeepEquals, []*model.Task{})
 
     c.Assert(eventThree.Kind, Equals, event.EventCompleteTask)
-    c.Assert(eventThree.Data[0], Equals, mate.Uid())
+    c.Assert(eventThree.Data[0], Equals, teammate.Uid())
     c.Assert(eventThree.Data[1], Equals, task.Uid())
 
-    mate.StartOtherWork()
-    c.Assert(mate.Status(), Equals, model.StatusOtherWork)
+    teammate.StartOtherWork()
+    c.Assert(teammate.Status(), Equals, model.StatusOtherWork)
 
-    mate.GoOnBreak()
-    c.Assert(mate.Status(), Equals, model.StatusOnBreak)
+    teammate.GoOnBreak()
+    c.Assert(teammate.Status(), Equals, model.StatusOnBreak)
 
-    mate.SignOut()
-    c.Assert(mate.Status(), Equals, model.StatusSignedOut)
+    teammate.SignOut()
+    c.Assert(teammate.Status(), Equals, model.StatusSignedOut)
 }
