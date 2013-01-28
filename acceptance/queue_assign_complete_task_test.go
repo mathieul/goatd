@@ -22,11 +22,9 @@ func (s *AcceptanceSuite) SetUpTest(c *C) {
     s.busManager = event.NewBusManager()
     s.busManager.Start()
     s.store = model.NewStore(s.busManager)
-    s.store.Start()
 }
 
 func (s *AcceptanceSuite) TearDownTest(c *C) {
-    s.store.Stop()
     s.busManager.Stop()
 }
 
@@ -35,7 +33,7 @@ func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
 
     // provisioning
     team := s.store.Teams.Create(model.A{"Name": "Jones Household"})
-    distributor := dispatch.NewDistributor(team, s.busManager, s.store)
+    distributor := dispatch.NewDistributor(s.store)
     mate := s.store.Teammates.Create(model.A{"Name": "Jack"}, team)
     queue := s.store.Queues.Create(model.A{"Name": "Duties"}, team)
     skill := s.store.Skills.Create(model.A{}, team, mate, queue)
