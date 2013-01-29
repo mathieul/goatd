@@ -5,6 +5,18 @@ import (
     "goatd/app/sm"
 )
 
+
+/*
+ * Global
+ */
+const (
+    LevelNone int = iota
+    LevelLow
+    LevelMedium
+    LevelHigh
+)
+
+
 /*
  * Skill
  */
@@ -21,6 +33,7 @@ type Skill struct {
 
 func NewSkill(attributes A) (skill *Skill) {
     skill = newModel(&Skill{}, &attributes).(*Skill)
+    if skill.AttrLevel == LevelNone { skill.AttrLevel = LevelMedium }
     skill.Identity = event.NewIdentity("Skill")
     return skill
 }

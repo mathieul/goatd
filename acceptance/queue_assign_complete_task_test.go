@@ -34,7 +34,7 @@ func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
 
     // provisioning
     team := s.store.Teams.Create(model.A{"Name": "Jones Household"})
-    distributor := dispatch.NewDistributor(s.store)
+    manager := dispatch.NewManager(s.store)
     teammate := s.store.Teammates.Create(model.A{"Name": "Jack"}, team)
     queue := s.store.Queues.Create(model.A{"Name": "Duties"}, team)
     skill := s.store.Skills.Create(model.A{"TeammateUid": teammate.Uid(),
@@ -58,7 +58,7 @@ func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
 
     task := s.store.Tasks.Create(model.A{"Title": "take out the trash"}, team)
     c.Assert(task.Status(), Equals, model.StatusCreated)
-    distributor.QueueTask(queue, task)
+    manager.QueueTask(queue, task)
     c.Assert(task.Status(), Equals, model.StatusQueued)
 
     teammate.MakeAvailable()
@@ -71,8 +71,7 @@ func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
     c.Assert(eventOne.Data[0], Equals, teammate.Uid())
     c.Assert(eventOne.Data[1], Equals, task.Uid())
 
-    distributor.AcceptTask(teammate, task)
-    time.Sleep(aLittleBit)
+    manager.AcceptTask(teammate, task)
     c.Assert(teammate.Status(), Equals, model.StatusBusy)
     c.Assert(teammate.CurrentTask(), DeepEquals, task)
     c.Assert(task.Status(), Equals, model.StatusAssigned)
@@ -82,7 +81,7 @@ func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
     c.Assert(eventTwo.Data[0], Equals, teammate.Uid())
     c.Assert(eventTwo.Data[1], Equals, task.Uid())
 
-    distributor.FinishTask(teammate, task)
+    manager.FinishTask(teammate, task)
     time.Sleep(aLittleBit)
     c.Assert(model.StatusWrappingUp, Equals, teammate.Status())
     c.Assert(teammate.CurrentTask(), IsNil)
