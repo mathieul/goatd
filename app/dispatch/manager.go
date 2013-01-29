@@ -10,7 +10,7 @@ import (
  */
 
 type Manager struct {
-    *model.Store
+    store *model.Store
 }
 
 func (manager Manager) QueueTask(queue *model.Queue, task *model.Task) bool {
@@ -22,7 +22,13 @@ func (manager Manager) QueueTask(queue *model.Queue, task *model.Task) bool {
 
 func (manager Manager) MakeTeammateAvailable(teammate *model.Teammate) bool {
     if !teammate.MakeAvailable() { return false }
-    FindAndAssignTaskForTeammate(teammate)
+    if task := FindTaskForTeammate(manager.store, teammate); task != nil {
+        // for now we just try offering this task: if it doesn't work we give up
+        if !task.Offer(teammate.Uid()) { return true }
+        if !teammate.OfferTask(task.Uid()) {
+            task.Requeue()
+        }
+    }
     return true
 }
 

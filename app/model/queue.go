@@ -69,6 +69,7 @@ func (queue Queue) QueuedTaskUids() []string {
 
 func (queue *Queue) AddTask(taskUid string) bool {
     queue.queuedTaskUids = append(queue.queuedTaskUids, taskUid)
+    // TODO: push to persitent storage
     return true
 }
 

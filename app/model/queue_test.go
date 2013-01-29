@@ -78,6 +78,8 @@ func (s *QueueSuite) TestAddTask(c *C) {
     c.Assert(caller.AddTask("task2"), Equals, true)
     c.Assert(caller.AddTask("task3"), Equals, true)
     c.Assert(caller.QueuedTaskUids(), DeepEquals, []string{"task1", "task2", "task3"})
+    persisted := s.store.Queues.Find(caller.Uid())
+    c.Assert(persisted.QueuedTaskUids(), DeepEquals, []string{"task1", "task2", "task3"})
 }
 
 func (s *QueueSuite) TestRemoveTask(c *C) {

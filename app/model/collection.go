@@ -44,6 +44,7 @@ func (collection Collection) Find(uid string) Model {
 }
 
 func (collection Collection) FindAll(uids []string) (found []Model) {
+    if len(uids) == 0 { return collection.Items }
     for _, candidate := range collection.Items {
         candidateUid := simpleMethodCall(candidate, "Uid").(string)
         for _, uid := range uids {
