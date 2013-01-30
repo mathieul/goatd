@@ -32,6 +32,13 @@ func (manager Manager) MakeTeammateAvailable(teammate *model.Teammate) bool {
     return true
 }
 
+func (manager Manager) AcceptTask(teammate *model.Teammate, task *model.Task) bool {
+    if !task.Assign(teammate.Uid())    { return false }
+    if teammate.AcceptTask(task.Uid()) { return true }
+    task.Requeue()
+    return false
+}
+
 func NewManager(store *model.Store) *Manager {
     return &Manager{store}
 }

@@ -53,12 +53,18 @@ func (s *ManagerSuite) TestMakeTeammateAvailable(c *C) {
     c.Assert(task.Reload().Status(), Equals, model.StatusOffered)
 }
 
-// func (s *ManagerSuite) TestAcceptTask(c *C) {
-//     queue := s.store.Queues.Create(model.A{"Name": "Daniel Craig"}, s.team)
-//     task := s.store.Tasks.Create(model.A{"Title": "Skyfall"}, s.team)
-//     manager.AcceptTask(teammate, task)
-//     c.Assert(teammate.Status(), Equals, model.StatusBusy)
-//     c.Assert(teammate.CurrentTask(), DeepEquals, task)
-//     c.Assert(task.Status(), Equals, model.StatusAssigned)
-//     c.Assert(queue.QueuedTaskUids(), DeepEquals, []string{task.Uid()})
-// }
+func (s *ManagerSuite) TestAcceptTask(c *C) {
+    queue := s.store.Queues.Create(model.A{"Name": "Daniel Craig"}, s.team)
+    task := s.store.Tasks.Create(model.A{"Title": "Skyfall"}, s.team)
+    teammate := s.store.Teammates.Create(model.A{"Name": "007"}, s.team)
+    s.store.Skills.Create(model.A{"Level": model.LevelHigh}, teammate, queue)
+    teammate.SignIn()
+    s.manager.QueueTask(queue, task)
+    s.manager.MakeTeammateAvailable(teammate)
+    task = task.Reload()
+
+    c.Assert(s.manager.AcceptTask(teammate, task), Equals, true)
+    c.Assert(teammate.Status(), Equals, model.StatusBusy)
+    c.Assert(teammate.CurrentTask().Uid(), DeepEquals, task.Uid())
+    c.Assert(task.Status(), Equals, model.StatusAssigned)
+}
