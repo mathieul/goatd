@@ -64,7 +64,7 @@ func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
     manager.MakeTeammateAvailable(teammate)
     task = task.Reload()
     c.Assert(teammate.Status(), Equals, model.StatusOffered)
-    c.Assert(teammate.CurrentTask().Uid(), DeepEquals, task.Uid())
+    c.Assert(teammate.TaskUid(), DeepEquals, task.Uid())
     c.Assert(task.Status(), Equals, model.StatusOffered)
 
     time.Sleep(aLittleBit)
@@ -74,7 +74,7 @@ func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
 
     manager.AcceptTask(teammate, task)
     c.Assert(teammate.Status(), Equals, model.StatusBusy)
-    c.Assert(teammate.CurrentTask().Uid(), DeepEquals, task.Uid())
+    c.Assert(teammate.TaskUid(), DeepEquals, task.Uid())
     c.Assert(task.Status(), Equals, model.StatusAssigned)
     c.Assert(queue.NextTaskUid(), DeepEquals, task.Uid())
 
@@ -86,7 +86,7 @@ func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
     manager.FinishTask(teammate, task)
     queue = queue.Reload()
     c.Assert(teammate.Status(), Equals, model.StatusWrappingUp)
-    c.Assert(teammate.CurrentTask(), IsNil)
+    c.Assert(teammate.TaskUid(), Equals, "")
     c.Assert(task.Status(), Equals, model.StatusCompleted)
     c.Assert(queue.NextTaskUid(), DeepEquals, "")
 

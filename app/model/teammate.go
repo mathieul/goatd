@@ -150,15 +150,6 @@ func (teammate *Teammate) SignOut() bool {
     return teammate.stateMachine.Trigger(EventSignOut, teammate)
 }
 
-func (teammate Teammate) CurrentTask() *Task {
-    if teammate.AttrTaskUid == "" { return nil }
-    found := teammate.store.Tasks.Select(func (item interface{}) bool {
-        return item.(*Task).Uid() == teammate.AttrTaskUid
-    })
-    if len(found) == 0 { return nil }
-    return found[0]
-}
-
 
 /*
  * TeammateStoreProxy

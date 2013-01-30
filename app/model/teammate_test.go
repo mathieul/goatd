@@ -105,7 +105,7 @@ func (s *TeammateSuite) TestChangingAvailability(c *C) {
     task := s.store.Tasks.Create(model.A{"Title": "Do It"}, s.owner)
     c.Assert(s.teammate.OfferTask(task.Uid()), Equals, true)
     c.Assert(s.teammate.Status(), Equals, model.StatusOffered)
-    c.Assert(s.teammate.CurrentTask().Uid(), DeepEquals, task.Uid())
+    c.Assert(s.teammate.TaskUid(), DeepEquals, task.Uid())
 }
 
 func (s *TeammateSuite) TestAcceptFinishTask(c *C) {
@@ -115,11 +115,11 @@ func (s *TeammateSuite) TestAcceptFinishTask(c *C) {
     s.teammate.OfferTask(task.Uid())
     c.Assert(s.teammate.AcceptTask(task.Uid()), Equals, true)
     c.Assert(s.teammate.Status(), Equals, model.StatusBusy)
-    c.Assert(s.teammate.CurrentTask().Uid(), DeepEquals, task.Uid())
+    c.Assert(s.teammate.TaskUid(), DeepEquals, task.Uid())
 
     c.Assert(s.teammate.FinishTask(task.Uid()), Equals, true)
     c.Assert(s.teammate.Status(), Equals, model.StatusWrappingUp)
-    c.Assert(s.teammate.CurrentTask(), IsNil)
+    c.Assert(s.teammate.TaskUid(), Equals, "")
 }
 
 func (s *TeammateSuite) TestOtherWorkOnBreakTask(c *C) {

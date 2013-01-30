@@ -49,7 +49,7 @@ func (s *ManagerSuite) TestMakeTeammateAvailable(c *C) {
 
     c.Assert(s.manager.MakeTeammateAvailable(teammate), Equals, true)
     c.Assert(teammate.Status(), Equals, model.StatusOffered)
-    c.Assert(teammate.CurrentTask().Uid(), DeepEquals, task.Uid())
+    c.Assert(teammate.TaskUid(), DeepEquals, task.Uid())
     c.Assert(task.Reload().Status(), Equals, model.StatusOffered)
 }
 
@@ -65,7 +65,7 @@ func (s *ManagerSuite) TestAcceptTask(c *C) {
 
     c.Assert(s.manager.AcceptTask(teammate, task), Equals, true)
     c.Assert(teammate.Status(), Equals, model.StatusBusy)
-    c.Assert(teammate.CurrentTask().Uid(), DeepEquals, task.Uid())
+    c.Assert(teammate.TaskUid(), DeepEquals, task.Uid())
     c.Assert(task.Status(), Equals, model.StatusAssigned)
 }
 
@@ -82,7 +82,7 @@ func (s *ManagerSuite) TestFinishTask(c *C) {
 
     c.Assert(s.manager.FinishTask(teammate, task), Equals, true)
     c.Assert(teammate.Status(), Equals, model.StatusWrappingUp)
-    c.Assert(teammate.CurrentTask(), IsNil)
+    c.Assert(teammate.TaskUid(), Equals, "")
     c.Assert(task.Status(), Equals, model.StatusCompleted)
     c.Assert(queue.Reload().NextTaskUid(), DeepEquals, "")
 }
