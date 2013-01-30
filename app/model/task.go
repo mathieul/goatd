@@ -1,6 +1,7 @@
 package model
 
 import (
+    "time"
     "goatd/app/event"
     "goatd/app/sm"
 )
@@ -15,6 +16,8 @@ type Task struct {
     store *Store
     stateMachine *sm.StateMachine
     InternalStatus sm.Status
+    AttrWeight int64
+    AttrCreated int64
     AttrTitle string
     AttrTeamUid string
     AttrQueueUid string
@@ -26,12 +29,14 @@ func setupTaksStateMachine(task *Task, status sm.Status) *sm.StateMachine {
         b.Event(EventEnqueue, StatusCreated, StatusQueued, func (args []interface{}) bool {
             task, queueUid := args[0].(*Task), args[1].(string)
             task.Update("QueueUid", queueUid)
+            task.Update("Created", time.Now().Unix())
             return true
         })
         b.Event(EventDequeue, StatusQueued, StatusCreated, func (args []interface{}) bool {
             task, queueUid := args[0].(*Task), args[1].(string)
             if queueUid != task.QueueUid() { return false }
             task.Update("QueueUid", "")
+            task.Update("Created", int64(0))
             return true
         })
         b.Event(EventOffer, StatusQueued, StatusOffered, func (args []interface{}) bool {
@@ -64,6 +69,10 @@ func setupTaksStateMachine(task *Task, status sm.Status) *sm.StateMachine {
     return stateMachine
 }
 
+func TaskLess(a, b interface{}) bool {
+    return a.(*Task).AttrWeight < b.(*Task).AttrWeight
+}
+
 func NewTask(attributes A) (task *Task) {
     task = newModel(&Task{}, &attributes).(*Task)
     if task.InternalStatus == StatusNone { task.InternalStatus = StatusCreated }
@@ -75,7 +84,8 @@ func (task *Task) Copy() Model {
     stateMachine := setupTaksStateMachine(task, task.InternalStatus)
     identity := task.Identity.Copy()
     return &Task{identity, nil, nil, stateMachine, task.InternalStatus,
-        task.AttrTitle, task.AttrTeamUid, task.AttrQueueUid, task.AttrTeammateUid}
+        task.AttrWeight, task.AttrCreated, task.AttrTitle, task.AttrTeamUid,
+        task.AttrQueueUid, task.AttrTeammateUid}
 }
 
 func (task *Task) SetupComs(busManager *event.BusManager, store *Store) {
@@ -89,6 +99,10 @@ func (task *Task) Update(name string, value interface{}) bool {
 }
 
 func (task Task) Title() string { return task.AttrTitle }
+
+func (task Task) Created() int64 { return task.AttrCreated }
+
+func (task Task) Weight() int64 { return task.AttrWeight }
 
 func (task Task) TeamUid() string { return task.AttrTeamUid }
 

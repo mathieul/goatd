@@ -71,22 +71,62 @@ func (s *QueueSuite) TestSelectQueues(c *C) {
     c.Assert(queueNames(selectedQueues), DeepEquals, []string{"Tyrion Lannister", "Jamie Lannister"})
 }
 
-func (s *QueueSuite) TestAddTask(c *C) {
-    caller := s.store.Queues.Create(model.A{"Name": "Caller"})
-    c.Assert(caller.AddTask("task1"), Equals, true)
-    c.Assert(caller.QueuedTaskUids(), DeepEquals, []string{"task1"})
-    c.Assert(caller.AddTask("task2"), Equals, true)
-    c.Assert(caller.AddTask("task3"), Equals, true)
-    c.Assert(caller.QueuedTaskUids(), DeepEquals, []string{"task1", "task2", "task3"})
-    persisted := s.store.Queues.Find(caller.Uid())
-    c.Assert(persisted.QueuedTaskUids(), DeepEquals, []string{"task1", "task2", "task3"})
+func (s *QueueSuite) TestPersistAddTask(c *C) {
+    queue := model.NewQueue(model.A{})
+    task1 := model.NewTask(model.A{"Title": "One", "Created": int64(41)})
+    task2 := model.NewTask(model.A{"Title": "Two", "Created": int64(42)})
+    c.Assert(queue.NumberTasks(), Equals, 0)
+    queue.PersistAddTask(task1)
+    c.Assert(task1.Weight(), Equals, int64(41))
+    queue.PersistAddTask(task2)
+    c.Assert(task2.Weight(), Equals, int64(42))
+    c.Assert(queue.NumberTasks(), Equals, 2)
+    c.Assert(queue.NextTaskUid(), Equals, task1.Uid())
 }
 
-func (s *QueueSuite) TestRemoveTask(c *C) {
+func (s *QueueSuite) TestAddTask(c *C) {
     caller := s.store.Queues.Create(model.A{"Name": "Caller"})
-    caller.AddTask("task1")
-    caller.AddTask("task2")
-    caller.AddTask("task3")
-    caller.RemoveTask("task2")
-    c.Assert(caller.QueuedTaskUids(), DeepEquals, []string{"task1", "task3"})
+    task1 := s.store.Tasks.Create(model.A{"Title": "One"})
+    task2 := s.store.Tasks.Create(model.A{"Title": "Two"})
+    task3 := s.store.Tasks.Create(model.A{"Title": "Three"})
+    c.Assert(caller.AddTask(task1.Uid()), Equals, true)
+    c.Assert(caller.NextTaskUid(), Equals, task1.Uid())
+    c.Assert(caller.NumberTasks(), Equals, 1)
+    caller.AddTask(task2.Uid())
+    caller.AddTask(task3.Uid())
+    c.Assert(caller.NextTaskUid(), Equals, task1.Uid())
+    c.Assert(caller.NumberTasks(), Equals, 3)
+    persisted := s.store.Queues.Find(caller.Uid())
+    c.Assert(persisted.NextTaskUid(), Equals, task1.Uid())
+    c.Assert(persisted.NumberTasks(), Equals, 3)
+}
+
+func (s *QueueSuite) TestPersistDelTask(c *C) {
+    queue := model.NewQueue(model.A{})
+    task1 := model.NewTask(model.A{"Title": "One", "Created": int64(41)})
+    task2 := model.NewTask(model.A{"Title": "Two", "Created": int64(42)})
+    queue.PersistAddTask(task1)
+    queue.PersistAddTask(task2)
+    queue.PersistDelTask(task1)
+    c.Assert(queue.NumberTasks(), Equals, 1)
+    c.Assert(queue.NextTaskUid(), Equals, task2.Uid())
+    queue.PersistDelTask(task2)
+    c.Assert(queue.NumberTasks(), Equals, 0)
+    c.Assert(queue.NextTaskUid(), Equals, "")
+}
+
+func (s *QueueSuite) TestDelTask(c *C) {
+    caller := s.store.Queues.Create(model.A{"Name": "Caller"})
+    task1 := s.store.Tasks.Create(model.A{"Title": "One", "Created": int64(1)})
+    task2 := s.store.Tasks.Create(model.A{"Title": "Two", "Created": int64(2)})
+    task3 := s.store.Tasks.Create(model.A{"Title": "Three", "Created": int64(3)})
+    caller.AddTask(task1.Uid())
+    caller.AddTask(task2.Uid())
+    caller.AddTask(task3.Uid())
+    caller.DelTask(task1.Uid())
+    c.Assert(caller.NextTaskUid(), Equals, task2.Uid())
+    c.Assert(caller.NumberTasks(), Equals, 2)
+    persisted := s.store.Queues.Find(caller.Uid())
+    c.Assert(persisted.NextTaskUid(), Equals, task2.Uid())
+    c.Assert(persisted.NumberTasks(), Equals, 2)
 }

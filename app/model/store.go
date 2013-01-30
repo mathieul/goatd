@@ -37,6 +37,8 @@ const (
     OpFind
     OpFindAll
     OpSelect
+    OpAddTask
+    OpDelTask
 )
 
 func (operation Operation) String() string {
@@ -49,6 +51,8 @@ func (operation Operation) String() string {
     case OpFind:        value = "Find"
     case OpFindAll:     value = "Find all"
     case OpSelect:      value = "Select"
+    case OpAddTask:     value = "Add task"
+    case OpDelTask:     value = "Del task"
     default:            value = fmt.Sprintf("Unknown(%d)", operation)
     }
     return fmt.Sprintf("<Operation{%s}>", value)
@@ -166,4 +170,22 @@ func (store *Store) Select(kind Kind, tester func(interface{}) bool) []Model {
         models = append(models, model)
     }
     return models
+}
+
+func (store *Store) AddTask(uid, taskUid string) *Queue {
+    args := []interface{}{uid, taskUid}
+    persisted.Request <- Request{KindQueue, OpAddTask, args}
+    if value := <- persisted.Response; value != nil {
+        return value.(*Queue)
+    }
+    return nil
+}
+
+func (store *Store) DelTask(uid, taskUid string) *Queue {
+    args := []interface{}{uid, taskUid}
+    persisted.Request <- Request{KindQueue, OpDelTask, args}
+    if value := <- persisted.Response; value != nil {
+        return value.(*Queue)
+    }
+    return nil
 }

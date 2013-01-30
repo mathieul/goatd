@@ -1,6 +1,7 @@
 package model
 
 import (
+    "github.com/petar/GoLLRB/llrb"
     "goatd/app/event"
     "goatd/app/sm"
 )
@@ -13,6 +14,7 @@ const (
     initialQueueLength = 10
 )
 
+
 /*
  * Queue
  */
@@ -21,7 +23,9 @@ type Queue struct {
     *event.Identity
     busManager *event.BusManager
     store *Store
-    queuedTaskUids []string
+    Tasks *llrb.Tree
+    numberTasks int
+    nextTaskUid string
     AttrName string
     AttrTeamUid string
 }
@@ -29,16 +33,14 @@ type Queue struct {
 func NewQueue(attributes A) (queue *Queue) {
     queue = newModel(&Queue{}, &attributes).(*Queue)
     queue.Identity = event.NewIdentity("Queue")
-    queue.queuedTaskUids = make([]string, 0, initialQueueLength)
+    queue.Tasks = llrb.New(TaskLess)
     return queue
 }
 
 func (queue *Queue) Copy() Model {
     identity := queue.Identity.Copy()
-    var queuedTaskUids []string
-    copy(queuedTaskUids, queue.queuedTaskUids)
-    return &Queue{identity, nil, nil, queuedTaskUids,
-        queue.AttrName, queue.AttrTeamUid}
+    return &Queue{identity, nil, nil, nil, queue.NumberTasks(),
+        queue.NextTaskUid(), queue.AttrName, queue.AttrTeamUid}
 }
 
 func (queue *Queue) SetupComs(busManager *event.BusManager, store *Store) {
@@ -63,25 +65,52 @@ func (queue Queue) TeamUid() string {
     return queue.AttrTeamUid
 }
 
-func (queue Queue) QueuedTaskUids() []string {
-    return queue.queuedTaskUids
+func (queue Queue) NextTaskUid() string {
+    if queue.Tasks == nil {
+        return queue.nextTaskUid
+    }
+    if item := queue.Tasks.Min(); item != nil {
+        return item.(*Task).Uid()
+    }
+    return ""
 }
 
-func (queue *Queue) AddTask(taskUid string) bool {
-    queue.queuedTaskUids = append(queue.queuedTaskUids, taskUid)
-    // TODO: push to persitent storage
+func (queue Queue) NumberTasks() int {
+    if queue.Tasks == nil {
+        return queue.numberTasks
+    }
+    return queue.Tasks.Len()
+}
+
+func (queue Queue) CalculateTaskWeight(task *Task) int64 {
+    return task.Created()
+}
+
+func (queue *Queue) PersistAddTask(task *Task) bool {
+    if queue.Tasks == nil { return false }
+    // update task inline
+    task.AttrWeight = queue.CalculateTaskWeight(task)
+    queue.Tasks.InsertNoReplace(task)
     return true
 }
 
-func (queue *Queue) RemoveTask(taskUid string) bool {
-    index := -1
-    for i, uid := range queue.queuedTaskUids {
-        if uid == taskUid {
-            index = i
-            break
-        }
-    }
-    queue.queuedTaskUids = append(queue.queuedTaskUids[:index], queue.queuedTaskUids[index + 1:]...)
+func (queue *Queue) AddTask(taskUid string) bool {
+    updated := queue.store.AddTask(queue.Uid(), taskUid)
+    queue.nextTaskUid = updated.NextTaskUid()
+    queue.numberTasks = updated.NumberTasks()
+    return true
+}
+
+func (queue *Queue) PersistDelTask(task *Task) bool {
+    if queue.Tasks == nil { return false }
+    queue.Tasks.Delete(task)
+    return true
+}
+
+func (queue *Queue) DelTask(taskUid string) bool {
+    updated := queue.store.DelTask(queue.Uid(), taskUid)
+    queue.nextTaskUid = updated.NextTaskUid()
+    queue.numberTasks = updated.NumberTasks()
     return true
 }
 

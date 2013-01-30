@@ -16,7 +16,7 @@ type Manager struct {
 func (manager Manager) QueueTask(queue *model.Queue, task *model.Task) bool {
     if !queue.AddTask(task.Uid()) { return false }
     if task.Enqueue(queue.Uid())  { return true }
-    queue.RemoveTask(task.Uid())
+    queue.DelTask(task.Uid())
     return false
 }
 

@@ -3,6 +3,7 @@ package model_test
 import (
     . "launchpad.net/gocheck"
     "strings"
+    "time"
     "goatd/app/event"
     "goatd/app/model"
 )
@@ -71,12 +72,22 @@ func (s *TaskSuite) TestSelectTasks(c *C) {
     c.Assert(taskTitles(selectedTasks), DeepEquals, []string{"Tyrion Lannister", "Jamie Lannister"})
 }
 
+func (s *TaskSuite) TestTaskWeight(c *C) {
+    task := s.store.Tasks.Create(model.A{"Title": "do something"}, s.owner)
+    now := time.Now().Unix()
+    task.Update("Weight", now - 21)
+    c.Assert(task.Weight(), Equals, now - 21)
+}
+
 func (s *TaskSuite) TestEnqueueTask(c *C) {
     queueUid := "abcd1234"
     task := s.store.Tasks.Create(model.A{"Title": "Clean-up my room"}, s.owner)
     c.Assert(task.Status(), Equals, model.StatusCreated)
+    c.Assert(task.Created(), Equals, int64(0))
+
     c.Assert(task.Enqueue(queueUid), Equals, true)
     c.Assert(task.Status(), Equals, model.StatusQueued)
+    c.Assert(task.Created(), Equals, time.Now().Unix())
     c.Assert(task.QueueUid(), Equals, queueUid)
     c.Assert(task.Enqueue(queueUid), Equals, false)
 }
@@ -88,6 +99,7 @@ func (s *TaskSuite) TestDequeueTask(c *C) {
     c.Assert(task.Dequeue("blah"), Equals, false)
     c.Assert(task.Dequeue(queueUid), Equals, true)
     c.Assert(task.Status(), Equals, model.StatusCreated)
+    c.Assert(task.Created(), Equals, int64(0))
     c.Assert(task.QueueUid(), Equals, "")
     c.Assert(task.Enqueue(queueUid), Equals, true)
 }

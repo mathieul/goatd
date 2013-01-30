@@ -112,6 +112,8 @@ func setFieldValue(model Model, name string, value interface{}) {
             field.SetString(value.(string))
         case reflect.Int:
             field.SetInt(int64(value.(int)))
+        case reflect.Int64:
+            field.SetInt(value.(int64))
         case reflect.Bool:
             field.SetBool(value.(bool))
         }

@@ -85,6 +85,19 @@ func (storage *persistentStorage) processRequest(request Request, collection *Co
         selector := request.args[0].(func (interface{}) bool)
         models := collection.Select(selector)
         response = copyModels(models)
+    case OpAddTask, OpDelTask:
+        uid, taskUid := request.args[0].(string), request.args[1].(string)
+        model := collection.Find(uid)
+        taskModel := storage.collections[KindTask].Find(taskUid)
+        if model != nil && taskModel != nil {
+            queue := model.(*Queue)
+            if request.Operation == OpAddTask {
+                queue.PersistAddTask(taskModel.(*Task))
+            } else {
+                queue.PersistDelTask(taskModel.(*Task))
+            }
+            response = queue.Copy()
+        }
     default:
         log.Printf("Unknown operation %v\n", request.Operation)
     }
