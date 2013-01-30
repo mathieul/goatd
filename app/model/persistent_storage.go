@@ -61,6 +61,11 @@ func (storage *persistentStorage) processRequest(request Request, collection *Co
         } else {
             response = false
         }
+    case OpDestroy:
+        uid := request.args[0].(string)
+        if model := collection.Destroy(uid); model != nil {
+            response = model.Copy()
+        }
     case OpSetStatus:
         uid := request.args[0].(string)
         oldStatus, newStatus := request.args[1].(sm.Status), request.args[2].(sm.Status)

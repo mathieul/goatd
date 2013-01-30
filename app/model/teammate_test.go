@@ -63,6 +63,12 @@ func (s *TeammateSuite) TestFindTeammate(c *C) {
     c.Assert(s.store.Teammates.Find("unknown"), IsNil)
 }
 
+func (s *TeammateSuite) TestDestroyTeammate(c *C) {
+    teammate := s.store.Teammates.Create(model.A{"Name": "Destroy me"}, s.owner)
+    c.Assert(teammate.Destroy().Uid(), Equals, teammate.Uid())
+    c.Assert(s.store.Teammates.Find(teammate.Uid()), IsNil)
+}
+
 func (s *TeammateSuite) TestUpdateTeammate(c *C) {
     teammate := s.store.Teammates.Create(model.A{"Name": "Jon"}, s.owner)
     teammate.Update("Name", "Egret")

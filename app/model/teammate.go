@@ -91,6 +91,13 @@ func (teammate *Teammate) Update(name string, value interface{}) bool {
     return teammate.store.Update(KindTeammate, teammate.Uid(), name, value)
 }
 
+func (teammate *Teammate) Destroy() *Teammate {
+    if destroyed := teammate.store.Destroy(KindTeammate, teammate.Uid()); destroyed != nil {
+        return destroyed.(*Teammate)
+    }
+    return nil
+}
+
 func (teammate Teammate) Reload() *Teammate {
     if found := teammate.store.Teammates.Find(teammate.Uid()); found != nil {
         return found

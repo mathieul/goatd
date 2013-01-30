@@ -67,6 +67,12 @@ func (s *SkillSuite) TestUpdateSkill(c *C) {
     c.Assert(found.QueueUid(), Equals, "queue007")
 }
 
+func (s *SkillSuite) TestDestroySkill(c *C) {
+    skill := s.store.Skills.Create(model.A{"Name": "Destroy me"}, s.owner)
+    c.Assert(skill.Destroy().Uid(), Equals, skill.Uid())
+    c.Assert(s.store.Skills.Find(skill.Uid()), IsNil)
+}
+
 func (s *SkillSuite) TestSelectSkills(c *C) {
     s1 := s.store.Skills.Create(model.A{"QueueUid": "queue007", "TeammateUid": "teammate_james"}, s.owner)
     s.store.Skills.Create(model.A{"QueueUid": "queue123", "TeammateUid": "teammate456"}, s.owner)

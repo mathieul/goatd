@@ -33,6 +33,7 @@ const (
     OpNone Operation = iota
     OpCreate
     OpUpdate
+    OpDestroy
     OpSetStatus
     OpFind
     OpFindAll
@@ -47,6 +48,7 @@ func (operation Operation) String() string {
     case OpNone:        value = "None"
     case OpCreate:      value = "Create"
     case OpUpdate:      value = "Update"
+    case OpDestroy:     value = "Destroy"
     case OpSetStatus:   value = "Set status"
     case OpFind:        value = "Find"
     case OpFindAll:     value = "Find all"
@@ -135,6 +137,17 @@ func (store *Store) Update(kind Kind, uid, name string, value interface{}) bool 
         return value.(bool)
     }
     return false
+}
+
+func (store *Store) Destroy(kind Kind, uid string) Model {
+    args := []interface{}{uid}
+    persisted.Request <- Request{kind, OpDestroy, args}
+    if value := <- persisted.Response; value != nil {
+        model := value.(Model)
+        model.SetupComs(store.busManager, store)
+        return model
+    }
+    return nil
 }
 
 func (store *Store) SetStatus(kind Kind, uid string, oldStatus, newStatus sm.Status) bool {

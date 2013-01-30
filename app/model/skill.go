@@ -54,6 +54,13 @@ func (skill *Skill) Update(name string, value interface{}) bool {
     return skill.store.Update(KindSkill, skill.Uid(), name, value)
 }
 
+func (skill *Skill) Destroy() *Skill {
+    if destroyed := skill.store.Destroy(KindSkill, skill.Uid()); destroyed != nil {
+        return destroyed.(*Skill)
+    }
+    return nil
+}
+
 func (skill Skill) Reload() *Skill {
     if found := skill.store.Skills.Find(skill.Uid()); found != nil {
         return found

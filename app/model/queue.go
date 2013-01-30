@@ -53,6 +53,13 @@ func (queue *Queue) Update(name string, value interface{}) bool {
     return queue.store.Update(KindQueue, queue.Uid(), name, value)
 }
 
+func (queue *Queue) Destroy() *Queue {
+    if destroyed := queue.store.Destroy(KindQueue, queue.Uid()); destroyed != nil {
+        return destroyed.(*Queue)
+    }
+    return nil
+}
+
 func (queue Queue) Reload() *Queue {
     if found := queue.store.Queues.Find(queue.Uid()); found != nil {
         return found

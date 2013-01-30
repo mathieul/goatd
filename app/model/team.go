@@ -38,6 +38,13 @@ func (team *Team) Update(name string, value interface{}) bool {
     return team.store.Update(KindTeam, team.Uid(), name, value)
 }
 
+func (team *Team) Destroy() *Team {
+    if destroyed := team.store.Destroy(KindTeam, team.Uid()); destroyed != nil {
+        return destroyed.(*Team)
+    }
+    return nil
+}
+
 func (team Team) Reload() *Team {
     if found := team.store.Teams.Find(team.Uid()); found != nil {
         return found

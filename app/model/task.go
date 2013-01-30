@@ -98,6 +98,13 @@ func (task *Task) Update(name string, value interface{}) bool {
     return task.store.Update(KindTask, task.Uid(), name, value)
 }
 
+func (task *Task) Destroy() *Task {
+    if destroyed := task.store.Destroy(KindTask, task.Uid()); destroyed != nil {
+        return destroyed.(*Task)
+    }
+    return nil
+}
+
 func (task Task) Reload() *Task {
     if found := task.store.Tasks.Find(task.Uid()); found != nil {
         return found
@@ -124,7 +131,7 @@ func (task *Task) Status(newStatus ...sm.Status) sm.Status {
     if task.IsCopy() && task.stateMachine != nil {
         return task.stateMachine.Status()
     }
-    return task.InternalStatus    
+    return task.InternalStatus
 }
 
 func (task *Task) Enqueue(queueUid string) bool {

@@ -65,3 +65,13 @@ func (collection Collection) Select(tester func(interface{}) bool) (result []Mod
     }
     return result
 }
+
+func (collection *Collection) Destroy(uid string) Model {
+    for index, item := range collection.Items {
+        if item.Uid() == uid {
+            collection.Items = append(collection.Items[:index], collection.Items[index + 1:]...)
+            return item
+        }
+    }
+    return nil
+}

@@ -48,6 +48,12 @@ func (s *TeamSuite) TestFindAllTeams(c *C) {
     c.Assert(notFound, HasLen, 0)
 }
 
+func (s *TeamSuite) TestDestroyTeam(c *C) {
+    team := s.store.Teams.Create(model.A{"Name": "Destroy me"})
+    c.Assert(team.Destroy().Uid(), Equals, team.Uid())
+    c.Assert(s.store.Teams.Find(team.Uid()), IsNil)
+}
+
 func (s *TeamSuite) TestUpdateTeam(c *C) {
     team := s.store.Teams.Create(model.A{"Name": "Metallica"})
     team.Update("Name", "Iron Maiden")

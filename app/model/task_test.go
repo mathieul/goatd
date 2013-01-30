@@ -45,6 +45,12 @@ func (s *TaskSuite) TestFindTask(c *C) {
     c.Assert(s.store.Tasks.Find("unknown"), IsNil)
 }
 
+func (s *TaskSuite) TestDestroyTask(c *C) {
+    task := s.store.Tasks.Create(model.A{"Title": "Destroy me"}, s.owner)
+    c.Assert(task.Destroy().Uid(), Equals, task.Uid())
+    c.Assert(s.store.Tasks.Find(task.Uid()), IsNil)
+}
+
 func (s *TaskSuite) TestFindAllTasks(c *C) {
     q1 := s.store.Tasks.Create(model.A{"Title": "One"}, s.owner)
     s.store.Tasks.Create(model.A{"Title": "Two"}, s.owner)

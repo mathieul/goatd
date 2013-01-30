@@ -44,6 +44,12 @@ func (s *QueueSuite) TestFindQueue(c *C) {
     c.Assert(s.store.Queues.Find("unknown"), IsNil)
 }
 
+func (s *QueueSuite) TestDestroyQueue(c *C) {
+    queue := s.store.Queues.Create(model.A{"Name": "Destroy me"}, s.owner)
+    c.Assert(queue.Destroy().Uid(), Equals, queue.Uid())
+    c.Assert(s.store.Queues.Find(queue.Uid()), IsNil)
+}
+
 func (s *QueueSuite) TestFindAllQueues(c *C) {
     q1 := s.store.Queues.Create(model.A{"Name": "One"}, s.owner)
     s.store.Queues.Create(model.A{"Name": "Two"}, s.owner)
