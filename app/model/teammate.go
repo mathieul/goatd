@@ -34,12 +34,7 @@ func setupTeammateStateMachine(teammate *Teammate, status sm.Status) *sm.StateMa
             b.Transition(StatusOnBreak, StatusSignedOut, sm.NoAction)
             b.Transition(StatusWaiting, StatusSignedOut, sm.NoAction)
         })
-        b.Event(EventMakeAvailable, StatusOnBreak, StatusWaiting, func (args []interface{}) bool {
-            teammate := args[0].(*Teammate)
-            teammate.busManager.PublishEvent(event.TeammateAvailable,
-                teammate.Identity, []interface{}{})
-            return true
-        })
+        b.Event(EventMakeAvailable, StatusOnBreak, StatusWaiting, sm.NoAction)
         b.Event(EventOfferTask, StatusWaiting, StatusOffered, func (args []interface{}) bool {
             teammate, taskUid := args[0].(*Teammate), args[1].(string)
             teammate.Update("TaskUid", taskUid)
@@ -48,26 +43,16 @@ func setupTeammateStateMachine(teammate *Teammate, status sm.Status) *sm.StateMa
         b.Event(EventAcceptTask, StatusOffered, StatusBusy, func (args []interface{}) bool {
             teammate, taskUid := args[0].(*Teammate), args[1].(string)
             if taskUid != teammate.TaskUid() { return false }
-            teammate.busManager.PublishEvent(event.AcceptTask, teammate.Identity,
-                []interface{}{teammate.Uid(), taskUid})
             return true
         })
-        b.Event(EventRejectTask, StatusOffered, StatusWaiting, func (args []interface{}) bool {
+        wrapupTask := func (args []interface{}) bool {
             teammate, taskUid := args[0].(*Teammate), args[1].(string)
             if taskUid != teammate.TaskUid() { return false }
             teammate.Update("TaskUid", "")
-            teammate.busManager.PublishEvent(event.CompleteTask, teammate.Identity,
-                []interface{}{teammate.Uid(), taskUid})
             return true
-        })
-        b.Event(EventFinishTask, StatusBusy, StatusWrappingUp, func (args []interface{}) bool {
-            teammate, taskUid := args[0].(*Teammate), args[1].(string)
-            if taskUid != teammate.TaskUid() { return false }
-            teammate.Update("TaskUid", "")
-            teammate.busManager.PublishEvent(event.CompleteTask, teammate.Identity,
-                []interface{}{teammate.Uid(), taskUid})
-            return true
-        })
+        }
+        b.Event(EventRejectTask, StatusOffered, StatusWaiting, wrapupTask)
+        b.Event(EventFinishTask, StatusBusy, StatusWrappingUp, wrapupTask)
         b.Event(EventStartOtherWork, func (b sm.Builder) {
             b.Transition(StatusOnBreak, StatusOtherWork, sm.NoAction)
             b.Transition(StatusWaiting, StatusOtherWork, sm.NoAction)
@@ -126,7 +111,7 @@ func (teammate *Teammate) Status(newStatus ...sm.Status) sm.Status {
     if teammate.IsCopy() && teammate.stateMachine != nil {
         return teammate.stateMachine.Status()
     }
-    return teammate.InternalStatus    
+    return teammate.InternalStatus
 }
 
 func (teammate *Teammate) SignIn() bool {

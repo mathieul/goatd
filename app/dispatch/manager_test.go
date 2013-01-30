@@ -20,7 +20,7 @@ func (s *ManagerSuite) SetUpTest(c *C) {
     s.busManager = event.NewBusManager()
     s.busManager.Start()
     s.store = model.NewStore(s.busManager)
-    s.manager = dispatch.NewManager(s.store)
+    s.manager = dispatch.NewManager(s.busManager, s.store)
     s.team = s.store.Teams.Create(model.A{"Name": "James Bond"})
 }
 

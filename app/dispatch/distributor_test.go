@@ -27,7 +27,7 @@ func (s *DistributorSuite) TestFindTaskForTeammateWhenOne(c *C) {
     queue := s.store.Queues.Create(model.A{"Name": "Daniel Craig"}, s.team)
     teammate := s.store.Teammates.Create(model.A{"Name": "007"}, s.team)
     s.store.Skills.Create(model.A{"Level": model.LevelHigh}, teammate, queue)
-    manager := dispatch.NewManager(s.store)
+    manager := dispatch.NewManager(s.busManager, s.store)
     manager.QueueTask(queue, task)
     task2 := s.store.Tasks.Find(task.Uid())
     queue2 := s.store.Queues.Find(queue.Uid())

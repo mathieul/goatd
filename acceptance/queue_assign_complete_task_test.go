@@ -4,6 +4,7 @@ import (
     . "launchpad.net/gocheck"
     "testing"
     "fmt"
+    "time"
     "goatd/app/event"
     "goatd/app/model"
     "goatd/app/dispatch"
@@ -29,9 +30,11 @@ func (s *AcceptanceSuite) TearDownTest(c *C) {
 }
 
 func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
+    aLittleBit := 100 * time.Millisecond
+
     // provisioning
     team := s.store.Teams.Create(model.A{"Name": "Jones Household"})
-    manager := dispatch.NewManager(s.store)
+    manager := dispatch.NewManager(s.busManager, s.store)
     teammate := s.store.Teammates.Create(model.A{"Name": "Jack"}, team)
     queue := s.store.Queues.Create(model.A{"Name": "Duties"}, team)
     s.store.Skills.Create(model.A{"TeammateUid": teammate.Uid(),
@@ -64,26 +67,30 @@ func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
     c.Assert(teammate.CurrentTask().Uid(), DeepEquals, task.Uid())
     c.Assert(task.Status(), Equals, model.StatusOffered)
 
+    time.Sleep(aLittleBit)
     c.Assert(eventOne.Kind, Equals, event.OfferTask)
     c.Assert(eventOne.Data[0], Equals, teammate.Uid())
     c.Assert(eventOne.Data[1], Equals, task.Uid())
 
     manager.AcceptTask(teammate, task)
     c.Assert(teammate.Status(), Equals, model.StatusBusy)
-    c.Assert(teammate.CurrentTask(), DeepEquals, task)
+    c.Assert(teammate.CurrentTask().Uid(), DeepEquals, task.Uid())
     c.Assert(task.Status(), Equals, model.StatusAssigned)
     c.Assert(queue.NextTaskUid(), DeepEquals, task.Uid())
 
+    time.Sleep(aLittleBit)
     c.Assert(eventTwo.Kind, Equals, event.AcceptTask)
     c.Assert(eventTwo.Data[0], Equals, teammate.Uid())
     c.Assert(eventTwo.Data[1], Equals, task.Uid())
 
     manager.FinishTask(teammate, task)
+    queue = queue.Reload()
     c.Assert(teammate.Status(), Equals, model.StatusWrappingUp)
     c.Assert(teammate.CurrentTask(), IsNil)
     c.Assert(task.Status(), Equals, model.StatusCompleted)
     c.Assert(queue.NextTaskUid(), DeepEquals, "")
 
+    time.Sleep(aLittleBit)
     c.Assert(eventThree.Kind, Equals, event.CompleteTask)
     c.Assert(eventThree.Data[0], Equals, teammate.Uid())
     c.Assert(eventThree.Data[1], Equals, task.Uid())
