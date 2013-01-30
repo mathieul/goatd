@@ -33,6 +33,18 @@ func (team *Team) SetupComs(busManager *event.BusManager, store *Store) {
     team.store = store
 }
 
+func (team *Team) Update(name string, value interface{}) bool {
+    setAttributeValue(team, name, value)
+    return team.store.Update(KindTeam, team.Uid(), name, value)
+}
+
+func (team Team) Reload() *Team {
+    if found := team.store.Teams.Find(team.Uid()); found != nil {
+        return found
+    }
+    return nil
+}
+
 func NewTeam(attributes A) (team *Team) {
     team = newModel(&Team{}, &attributes).(*Team)
     team.Identity = event.NewIdentity("Team")

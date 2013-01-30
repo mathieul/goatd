@@ -48,6 +48,14 @@ func (s *TeamSuite) TestFindAllTeams(c *C) {
     c.Assert(notFound, HasLen, 0)
 }
 
+func (s *TeamSuite) TestUpdateTeam(c *C) {
+    team := s.store.Teams.Create(model.A{"Name": "Metallica"})
+    team.Update("Name", "Iron Maiden")
+    c.Assert(team.Name(), Equals, "Iron Maiden")
+    found := s.store.Teams.Find(team.Uid())
+    c.Assert(found.Name(), Equals, "Iron Maiden")
+}
+
 func (s *TeamSuite) TestSelectTeams(c *C) {
     tyrion := s.store.Teams.Create(model.A{"Name": "Tyrion Lannister"})
     s.store.Teams.Create(model.A{"Name": "Jon Snow"})

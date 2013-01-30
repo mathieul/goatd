@@ -54,6 +54,13 @@ func (skill *Skill) Update(name string, value interface{}) bool {
     return skill.store.Update(KindSkill, skill.Uid(), name, value)
 }
 
+func (skill Skill) Reload() *Skill {
+    if found := skill.store.Skills.Find(skill.Uid()); found != nil {
+        return found
+    }
+    return nil
+}
+
 func (skill Skill) Status(_ ...sm.Status) sm.Status {
     return StatusNone
 }

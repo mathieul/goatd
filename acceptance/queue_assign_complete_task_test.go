@@ -75,7 +75,7 @@ func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
     c.Assert(teammate.Status(), Equals, model.StatusBusy)
     c.Assert(teammate.CurrentTask(), DeepEquals, task)
     c.Assert(task.Status(), Equals, model.StatusAssigned)
-    c.Assert(queue.QueuedTaskUids(), DeepEquals, []string{task.Uid()})
+    c.Assert(queue.NextTaskUid(), DeepEquals, task.Uid())
 
     c.Assert(eventTwo.Kind, Equals, event.AcceptTask)
     c.Assert(eventTwo.Data[0], Equals, teammate.Uid())
@@ -86,7 +86,7 @@ func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
     c.Assert(model.StatusWrappingUp, Equals, teammate.Status())
     c.Assert(teammate.CurrentTask(), IsNil)
     c.Assert(task.Status(), Equals, model.StatusCompleted)
-    c.Assert(queue.QueuedTaskUids(), DeepEquals, []string{})
+    c.Assert(queue.NextTaskUid(), DeepEquals, "")
 
     c.Assert(eventThree.Kind, Equals, event.CompleteTask)
     c.Assert(eventThree.Data[0], Equals, teammate.Uid())

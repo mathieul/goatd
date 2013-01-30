@@ -53,6 +53,13 @@ func (queue *Queue) Update(name string, value interface{}) bool {
     return queue.store.Update(KindQueue, queue.Uid(), name, value)
 }
 
+func (queue Queue) Reload() *Queue {
+    if found := queue.store.Queues.Find(queue.Uid()); found != nil {
+        return found
+    }
+    return nil
+}
+
 func (queue Queue) Status(_ ...sm.Status) sm.Status {
     return StatusNone
 }

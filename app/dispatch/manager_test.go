@@ -34,7 +34,7 @@ func (s *ManagerSuite) TestQueueTask(c *C) {
     c.Assert(s.manager.QueueTask(queue, task), Equals, true)
     c.Assert(task.Status(), Equals, model.StatusQueued)
     c.Assert(task.QueueUid(), Equals, queue.Uid())
-    c.Assert(queue.QueuedTaskUids(), DeepEquals, []string{task.Uid()})
+    c.Assert(queue.NextTaskUid(), DeepEquals, task.Uid())
     c.Assert(s.manager.QueueTask(queue, task), Equals, false)
 }
 
@@ -48,9 +48,9 @@ func (s *ManagerSuite) TestMakeTeammateAvailable(c *C) {
     teammate.SignIn()
 
     c.Assert(s.manager.MakeTeammateAvailable(teammate), Equals, true)
-    // c.Assert(teammate.Status(), Equals, model.StatusOffered)
-    // c.Assert(teammate.CurrentTask(), DeepEquals, task)
-    // c.Assert(task.Status(), Equals, model.StatusOffered)
+    c.Assert(teammate.Status(), Equals, model.StatusOffered)
+    c.Assert(teammate.CurrentTask().Uid(), DeepEquals, task.Uid())
+    c.Assert(task.Reload().Status(), Equals, model.StatusOffered)
 }
 
 // func (s *ManagerSuite) TestAcceptTask(c *C) {

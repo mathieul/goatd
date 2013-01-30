@@ -98,6 +98,13 @@ func (task *Task) Update(name string, value interface{}) bool {
     return task.store.Update(KindTask, task.Uid(), name, value)
 }
 
+func (task Task) Reload() *Task {
+    if found := task.store.Tasks.Find(task.Uid()); found != nil {
+        return found
+    }
+    return nil
+}
+
 func (task Task) Title() string { return task.AttrTitle }
 
 func (task Task) Created() int64 { return task.AttrCreated }

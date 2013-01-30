@@ -13,10 +13,10 @@ func FindTaskForTeammate(store *model.Store, teammate *model.Teammate) *model.Ta
     queuesWithTasks := store.Queues.Select(func (item interface{}) bool {
         queue := item.(*model.Queue)
         // TODO: select only queues with a task waiting
-        return queue.TeamUid() == teamUid && len(queue.QueuedTaskUids()) > 0
+        return queue.TeamUid() == teamUid && queue.NextTaskUid() != ""
     })
     if len(queuesWithTasks) == 0 { return nil }
-    taskUid := queuesWithTasks[0].QueuedTaskUids()[0]
+    taskUid := queuesWithTasks[0].NextTaskUid()
     task := store.Tasks.Find(taskUid)
     return task
 }

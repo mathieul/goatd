@@ -106,6 +106,13 @@ func (teammate *Teammate) Update(name string, value interface{}) bool {
     return teammate.store.Update(KindTeammate, teammate.Uid(), name, value)
 }
 
+func (teammate Teammate) Reload() *Teammate {
+    if found := teammate.store.Teammates.Find(teammate.Uid()); found != nil {
+        return found
+    }
+    return nil
+}
+
 func (teammate Teammate) Name() string { return teammate.AttrName }
 
 func (teammate Teammate) TeamUid() string { return teammate.AttrTeamUid }

@@ -33,7 +33,7 @@ func (s *DistributorSuite) TestFindTaskForTeammateWhenOne(c *C) {
     queue2 := s.store.Queues.Find(queue.Uid())
     c.Assert(task2.Status(), Equals, model.StatusQueued)
     c.Assert(task2.QueueUid(), Equals, queue.Uid())
-    c.Assert(queue2.QueuedTaskUids(), DeepEquals, []string{task.Uid()})
+    c.Assert(queue2.NextTaskUid(), DeepEquals, task.Uid())
 
     found := dispatch.FindTaskForTeammate(s.store, teammate)
     c.Assert(found, Not(IsNil))
