@@ -39,6 +39,18 @@ func (manager Manager) AcceptTask(teammate *model.Teammate, task *model.Task) bo
     return false
 }
 
+func (manager Manager) FinishTask(teammate *model.Teammate, task *model.Task) bool {
+    if task.TeammateUid() != teammate.Uid() ||
+        teammate.CurrentTask() == nil ||
+        teammate.CurrentTask().Uid() != task.Uid() { return false }
+    if queue := manager.store.Queues.Find(task.QueueUid()); queue != nil {
+        queue.DelTask(task.Uid())
+    }
+    if !task.Complete() { return false }
+    teammate.FinishTask(task.Uid())
+    return true
+}
+
 func NewManager(store *model.Store) *Manager {
     return &Manager{store}
 }

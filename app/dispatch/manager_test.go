@@ -68,3 +68,21 @@ func (s *ManagerSuite) TestAcceptTask(c *C) {
     c.Assert(teammate.CurrentTask().Uid(), DeepEquals, task.Uid())
     c.Assert(task.Status(), Equals, model.StatusAssigned)
 }
+
+func (s *ManagerSuite) TestFinishTask(c *C) {
+    queue := s.store.Queues.Create(model.A{"Name": "Daniel Craig"}, s.team)
+    task := s.store.Tasks.Create(model.A{"Title": "Skyfall"}, s.team)
+    teammate := s.store.Teammates.Create(model.A{"Name": "007"}, s.team)
+    s.store.Skills.Create(model.A{"Level": model.LevelHigh}, teammate, queue)
+    teammate.SignIn()
+    s.manager.QueueTask(queue, task)
+    s.manager.MakeTeammateAvailable(teammate)
+    task = task.Reload()
+    s.manager.AcceptTask(teammate, task)
+
+    c.Assert(s.manager.FinishTask(teammate, task), Equals, true)
+    c.Assert(teammate.Status(), Equals, model.StatusWrappingUp)
+    c.Assert(teammate.CurrentTask(), IsNil)
+    c.Assert(task.Status(), Equals, model.StatusCompleted)
+    c.Assert(queue.Reload().NextTaskUid(), DeepEquals, "")
+}

@@ -4,7 +4,6 @@ import (
     . "launchpad.net/gocheck"
     "testing"
     "fmt"
-    "time"
     "goatd/app/event"
     "goatd/app/model"
     "goatd/app/dispatch"
@@ -30,14 +29,12 @@ func (s *AcceptanceSuite) TearDownTest(c *C) {
 }
 
 func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
-    aLittleBit := 100 * time.Millisecond
-
     // provisioning
     team := s.store.Teams.Create(model.A{"Name": "Jones Household"})
     manager := dispatch.NewManager(s.store)
     teammate := s.store.Teammates.Create(model.A{"Name": "Jack"}, team)
     queue := s.store.Queues.Create(model.A{"Name": "Duties"}, team)
-    skill := s.store.Skills.Create(model.A{"TeammateUid": teammate.Uid(),
+    s.store.Skills.Create(model.A{"TeammateUid": teammate.Uid(),
         "QueueUid": queue.Uid()}, team)
 
     // keep track of events received
@@ -61,10 +58,10 @@ func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
     manager.QueueTask(queue, task)
     c.Assert(task.Status(), Equals, model.StatusQueued)
 
-    teammate.MakeAvailable()
-    time.Sleep(aLittleBit)
+    manager.MakeTeammateAvailable(teammate)
+    task = task.Reload()
     c.Assert(teammate.Status(), Equals, model.StatusOffered)
-    c.Assert(teammate.CurrentTask(), DeepEquals, task)
+    c.Assert(teammate.CurrentTask().Uid(), DeepEquals, task.Uid())
     c.Assert(task.Status(), Equals, model.StatusOffered)
 
     c.Assert(eventOne.Kind, Equals, event.OfferTask)
@@ -82,8 +79,7 @@ func (s *AcceptanceSuite) TestAssignsATaskToATeamMate(c *C) {
     c.Assert(eventTwo.Data[1], Equals, task.Uid())
 
     manager.FinishTask(teammate, task)
-    time.Sleep(aLittleBit)
-    c.Assert(model.StatusWrappingUp, Equals, teammate.Status())
+    c.Assert(teammate.Status(), Equals, model.StatusWrappingUp)
     c.Assert(teammate.CurrentTask(), IsNil)
     c.Assert(task.Status(), Equals, model.StatusCompleted)
     c.Assert(queue.NextTaskUid(), DeepEquals, "")
