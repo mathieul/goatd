@@ -6,6 +6,9 @@ Automated Task Distributor implemented in Go
 
   * launchpad.net/gocheck
   * github.com/petar/GoLLRB/llrb
+  * zeromq:
+    - brew install zeromq
+    - go get -tags zmq_3_x github.com/alecthomas/gozmq
 
 ## Architecture ##
 
