@@ -1,5 +1,9 @@
 # Guardfile
 
+guard 'coffeescript', :input => 'app/assets/coffeescripts',
+                      :output => 'public/javascripts/compiled',
+                      :all_on_start => true
+
 guard 'shell', :all_on_start => false do
   runner = ->(m) {
     changed = File.basename(m[0])

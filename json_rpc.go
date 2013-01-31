@@ -1,17 +1,24 @@
 package main
 
 import (
+    "os"
     "net/http"
     "github.com/gorilla/rpc"
     "github.com/gorilla/rpc/json"
 )
 
-func main() {
+func init() {
     s := rpc.NewServer()
     s.RegisterCodec(json.NewCodec(), "application/json")
     s.RegisterService(new(HelloService), "")
-    println("before handle...")
     http.Handle("/rpc", s)
+}
+
+func main() {
+    dir, _ := os.Getwd()
+    dir += "/public/"
+    http.Handle("/public/", http.FileServer(http.Dir(dir)))
+    println("Serving ", dir)
     http.ListenAndServe(":8080", nil)
 }
 
