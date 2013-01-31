@@ -16,9 +16,7 @@ func init() {
 
 func main() {
     dir, _ := os.Getwd()
-    dir += "/public/"
-    http.Handle("/public/", http.FileServer(http.Dir(dir)))
-    println("Serving ", dir)
+    http.Handle("/", http.FileServer(http.Dir(dir + "/public/")))
     http.ListenAndServe(":8080", nil)
 }
 

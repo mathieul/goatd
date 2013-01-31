@@ -1,6 +1,6 @@
 # Guardfile
 
-guard 'coffeescript', :input => 'app/assets/coffeescripts',
+guard 'coffeescript', :input => 'assets/coffeescripts',
                       :output => 'public/javascripts/compiled',
                       :all_on_start => true
 
