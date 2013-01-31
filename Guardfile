@@ -19,3 +19,8 @@ guard 'shell', :all_on_start => false do
   watch /(app)\/(.*?)(_test|).go/, &runner
   watch /(acceptance)\/(.*?)(_test|).go/, &runner
 end
+
+`compass compile`
+Thread.new do
+  `compass watch`
+end

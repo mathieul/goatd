@@ -26,4 +26,7 @@ bin
 
 .rbenv-version
 
+.sass-cache
 public/javascripts/compiled
+public/javascripts/bootstrap-*
+public/stylesheets/*.css
