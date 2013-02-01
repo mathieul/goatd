@@ -7,9 +7,12 @@ import (
     // "goatd/app/event"
     // "goatd/app/model"
     // "goatd/app/dispatch"
+    "goatd/app/web"
 )
 
 func main() {
+    go web.ServeApplication()
+
     context, _ := zmq.NewContext()
     socket, _ := context.NewSocket(zmq.REP)
     socket.Bind("tcp://127.0.0.1:5000")
