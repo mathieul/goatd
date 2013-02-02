@@ -20,12 +20,6 @@ guard 'shell', :all_on_start => false do
   watch /(acceptance)\/(.*?)(_test|).go/, &runner
 end
 
-# `compass compile`
-# Thread.new do
-#   `compass watch --trace`
-# end
-
-
 guard 'compass' do
   watch(%r{^assets/sass/(.*)\.s[ac]ss})
 end
