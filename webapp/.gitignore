@@ -1,0 +1,13 @@
+**/.DS_Store
+nbproject
+manifest.mf
+build.xml
+
+.project
+.settings
+.idea/*
+tmp/*
+public/css/*.css
+public/js/app.js
+test/javascripts/e2e/*.js
+test/javascripts/unit/*.js

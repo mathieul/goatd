@@ -1,8 +1,24 @@
 # Guardfile
 
-guard 'coffeescript', :input => 'assets/coffeescripts',
-                      :output => 'public/javascripts/compiled',
+guard 'compass' do
+  watch(%r{^webapp/app/sass/(.*)\.s[ac]ss})
+end
+
+guard 'coffeescript', :input => 'webapp/app/coffeescripts',
+                      :output => 'webapp/tmp/compiled',
                       :all_on_start => true
+
+%w[e2e unit].each do |dir|
+  guard 'coffeescript', :input => "webapp/test/#{dir}",
+                        :output => "webapp/test/javascripts/#{dir}",
+                        :all_on_start => true
+end
+
+
+guard :jammit, :config_path => 'assets.yml' do
+  watch(%r{^webapp/tmp/compiled/(.*)\.js$})
+  watch('assets.yml')
+end
 
 guard 'shell', :all_on_start => false do
   runner = ->(m) {
@@ -18,8 +34,4 @@ guard 'shell', :all_on_start => false do
   }
   watch /(app)\/(.*?)(_test|).go/, &runner
   watch /(acceptance)\/(.*?)(_test|).go/, &runner
-end
-
-guard 'compass' do
-  watch(%r{^assets/sass/(.*)\.s[ac]ss})
 end
