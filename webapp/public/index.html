@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" ng-app>
+<html lang="en" ng-app="testing">
 <head>
   <meta charset="utf-8">
   <title>My AngularJS App</title>
@@ -7,15 +7,35 @@
 </head>
 <body ng-controller="TestCtrl">
 
-  <h2>Testing</h2>
-  <p>Hello {{30 + 12}}</p>
+  <p><a href="#/">Home</a></p>
+  <p><a href="#/json">JSON test</a></p>
 
-  Filter: <input ng-model="query">
-  <ul>
-    <li ng-repeat="item in items | filter:query">
-        {{item.label}}
-    </li>
-  </ul>
+  <div ng-view></div>
+
+  <script type="text/ng-template" id="home.html">
+    <h2>Home</h2>
+    <p>Hello {{30 + 12}}</p>
+
+    <h2>Data</h2>
+    <p>Filter: <input ng-model="query"></p>
+    <p>
+      Sort:
+      <select ng-model="order">
+          <option value="label">Alphabetic</option>
+          <option value="index">Index</option>
+      </select>
+    </p>
+    <ul>
+      <li ng-repeat="item in items | filter:query | orderBy:order">
+          {{item.label}}
+      </li>
+    </ul>
+  </script>
+
+  <script type="text/ng-template" id="json.html">
+    <h2>JSON xhr</h2>
+    <p>Result is {{json}}</p>
+  </script>
 
   <script src="js/app.js"></script>
 </body>
