@@ -1,8 +1,7 @@
 # javascript_compressor: uglifier
-compress_assets: off             # off for debugging, on for production
+compress_assets: off            # off for debugging, on for production
 gzip_assets: off                # don't generate a gzipped asset file (we rely on nginx + cloudfront)
 package_path: "../webapp/public/js"
-# template_function: _.template
 
 javascripts:
   app:

@@ -15,7 +15,7 @@ func ServeApplication(port int) {
     http.Handle("/rpc", server)
 
     dir, _ := os.Getwd()
-    http.Handle("/", http.FileServer(http.Dir(dir + "/public/")))
+    http.Handle("/", http.FileServer(http.Dir(dir + "/webapp/public/")))
     address := fmt.Sprintf(":%d", port)
     http.ListenAndServe(address, nil)
 }
