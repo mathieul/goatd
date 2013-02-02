@@ -5,10 +5,17 @@
   <title>My AngularJS App</title>
   <link rel="stylesheet" href="css/app.css"/>
 </head>
-<body>
+<body ng-controller="TestCtrl">
 
   <h2>Testing</h2>
   <p>Hello {{30 + 12}}</p>
+
+  Filter: <input ng-model="query">
+  <ul>
+    <li ng-repeat="item in items | filter:query">
+        {{item.label}}
+    </li>
+  </ul>
 
   <script src="js/app.js"></script>
 </body>
