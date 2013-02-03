@@ -1,11 +1,12 @@
 # Application
+
+window.app = {}
+
 angular
-  .module("testing", [])
+  .module("app.testing", [])
   .config(["$routeProvider", ($routeProvider) ->
     $routeProvider
-      .when('/', {templateUrl: 'home.html'})
-      .when('/json', {templateUrl: 'json.html'})
+      .when('/', {templateUrl: 'home.html', controller: 'app.TestCtrl'})
+      .when('/json', {templateUrl: 'json.html', controller: 'app.JsonCtrl'})
       .otherwise(redirectTo: '/')
   ])
-
-# angular.bootstrap document, ["testing"]

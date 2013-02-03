@@ -1,6 +1,6 @@
 # Controllers
 
-window.TestCtrl = ($scope, $http) ->
+app.TestCtrl = ($scope) ->
   $scope.items = [
     label: "allo"
     index: 0
@@ -20,6 +20,9 @@ window.TestCtrl = ($scope, $http) ->
 
   $scope.order = "label"
 
+app.TestCtrl.$inject = ['$scope']
+
+app.JsonCtrl = ($scope, $http) ->
   $http
     .post("/rpc",
       method: "Test.Run"
@@ -32,4 +35,4 @@ window.TestCtrl = ($scope, $http) ->
     .success (data) ->
       $scope.json = JSON.stringify(data.result)
 
-TestCtrl.$inject = ['$scope', '$http']
+app.JsonCtrl.$inject = ['$scope', '$http']
