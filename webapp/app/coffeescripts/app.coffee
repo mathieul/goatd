@@ -6,6 +6,6 @@ angular
   .module("app.goatd", [])
   .config(["$routeProvider", ($routeProvider) ->
     $routeProvider
-      .when('/', {templateUrl: 'home.html', controller: 'app.HomeCtrl'})
+      .when('/', {templateUrl: 'overview.html', controller: 'app.OverviewCtrl'})
       .otherwise(redirectTo: '/')
   ])

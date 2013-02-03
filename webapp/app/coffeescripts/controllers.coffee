@@ -2,7 +2,7 @@
 
 app.NavCtrl = ($scope, $location) ->
   $scope.navs = [
-    label: "Home"
+    label: "Overview"
     path: "/"
   ,
     label: "TODO"
@@ -15,6 +15,14 @@ app.NavCtrl = ($scope, $location) ->
 app.NavCtrl.$inject = ["$scope", "$location"]
 
 
-app.HomeCtrl = ($scope) ->
+app.OverviewCtrl = ($scope) ->
+  $scope.resources = [
+    {name: "Team", count: 1}
+    {name: "Teammate", count: 5}
+    {name: "Queue", count: 3}
+    {name: "Task", count: 42}
+  ]
 
-app.HomeCtrl.$inject = ['$scope']
+  $scope.message = (msg) -> alert(msg)
+
+app.OverviewCtrl.$inject = ['$scope']
