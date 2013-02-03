@@ -2,15 +2,43 @@
 <html lang="en" ng-app="app.testing">
 <head>
   <meta charset="utf-8">
-  <title>My AngularJS App</title>
+  <title>Go ATD</title>
   <link rel="stylesheet" href="css/app.css"/>
 </head>
 <body>
 
-  <p><a href="#/">Home</a></p>
-  <p><a href="#/json">JSON test</a></p>
+  <header>
+    <div class="container">
+      <h1>Go ATD</h1>
+      <p class="lead">Automatic Transaction Distributor in Go.</p>
+    </div>
+  </header>
 
-  <div ng-view></div>
+  <div class="container">
+
+    <div class="row">
+      <div class="span3" ng-controller="app.NavCtrl">
+        <h2>Location</h2>
+        <p>Location is: {{$location.path()}}</p>
+        <hr />
+        <ul class="nav nav-list">
+          <li><a href="#/">Home</a></li>
+          <li><a href="#/json">JSON</a></li>
+        </ul>
+      </div>
+
+      <div class="span9">
+        <div ng-view></div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="container">
+      <p>Go ATD &copy;</p>
+    </div>
+  </footer>
 
   <script type="text/ng-template" id="home.html">
     <h2>Home</h2>
@@ -35,7 +63,27 @@
   <script type="text/ng-template" id="json.html">
     <h2>JSON xhr</h2>
     <p>Result is {{json}}</p>
+    <h2>Clicks</h2>
+    <p>warziz = [{{warziz}}]</p>
+    <button ng-click="warziz='hello there'">English</button>
+    <button ng-click="warziz='bonjour vous'">Français</button>
+    <button ng-click="warziz=null">RESET</button>
+    <h2>Include</h2>
+    <button ng-click="tpl='allo.html'" ng-init="allo = ''" ng-mousedown="allo = 'mouse down'" ng-mouseup="allo = 'mouse up'">Allo</button>
+    <button ng-click="tpl='laterre.html'">La terre</button>
+    <div ng-include src="tpl"></div>
+    <p>Button Allo: {{allo}}</p>
+
   </script>
+
+  <script type="text/ng-template" id="allo.html">
+    <h3>Allo???</h3>
+  </script>
+
+  <script type="text/ng-template" id="laterre.html">
+    <h3>La Terre???</h3>
+  </script>
+
 
   <script src="js/app.js"></script>
 </body>

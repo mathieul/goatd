@@ -1,5 +1,11 @@
 # Controllers
 
+app.NavCtrl = ($scope, $location) ->
+  $scope.$location = $location
+
+app.NavCtrl.$inject = ["$scope", "$location"]
+
+
 app.TestCtrl = ($scope) ->
   $scope.items = [
     label: "allo"
@@ -21,6 +27,7 @@ app.TestCtrl = ($scope) ->
   $scope.order = "label"
 
 app.TestCtrl.$inject = ['$scope']
+
 
 app.JsonCtrl = ($scope, $http) ->
   $http
