@@ -15,14 +15,19 @@ app.NavCtrl = ($scope, $location) ->
 app.NavCtrl.$inject = ["$scope", "$location"]
 
 
-app.OverviewCtrl = ($scope) ->
-  $scope.resources = [
-    {name: "Team", count: 1}
-    {name: "Teammate", count: 5}
-    {name: "Queue", count: 3}
-    {name: "Task", count: 42}
-  ]
+app.OverviewCtrl = ($scope, $http) ->
+  $http
+    .post("rpc",
+      method: "Overview.List"
+      params: []
+      id:     (new Date).getTime()
+    ,
+      headers:
+        "Content-Type": "application/json"
+    )
+    .success (data) ->
+      $scope.resources = data.result.Rows
 
   $scope.message = (msg) -> alert(msg)
 
-app.OverviewCtrl.$inject = ['$scope']
+app.OverviewCtrl.$inject = ['$scope', '$http']

@@ -11,7 +11,7 @@ import (
 func ServeApplication(port int) {
     server := rpc.NewServer()
     server.RegisterCodec(json.NewCodec(), "application/json")
-    server.RegisterService(new(TestService), "Test")
+    server.RegisterService(new(OverviewService), "Overview")
     http.Handle("/rpc", server)
 
     dir, _ := os.Getwd()
