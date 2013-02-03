@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" ng-app="app.testing">
+<html lang="en" ng-app="app.goatd">
 <head>
   <meta charset="utf-8">
   <title>Go ATD</title>
@@ -14,16 +14,16 @@
     </div>
   </header>
 
-  <div class="container">
+  <div class="container" id="root">
 
     <div class="row">
       <div class="span3" ng-controller="app.NavCtrl">
-        <p>Current path: {{$location.path()}}</p>
         <div class="well">
           <ul class="nav nav-list">
             <li class="nav-header">Navigation</li>
-            <li ng-class="activeIfCurrent('/')"><a href="#/">Home</a></li>
-            <li ng-class="activeIfCurrent('/json')"><a href="#/json">JSON</a></li>
+            <li ng-repeat="nav in navs" ng-class="activeIfCurrent(nav.path)">
+              <a href="#{{nav.path}}">{{nav.label}}</a>
+            </li>
           </ul>
         </div>
       </div>
@@ -45,53 +45,8 @@
 
   <script type="text/ng-template" id="home.html">
     <h2>Home</h2>
-    <p>Hello {{30 + 12}}</p>
-
-    <h2>Data</h2>
-    <p>Filter: <input ng-model="query"></p>
-    <p>
-      Sort:
-      <select ng-model="order">
-          <option value="label">Alphabetic</option>
-          <option value="index">Index</option>
-      </select>
-    </p>
-    <ul>
-      <li ng-repeat="item in items | filter:query | orderBy:order">
-          {{item.label}}
-      </li>
-    </ul>
+    <p>TODO</p>
   </script>
-
-  <script type="text/ng-template" id="json.html">
-    <h2>JSON xhr</h2>
-    <p>Result is {{json}}</p>
-    <h2>Clicks</h2>
-    <p>warziz = [{{warziz}}]</p>
-    <button ng-click="warziz='hello there'">English</button>
-    <button ng-click="warziz='bonjour vous'">Français</button>
-    <button ng-click="warziz=null">RESET</button>
-    <h2>Include</h2>
-    <button ng-click="tpl='allo.html'"
-            ng-init="allo = ''"
-            ng-mouseenter="allo = 'mouse enters'"
-            ng-mouseleave="allo = 'mouse leaves'"
-            ng-mousedown="allo = 'mouse click down'"
-            ng-mouseup="allo = 'mouse click up'">Allo</button>
-    <button ng-click="tpl='laterre.html'">La terre</button>
-    <div ng-include src="tpl" ng-init="tpl = 'allo.html'"></div>
-    <p>Button Allo: {{allo}}</p>
-
-  </script>
-
-  <script type="text/ng-template" id="allo.html">
-    <h3>Allo???</h3>
-  </script>
-
-  <script type="text/ng-template" id="laterre.html">
-    <h3>La Terre???</h3>
-  </script>
-
 
   <script src="js/app.js"></script>
 </body>

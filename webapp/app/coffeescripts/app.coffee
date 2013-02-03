@@ -3,10 +3,9 @@
 window.app = {}
 
 angular
-  .module("app.testing", [])
+  .module("app.goatd", [])
   .config(["$routeProvider", ($routeProvider) ->
     $routeProvider
-      .when('/', {templateUrl: 'home.html', controller: 'app.TestCtrl'})
-      .when('/json', {templateUrl: 'json.html', controller: 'app.JsonCtrl'})
+      .when('/', {templateUrl: 'home.html', controller: 'app.HomeCtrl'})
       .otherwise(redirectTo: '/')
   ])
