@@ -3,6 +3,9 @@
 app.NavCtrl = ($scope, $location) ->
   $scope.$location = $location
 
+  $scope.activeIfCurrent = (path) ->
+    if $location.path() == path then "active" else ""
+
 app.NavCtrl.$inject = ["$scope", "$location"]
 
 

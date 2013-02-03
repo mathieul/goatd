@@ -18,13 +18,14 @@
 
     <div class="row">
       <div class="span3" ng-controller="app.NavCtrl">
-        <h2>Location</h2>
-        <p>Location is: {{$location.path()}}</p>
-        <hr />
-        <ul class="nav nav-list">
-          <li><a href="#/">Home</a></li>
-          <li><a href="#/json">JSON</a></li>
-        </ul>
+        <p>Current path: {{$location.path()}}</p>
+        <div class="well">
+          <ul class="nav nav-list">
+            <li class="nav-header">Navigation</li>
+            <li ng-class="activeIfCurrent('/')"><a href="#/">Home</a></li>
+            <li ng-class="activeIfCurrent('/json')"><a href="#/json">JSON</a></li>
+          </ul>
+        </div>
       </div>
 
       <div class="span9">
@@ -69,9 +70,14 @@
     <button ng-click="warziz='bonjour vous'">Français</button>
     <button ng-click="warziz=null">RESET</button>
     <h2>Include</h2>
-    <button ng-click="tpl='allo.html'" ng-init="allo = ''" ng-mousedown="allo = 'mouse down'" ng-mouseup="allo = 'mouse up'">Allo</button>
+    <button ng-click="tpl='allo.html'"
+            ng-init="allo = ''"
+            ng-mouseenter="allo = 'mouse enters'"
+            ng-mouseleave="allo = 'mouse leaves'"
+            ng-mousedown="allo = 'mouse click down'"
+            ng-mouseup="allo = 'mouse click up'">Allo</button>
     <button ng-click="tpl='laterre.html'">La terre</button>
-    <div ng-include src="tpl"></div>
+    <div ng-include src="tpl" ng-init="tpl = 'allo.html'"></div>
     <p>Button Allo: {{allo}}</p>
 
   </script>
