@@ -1,3 +1,11 @@
+GIT
+  remote: git://github.com/guard/guard-compass.git
+  revision: bfc95d5b134bb06709d2951681ce453a9b3299e0
+  specs:
+    guard-compass (0.0.6)
+      compass (>= 0.10.5)
+      guard (>= 0.2.1)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -28,9 +36,6 @@ GEM
     guard-coffeescript (1.2.1)
       coffee-script (>= 2.2.0)
       guard (>= 1.1.0)
-    guard-compass (0.0.6)
-      compass (>= 0.10.5)
-      guard (>= 0.2.1)
     guard-jammit (1.0.1)
       guard (>= 1.1.0)
       jammit
@@ -62,7 +67,7 @@ DEPENDENCIES
   compass (~> 0.12.2)
   guard (~> 1.5.4)
   guard-coffeescript (~> 1.2.1)
-  guard-compass (~> 0.0.6)
+  guard-compass!
   guard-jammit (~> 1.0.1)
   guard-shell (~> 0.5.1)
   rb-fsevent (~> 0.9.1)

@@ -1,8 +1,10 @@
 # Guardfile
 
-guard 'compass' do
+guard 'compass', :compile_on_start => true do
   watch(%r{^webapp/app/sass/(.*)\.s[ac]ss})
 end
+
+`compass compile`
 
 guard 'coffeescript', :input => 'webapp/app/coffeescripts',
                       :output => 'webapp/tmp/compiled',
