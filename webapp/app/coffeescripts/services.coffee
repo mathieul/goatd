@@ -1,13 +1,12 @@
 # Services
 
-angular.module('app.goatdServices', ['ng'])
-  .factory('Rpc', ['$http'], ($http) ->
-    RpcFactory = (service, actions...) ->
-      Rpc = -> @service = service
-
+angular.module("app.goatdServices", ["ng"])
+  .factory("Rpc", ["$http", ($http) ->
+    serviceFactory = (service, actions...) ->
+      ServiceConstructor = -> @service = service
       for action in actions
         do (action) ->
-          Rpc.prototype[action] = (params, success = null) ->
+          ServiceConstructor.prototype[action] = (params, success = null) ->
             if success is null
               [params, success] = [[], params]
             else
@@ -24,7 +23,6 @@ angular.module('app.goatdServices', ['ng'])
               )
               .success (data) ->
                 success(data.result)
-      Rpc
-
-    RpcFactory
-  )
+      new ServiceConstructor
+    serviceFactory
+  ])

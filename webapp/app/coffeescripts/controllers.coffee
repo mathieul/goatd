@@ -16,9 +16,9 @@ app.NavCtrl.$inject = ["$scope", "$location"]
 
 
 app.OverviewCtrl = ($scope, Rpc) ->
-  overview = Rpc('Overview', 'List')
-  overview (result) ->
+  overview = Rpc("Overview", "List")
+  overview.List (result) ->
     $scope.resources = result.Rows
   $scope.message = (msg) -> alert(msg)
 
-app.OverviewCtrl.$inject = ['$scope', 'Rpc']
+app.OverviewCtrl.$inject = ["$scope", "Rpc"]
