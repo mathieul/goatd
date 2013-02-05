@@ -66,6 +66,14 @@ func (collection Collection) Select(tester func(interface{}) bool) (result []Mod
     return result
 }
 
+func (collection Collection) Each(iterator func(interface{})) {
+    for _, item := range collection.Items { iterator(item) }
+}
+
+func (collection Collection) Count() int {
+    return len(collection.Items)
+}
+
 func (collection *Collection) Destroy(uid string) Model {
     for index, item := range collection.Items {
         if item.Uid() == uid {
@@ -74,4 +82,8 @@ func (collection *Collection) Destroy(uid string) Model {
         }
     }
     return nil
+}
+
+func (collection *Collection) DestroyAll() {
+    collection.Items = make([]Model, 0)
 }

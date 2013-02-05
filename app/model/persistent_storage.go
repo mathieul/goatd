@@ -66,6 +66,8 @@ func (storage *persistentStorage) processRequest(request Request, collection *Co
         if model := collection.Destroy(uid); model != nil {
             response = model.Copy()
         }
+    case OpDestroyAll:
+        collection.DestroyAll()
     case OpSetStatus:
         uid := request.args[0].(string)
         oldStatus, newStatus := request.args[1].(sm.Status), request.args[2].(sm.Status)
@@ -90,6 +92,11 @@ func (storage *persistentStorage) processRequest(request Request, collection *Co
         selector := request.args[0].(func (interface{}) bool)
         models := collection.Select(selector)
         response = copyModels(models)
+    case OpEach:
+        iterator := request.args[0].(func (interface{}))
+        collection.Each(iterator)
+    case OpCount:
+        response = collection.Count()
     case OpAddTask, OpDelTask:
         uid, taskUid := request.args[0].(string), request.args[1].(string)
         model := collection.Find(uid)

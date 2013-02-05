@@ -34,10 +34,13 @@ const (
     OpCreate
     OpUpdate
     OpDestroy
+    OpDestroyAll
     OpSetStatus
     OpFind
     OpFindAll
     OpSelect
+    OpEach
+    OpCount
     OpAddTask
     OpDelTask
 )
@@ -49,10 +52,13 @@ func (operation Operation) String() string {
     case OpCreate:      value = "Create"
     case OpUpdate:      value = "Update"
     case OpDestroy:     value = "Destroy"
+    case OpDestroyAll:  value = "Destroy all"
     case OpSetStatus:   value = "Set status"
     case OpFind:        value = "Find"
     case OpFindAll:     value = "Find all"
     case OpSelect:      value = "Select"
+    case OpEach:        value = "Each"
+    case OpCount:       value = "Count"
     case OpAddTask:     value = "Add task"
     case OpDelTask:     value = "Del task"
     default:            value = fmt.Sprintf("Unknown(%d)", operation)
@@ -150,6 +156,11 @@ func (store *Store) Destroy(kind Kind, uid string) Model {
     return nil
 }
 
+func (store *Store) DestroyAll(kind Kind) {
+    persisted.Request <- Request{kind, OpDestroyAll, []interface{}{}}
+    <- persisted.Response
+}
+
 func (store *Store) SetStatus(kind Kind, uid string, oldStatus, newStatus sm.Status) bool {
     args := []interface{}{uid, oldStatus, newStatus}
     persisted.Request <- Request{kind, OpSetStatus, args}
@@ -183,6 +194,18 @@ func (store *Store) Select(kind Kind, tester func(interface{}) bool) []Model {
         models = append(models, model)
     }
     return models
+}
+
+func (store *Store) Each(kind Kind, iterator func(interface{})) {
+    args := []interface{}{iterator}
+    persisted.Request <- Request{kind, OpEach, args}
+    <- persisted.Response
+}
+
+func (store *Store) Count(kind Kind) int {
+    persisted.Request <- Request{kind, OpCount, []interface{}{}}
+    value := <- persisted.Response
+    return value.(int)
 }
 
 func (store *Store) AddTask(uid, taskUid string) *Queue {
