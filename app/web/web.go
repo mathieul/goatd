@@ -8,6 +8,8 @@ import (
     "github.com/gorilla/rpc/json"
 )
 
+type EmptyStruct struct {}
+
 func ServeApplication(port int) {
     server := rpc.NewServer()
     server.RegisterCodec(json.NewCodec(), "application/json")
