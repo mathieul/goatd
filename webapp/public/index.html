@@ -50,14 +50,35 @@
         <tr>
           <th>Resource</th>
           <th>Instances</th>
-          <th>&nbsp;</th>
         </tr>
       </thead>
       <tbody>
         <tr ng-repeat="resource in resources">
           <td>{{resource.Name}}</td>
           <td>{{resource.Count}}</td>
-          <td><a href ng-click="message('TODO: edit ' + resource.Name)">Edit</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </script>
+
+  <script type="text/ng-template" id="teams.html">
+    <h3>Team</h3>
+    <table class="table table-striped table-hover">
+      <thead>
+        <tr>
+          <th>Uid</th>
+          <th>Name</th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-show="noTeams">
+          <td colspan="3">No teams yet.</td>
+        </tr>
+        <tr ng-repeat="team in teams">
+          <td>{{team.Uid}}</td>
+          <td>{{team.Name}}</td>
+          <td><a href ng-click="message('TODO: edit ' + team.Name)">Edit</a></td>
         </tr>
       </tbody>
     </table>
