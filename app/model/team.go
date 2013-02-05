@@ -93,3 +93,15 @@ func (proxy *TeamStoreProxy) Select(tester func(interface{}) bool) []*Team {
     values := proxy.store.Select(KindTeam, tester)
     return toTeamSlice(values)
 }
+
+func (proxy *TeamStoreProxy) Each(iterator func(interface{})) {
+    proxy.store.Each(KindTeam, iterator)
+}
+
+func (proxy *TeamStoreProxy) Count() int {
+    return proxy.store.Count(KindTeam)
+}
+
+func (proxy *TeamStoreProxy) DestroyAll() {
+    proxy.store.DestroyAll(KindTeam)
+}

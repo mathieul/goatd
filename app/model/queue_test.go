@@ -77,6 +77,22 @@ func (s *QueueSuite) TestSelectQueues(c *C) {
     c.Assert(queueNames(selectedQueues), DeepEquals, []string{"Tyrion Lannister", "Jamie Lannister"})
 }
 
+func (s *QueueSuite) TestCountAndEachQueues(c *C) {
+    s.store.Queues.DestroyAll()
+    c.Assert(s.store.Queues.Count(), Equals, 0)
+
+    s.store.Queues.Create(model.A{"Name": "One"})
+    s.store.Queues.Create(model.A{"Name": "Two"})
+
+    c.Assert(s.store.Queues.Count(), Equals, 2)
+    names := make([]string, 0)
+    s.store.Queues.Each(func (item interface{}) {
+        queue := item.(*model.Queue)
+        names = append(names, queue.Name())
+    })
+    c.Assert(names, DeepEquals, []string{"One", "Two"})
+}
+
 func (s *QueueSuite) TestPersistAddTask(c *C) {
     queue := model.NewQueue(model.A{})
     task1 := model.NewTask(model.A{"Title": "One", "Created": int64(41)})

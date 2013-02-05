@@ -194,3 +194,15 @@ func (proxy *TaskStoreProxy) Select(tester func(interface{}) bool) []*Task {
     values := proxy.store.Select(KindTask, tester)
     return toTaskSlice(values)
 }
+
+func (proxy *TaskStoreProxy) Each(iterator func(interface{})) {
+    proxy.store.Each(KindTask, iterator)
+}
+
+func (proxy *TaskStoreProxy) Count() int {
+    return proxy.store.Count(KindTask)
+}
+
+func (proxy *TaskStoreProxy) DestroyAll() {
+    proxy.store.DestroyAll(KindTask)
+}

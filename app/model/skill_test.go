@@ -83,3 +83,19 @@ func (s *SkillSuite) TestSelectSkills(c *C) {
     })
     c.Assert(skillUids(selectedSkills), DeepEquals, []string{s1.Uid(), s3.Uid()})
 }
+
+func (s *SkillSuite) TestCountAndEachSkills(c *C) {
+    s.store.Skills.DestroyAll()
+    c.Assert(s.store.Skills.Count(), Equals, 0)
+
+    s.store.Skills.Create(model.A{"QueueUid": "queue123", "TeammateUid": "teammate456"}, s.owner)
+    s.store.Skills.Create(model.A{"QueueUid": "queueabc", "TeammateUid": "teammate789"}, s.owner)
+
+    c.Assert(s.store.Skills.Count(), Equals, 2)
+    queueUids := make([]string, 0)
+    s.store.Skills.Each(func (item interface{}) {
+        skill := item.(*model.Skill)
+        queueUids = append(queueUids, skill.QueueUid())
+    })
+    c.Assert(queueUids, DeepEquals, []string{"queue123", "queueabc"})
+}

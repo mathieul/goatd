@@ -124,3 +124,15 @@ func (proxy *SkillStoreProxy) Select(tester func(interface{}) bool) []*Skill {
     values := proxy.store.Select(KindSkill, tester)
     return toSkillSlice(values)
 }
+
+func (proxy *SkillStoreProxy) Each(iterator func(interface{})) {
+    proxy.store.Each(KindSkill, iterator)
+}
+
+func (proxy *SkillStoreProxy) Count() int {
+    return proxy.store.Count(KindSkill)
+}
+
+func (proxy *SkillStoreProxy) DestroyAll() {
+    proxy.store.DestroyAll(KindSkill)
+}

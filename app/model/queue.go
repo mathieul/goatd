@@ -164,3 +164,15 @@ func (proxy *QueueStoreProxy) Select(tester func(interface{}) bool) []*Queue {
     values := proxy.store.Select(KindQueue, tester)
     return toQueueSlice(values)
 }
+
+func (proxy *QueueStoreProxy) Each(iterator func(interface{})) {
+    proxy.store.Each(KindQueue, iterator)
+}
+
+func (proxy *QueueStoreProxy) Count() int {
+    return proxy.store.Count(KindQueue)
+}
+
+func (proxy *QueueStoreProxy) DestroyAll() {
+    proxy.store.DestroyAll(KindQueue)
+}

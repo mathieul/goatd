@@ -96,6 +96,22 @@ func (s *TeammateSuite) TestSelectTeammates(c *C) {
     c.Assert(teammateNames(selectedTeammates), DeepEquals, []string{"Tyrion Lannister", "Jamie Lannister"})
 }
 
+func (s *TeammateSuite) TestCountAndEachTeams(c *C) {
+    s.store.Teammates.DestroyAll()
+    c.Assert(s.store.Teammates.Count(), Equals, 0)
+
+    s.store.Teammates.Create(model.A{"Name": "One"}, s.owner)
+    s.store.Teammates.Create(model.A{"Name": "Two"}, s.owner)
+
+    c.Assert(s.store.Teammates.Count(), Equals, 2)
+    names := make([]string, 0)
+    s.store.Teammates.Each(func (item interface{}) {
+        teammate := item.(*model.Teammate)
+        names = append(names, teammate.Name())
+    })
+    c.Assert(names, DeepEquals, []string{"One", "Two"})
+}
+
 func (s *TeammateSuite) TestSignInSignOutTeammate(c *C) {
     c.Assert(s.teammate.Status(), Equals, model.StatusSignedOut)
     c.Assert(s.teammate.SignIn(), Equals, true)

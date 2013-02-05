@@ -73,3 +73,19 @@ func (s *TeamSuite) TestSelectTeams(c *C) {
         DeepEquals,
         []*model.Team{tyrion, jamie})
 }
+
+func (s *TeamSuite) TestCountAndEachTeams(c *C) {
+    s.store.Teams.DestroyAll()
+    c.Assert(s.store.Teams.Count(), Equals, 0)
+
+    s.store.Teams.Create(model.A{"Name": "One"})
+    s.store.Teams.Create(model.A{"Name": "Two"})
+
+    c.Assert(s.store.Teams.Count(), Equals, 2)
+    names := make([]string, 0)
+    s.store.Teams.Each(func (item interface{}) {
+        team := item.(*model.Team)
+        names = append(names, team.Name())
+    })
+    c.Assert(names, DeepEquals, []string{"One", "Two"})
+}

@@ -78,6 +78,22 @@ func (s *TaskSuite) TestSelectTasks(c *C) {
     c.Assert(taskTitles(selectedTasks), DeepEquals, []string{"Tyrion Lannister", "Jamie Lannister"})
 }
 
+func (s *TaskSuite) TestCountAndEachTeams(c *C) {
+    s.store.Tasks.DestroyAll()
+    c.Assert(s.store.Tasks.Count(), Equals, 0)
+
+    s.store.Tasks.Create(model.A{"Title": "One"})
+    s.store.Tasks.Create(model.A{"Title": "Two"})
+
+    c.Assert(s.store.Tasks.Count(), Equals, 2)
+    titles := make([]string, 0)
+    s.store.Tasks.Each(func (item interface{}) {
+        task := item.(*model.Task)
+        titles = append(titles, task.Title())
+    })
+    c.Assert(titles, DeepEquals, []string{"One", "Two"})
+}
+
 func (s *TaskSuite) TestTaskWeight(c *C) {
     task := s.store.Tasks.Create(model.A{"Title": "do something"}, s.owner)
     now := time.Now().Unix()
