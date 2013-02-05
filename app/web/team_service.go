@@ -20,8 +20,6 @@ type TeamListReply struct {
     Rows []TeamAttributes
 }
 
-type TeamListArgs struct {}
-
 // curl -v http://localhost:8080/rpc -d '{"method":"Team.List", "params": [], "id": 42}' -H "Content-Type: application/json"
 func (service *TeamService) List(r *http.Request, args *EmptyStruct, reply *TeamListReply) error {
     store := atd.GetInstance().Store()
@@ -48,9 +46,7 @@ type TeamCreateArgs struct {
 func (service *TeamService) Create(r *http.Request, args *TeamCreateArgs, reply *TeamAttributes) error {
     store := atd.GetInstance().Store()
     team  := store.Teams.Create(model.A{"Name": args.Name})
-    reply = new(TeamAttributes)
     reply.Uid = team.Uid()
     reply.Name = team.Name()
-    // reply = &TeamAttributes{team.Uid(), team.Name()}
     return nil
 }
