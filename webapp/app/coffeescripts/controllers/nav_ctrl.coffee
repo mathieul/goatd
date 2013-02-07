@@ -1,13 +1,16 @@
-app.NavCtrl = ($scope, $location) ->
-  $scope.navs = [
-    label: "Overview"
-    path: "/"
-  ,
-    label: "Teams"
-    path: "/teams"
-  ]
+angular.module("goatd").controller("NavCtrl", [
+  "$scope", "$location",
+  ($scope, $location) ->
 
-  $scope.activeIfCurrent = (path) ->
-    if $location.path() == path then "active" else ""
+    $scope.navs = [
+      label: "Overview"
+      path: "/"
+    ,
+      label: "Teams"
+      path: "/teams"
+    ]
 
-app.NavCtrl.$inject = ["$scope", "$location"]
+    $scope.activeIfCurrent = (path) ->
+      if $location.path() == path then "active" else ""
+
+  ])

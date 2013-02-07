@@ -1,6 +1,9 @@
-app.OverviewCtrl = ($scope, Rpc) ->
-  overview = Rpc("Overview", "List")
-  overview.List (result) ->
-    $scope.resources = result.Rows
+angular.module("goatd").controller("OverviewCtrl", [
+  "$scope", "Rpc",
+  ($scope, Rpc) ->
 
-app.OverviewCtrl.$inject = ["$scope", "Rpc"]
+    overview = Rpc("Overview", "List")
+    overview.List (result) ->
+      $scope.resources = result.Rows
+
+  ])

@@ -1,17 +1,20 @@
+# Modules
+
+angular.module("goatd", ["goatdServices"])
+angular.module("goatdServices", ["ng"])
+
 # Application
 
-window.app = {}
-
-angular.module("app.goatd", ["app.goatdServices"])
+angular.module("goatd")
   .config(["$routeProvider", ($routeProvider) ->
     $routeProvider
       .when("/",
         templateUrl: "overview.html"
-        controller: "app.OverviewCtrl"
+        controller: "OverviewCtrl"
       )
       .when("/teams",
         templateUrl: "teams.html"
-        controller: "app.TeamCtrl"
+        controller: "TeamCtrl"
       )
       .otherwise(redirectTo: "/")
   ])

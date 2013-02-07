@@ -1,7 +1,8 @@
 # Services
+angular.module("goatdServices").factory("Rpc", [
+  "$http",
+  ($http) ->
 
-angular.module("app.goatdServices", ["ng"])
-  .factory("Rpc", ["$http", ($http) ->
     serviceFactory = (service, actions...) ->
       ServiceConstructor = -> @service = service
       for action in actions
@@ -25,4 +26,5 @@ angular.module("app.goatdServices", ["ng"])
                 success(data.result)
       new ServiceConstructor
     serviceFactory
+
   ])
