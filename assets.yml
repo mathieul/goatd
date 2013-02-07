@@ -9,5 +9,3 @@ javascripts:
     - webapp/tmp/compiled/app.js
     - webapp/tmp/compiled/services.js
     - webapp/tmp/compiled/controllers/*.js
-    - webapp/tmp/compiled/filters.js
-    - webapp/tmp/compiled/directives.js
