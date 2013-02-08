@@ -12,3 +12,5 @@ group :assets do
   gem 'compass-rails',   '1.0.3'
   gem 'bootstrap-sass',  '2.2.2.0'
 end
+
+gem 'ffi-rzmq'
