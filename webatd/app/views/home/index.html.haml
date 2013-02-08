@@ -1,0 +1,36 @@
+!!!
+%html(ng-app="atd")
+
+  %head
+    %title ATD
+    %meta(http-equiv="Content-Type" content="text/html; charset=utf-8")
+    = stylesheet_link_tag 'application', media: 'all'
+    = javascript_include_tag 'application'
+
+  %body
+    #root
+      %header.jumbotron
+        .container-fluid
+          %h1 Go ATD
+          %p.lead Automatic Transaction Distributor in Go.
+
+      .container-fluid
+        .row-fluid
+          .span3(ng-controller="NavCtrl")
+            .well
+              %ul.nav.nav-list
+                %li.nav-header Navigation
+                %li(ng-repeat="nav in navs" ng-class="activeIfCurrent(nav.path)")
+                  %a(href="\#{{nav.path}}") {{nav.label}}
+
+          .span9
+            %div(ng-view)
+
+      #root_footer
+
+    %footer#footer
+      .container-fluid
+        %p Go ATD &copy;
+
+    = render "overview"
+    = render "teams"

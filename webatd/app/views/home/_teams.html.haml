@@ -1,0 +1,16 @@
+%script(type="text/ng-template" id="teams.html")
+  %h3 Team
+  %table.table.table-striped.table-hover
+    %thead
+      %tr
+        %th Uid
+        %th Name
+        %th &nbsp;
+    %tbody
+      %tr(ng-show="noTeams")
+        %td(colspan="3")No teams yet.
+      %tr(ng-repeat="team in teams")
+        %td {{team.Uid}}
+        %td {{team.Name}}
+        %td
+          %a(href ng-click="message('TODO: edit ' + team.Name)")Edit

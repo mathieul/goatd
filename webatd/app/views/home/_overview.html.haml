@@ -1,0 +1,11 @@
+%script(type="text/ng-template" id="overview.html")
+  %h3 Overview
+  %table.table.table-striped.table-hover
+    %thead
+      %tr
+        %th Resource
+        %th Instances
+    %tbody
+      %tr(ng-repeat="resource in resources")
+        %td {{resource.Name}}
+        %td {{resource.Count}}
