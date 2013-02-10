@@ -15,7 +15,10 @@ const (
 
 func ServeRequests(port int) {
     launchServices()
+    runBroker(port)
+}
 
+func runBroker(port int) {
     clientAddress := fmt.Sprintf(addressPrefix, port)
     context, _ := zmq.NewContext()
     defer context.Close()
@@ -42,25 +45,25 @@ func ServeRequests(port int) {
         _, _ = zmq.Poll(toPoll, noTimeOut)
 
         switch {
-            case toPoll[0].REvents & zmq.POLLIN != 0:
-                messages, _ := toPoll[0].Socket.RecvMultipart(0)
-                serviceName := string(messages[len(messages) - 1])
-                println("Request for service:", serviceName)
-                messages = messages[:len(messages) - 1]
-                switch serviceName {
-                case "overview":
-                    overviewSocket.SendMultipart(messages, 0)
-                case "teams":
-                    teamsSocket.SendMultipart(messages, 0)
-                }
-                
-            case toPoll[1].REvents & zmq.POLLIN != 0:
-                messages, _ := toPoll[1].Socket.RecvMultipart(0)
-                frontend.SendMultipart(messages, 0)
+        case toPoll[0].REvents & zmq.POLLIN != 0:
+            messages, _ := toPoll[0].Socket.RecvMultipart(0)
+            serviceName := string(messages[len(messages) - 1])
+            println("Request for service:", serviceName)
+            messages = messages[:len(messages) - 1]
+            switch serviceName {
+            case "overview":
+                overviewSocket.SendMultipart(messages, 0)
+            case "teams":
+                teamsSocket.SendMultipart(messages, 0)
+            }
+            
+        case toPoll[1].REvents & zmq.POLLIN != 0:
+            messages, _ := toPoll[1].Socket.RecvMultipart(0)
+            frontend.SendMultipart(messages, 0)
 
-            case toPoll[2].REvents & zmq.POLLIN != 0:
-                messages, _ := toPoll[2].Socket.RecvMultipart(0)
-                frontend.SendMultipart(messages, 0)
+        case toPoll[2].REvents & zmq.POLLIN != 0:
+            messages, _ := toPoll[2].Socket.RecvMultipart(0)
+            frontend.SendMultipart(messages, 0)
         }
     }
 }
@@ -81,6 +84,7 @@ func overviewService() {
     receiver, _ := context.NewSocket(zmq.REP)
     defer receiver.Close()
     receiver.Connect(overviewAddress)
+    println("Service Overview is ready.")
 
     for {
         received, _ := receiver.Recv(0)
@@ -96,6 +100,7 @@ func teamsService() {
     receiver, _ := context.NewSocket(zmq.REP)
     defer receiver.Close()
     receiver.Connect(teamsAddress)
+    println("Service Teams is ready.")
 
     for {
         received, _ := receiver.Recv(0)
