@@ -22,6 +22,11 @@ class TcpClient
     self
   end
 
+  def send_typed_message(message, type)
+    req_socket.send_string(type, ZMQ::SNDMORE)
+    send_message(message)
+  end
+
   def receive_message
     message = ""
     rc = req_socket.recv_string(message)
@@ -52,8 +57,11 @@ end
 
 if $0 == __FILE__
   TcpClient.new("tcp://127.0.0.1:4242") do
-    send_message(ARGV.first || "Allo la terre")
+    message = ARGV.first || "Allo la terre"
+    services = %w[overview teams]
+    service = services.sample
+    send_typed_message(service, message)
     received = receive_message
-    puts "received: #{received.inspect}"
+    puts "received from #{service.inspect}: #{received.inspect}"
   end
 end
