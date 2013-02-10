@@ -3,8 +3,9 @@ require "ffi-rzmq"
 TcpClientError = Class.new(StandardError)
 
 class TcpClient
-  def initialize(address)
+  def initialize(address, &block)
     @address = address
+    run(&block) if block_given?
   end
 
   def run(&block)
@@ -50,8 +51,7 @@ class TcpClient
 end
 
 if $0 == __FILE__
-  client = TcpClient.new("tcp://127.0.0.1:4242")
-  client.run do
+  TcpClient.new("tcp://127.0.0.1:4242") do
     send_message(ARGV.first || "Allo la terre")
     received = receive_message
     puts "received: #{received.inspect}"
