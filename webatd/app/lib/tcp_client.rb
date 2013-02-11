@@ -1,4 +1,5 @@
 require "ffi-rzmq"
+require "yajl"
 
 TcpClientError = Class.new(StandardError)
 
@@ -16,8 +17,9 @@ class TcpClient
     ctx.terminate
   end
 
-  def send_request(service, action, message)
-    req_socket.send_string(message, ZMQ::SNDMORE)
+  def send_request(service, action, request)
+    json = Yajl::Encoder.encode(request)
+    req_socket.send_string(json, ZMQ::SNDMORE)
     req_socket.send_string(action, ZMQ::SNDMORE)
     rc = req_socket.send_string(service)
     raise TcpClientError.new("Can't send request") unless ok?(rc)
@@ -56,8 +58,8 @@ if $0 == __FILE__
     message = ARGV.first || "Allo la terre"
     services = %w[overview teams]
     service = services.sample
-    send_request(service, "index", message)
+    send_request(service, "index", message: message)
     received = receive_response
-    puts "received from #{service.inspect}: #{received.inspect}"
+    puts "received from #{service.inspect}: #{received}"
   end
 end
