@@ -16,18 +16,14 @@ class TcpClient
     ctx.terminate
   end
 
-  def send_message(message)
-    rc = req_socket.send_string(message)
-    raise TcpClientError.new("Can't send message") unless ok?(rc)
-    self
+  def send_request(service, action, message)
+    req_socket.send_string(message, ZMQ::SNDMORE)
+    req_socket.send_string(action, ZMQ::SNDMORE)
+    rc = req_socket.send_string(service)
+    raise TcpClientError.new("Can't send request") unless ok?(rc)
   end
 
-  def send_typed_message(message, type)
-    req_socket.send_string(type, ZMQ::SNDMORE)
-    send_message(message)
-  end
-
-  def receive_message
+  def receive_response
     message = ""
     rc = req_socket.recv_string(message)
     raise TcpClientError.new("Can't receive message") unless ok?(rc)
@@ -60,8 +56,8 @@ if $0 == __FILE__
     message = ARGV.first || "Allo la terre"
     services = %w[overview teams]
     service = services.sample
-    send_typed_message(service, message)
-    received = receive_message
+    send_request(service, "index", message)
+    received = receive_response
     puts "received from #{service.inspect}: #{received.inspect}"
   end
 end

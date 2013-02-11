@@ -2,6 +2,7 @@ package tcp
 
 import (
     "fmt"
+    "strings"
     "log"
     "reflect"
     zmq "github.com/alecthomas/gozmq"
@@ -106,8 +107,9 @@ func (server Server) runService(service interface{}, name string) {
     println("Service", name, "is ready.")
 
     for {
-        received, _ := receiver.Recv(0)
-        response := callServiceAction(service, "Index", received)
+        received, _ := receiver.RecvMultipart(0)
+        action := strings.Title(string(received[1]))
+        response := callServiceAction(service, action, received[0])
         receiver.Send(response, 0)
     }
 }
@@ -116,7 +118,8 @@ func callServiceAction(service interface{}, methodName string, param []byte) []b
     value := reflect.ValueOf(service)
     method := value.MethodByName(methodName)
     if !method.IsValid() {
-        log.Fatal(fmt.Errorf("callServiceAction(): missing service method %q.", methodName))
+        log.Print(fmt.Errorf("callServiceAction(): missing service method %q.", methodName))
+        return nil
     }
     result := method.Call([]reflect.Value{
         reflect.ValueOf(param),
