@@ -6,7 +6,10 @@ import (
 
 type TeamsService struct {}
 
-func (service TeamsService) Index(request []byte) (response []byte) {
+func (service TeamsService) Index(request []byte) []byte {
     message := string(request)
-    return "[TeamsService] " + message + "[" + time.Now().String() + "]"
+    response := "[TeamsService] " + message + "[" + time.Now().String() + "]"
+    println("TeamsService received:", message)
+    println("TeamsService responds:", response)
+    return []byte(response)
 }

@@ -2,23 +2,27 @@ package tcp
 
 import (
     "fmt"
-    "time"
+    "log"
+    "reflect"
     zmq "github.com/alecthomas/gozmq"
 )
 
 const (
-    overviewAddress = "ipc://overview.ipc"
-    teamsAddress = "ipc://teams.ipc"
-    addressPrefix  = "tcp://*:%d"
+    clientAddressTemplate  = "tcp://*:%d"
+    serviceAddressTemplate = "ipc://%s.ipc"
     noTimeOut = -1
 )
 
 type Server struct {
     port int
+    services map[string]interface{}
 }
 
-func NewServer(port int) *Server {
-    return &Server{port}
+func NewServer(port int) (server *Server) {
+    server = new(Server)
+    server.port = port
+    server.services = make(map[string]interface{})
+    return server
 }
 
 func (server Server) ListenAndReply() {
@@ -26,94 +30,99 @@ func (server Server) ListenAndReply() {
     server.runBroker()
 }
 
+func (server *Server) RegisterService(service interface{}, name string) {
+    server.services[name] = service
+}
+
+func newBoundSocket(context zmq.Context, address string, kind zmq.SocketType) zmq.Socket {
+    socket, _ := context.NewSocket(kind)
+    socket.Bind(address)
+    return socket
+}
+
 func (server *Server) runBroker() {
-    clientAddress := fmt.Sprintf(addressPrefix, server.port)
     context, _ := zmq.NewContext()
     defer context.Close()
 
-    frontend, _ := context.NewSocket(zmq.ROUTER)
+    clientAddress := fmt.Sprintf(clientAddressTemplate, server.port)
+    frontend := newBoundSocket(context, clientAddress, zmq.ROUTER)
     defer frontend.Close()
-    frontend.Bind(clientAddress)
-
-    overviewSocket, _ := context.NewSocket(zmq.DEALER)
-    defer overviewSocket.Close()
-    overviewSocket.Bind(overviewAddress)
-
-    teamsSocket, _ := context.NewSocket(zmq.DEALER)
-    defer teamsSocket.Close()
-    teamsSocket.Bind(teamsAddress)
 
     toPoll := zmq.PollItems{
-        zmq.PollItem{zmq.Socket: frontend,       zmq.Events: zmq.POLLIN},
-        zmq.PollItem{zmq.Socket: overviewSocket, zmq.Events: zmq.POLLIN},
-        zmq.PollItem{zmq.Socket: teamsSocket,    zmq.Events: zmq.POLLIN},
+        zmq.PollItem{zmq.Socket: frontend, zmq.Events: zmq.POLLIN},
     }
+    socketByName := make(map[string]zmq.Socket)
+
+    for name, _ := range server.services {
+        serviceAddress := fmt.Sprintf(serviceAddressTemplate, name)
+        serviceSocket := newBoundSocket(context, serviceAddress, zmq.DEALER)
+        defer serviceSocket.Close()
+        socketByName[name] = serviceSocket
+        toPoll = append(toPoll,
+            zmq.PollItem{zmq.Socket: serviceSocket, zmq.Events: zmq.POLLIN},
+        )
+    }
+    numSockets := len(toPoll)
 
     for {
         zmq.Poll(toPoll, noTimeOut)
 
-        switch {
-        case toPoll[0].REvents & zmq.POLLIN != 0:
+        if toPoll[0].REvents & zmq.POLLIN != 0 {
             messages, _ := toPoll[0].Socket.RecvMultipart(0)
             serviceName := string(messages[len(messages) - 1])
             println("Request for service:", serviceName)
-            messages = messages[:len(messages) - 1]
-            switch serviceName {
-            case "overview":
-                overviewSocket.SendMultipart(messages, 0)
-            case "teams":
-                teamsSocket.SendMultipart(messages, 0)
+            if serviceSocket, found := socketByName[serviceName]; found {
+                messages = messages[:len(messages) - 1]
+                println("forwarding to service socket")
+                serviceSocket.SendMultipart(messages, 0)
             }
-
-        case toPoll[1].REvents & zmq.POLLIN != 0:
-            messages, _ := toPoll[1].Socket.RecvMultipart(0)
-            frontend.SendMultipart(messages, 0)
-
-        case toPoll[2].REvents & zmq.POLLIN != 0:
-            messages, _ := toPoll[2].Socket.RecvMultipart(0)
-            frontend.SendMultipart(messages, 0)
+        } else {
+            for i := 1; i < numSockets; i++ {
+                if toPoll[i].REvents & zmq.POLLIN != 0 {
+                    messages, _ := toPoll[i].Socket.RecvMultipart(0)
+                    frontend.SendMultipart(messages, 0)
+                    break
+                }
+            }
         }
     }
 }
 
 func (server Server) launchServices() {
-    go overviewService()
-    go teamsService()
+    for name, service := range server.services {
+        go server.runService(service, name)
+    }
 }
 
-func timestampedMessage(message string) string {
-    return message + "[" + time.Now().String() + "]"
-}
-
-func overviewService() {
+func (server Server) runService(service interface{}, name string) {
     context, _ := zmq.NewContext()
     defer context.Close()
 
     receiver, _ := context.NewSocket(zmq.REP)
     defer receiver.Close()
-    receiver.Connect(overviewAddress)
-    println("Service Overview is ready.")
+
+    serviceAddress := fmt.Sprintf(serviceAddressTemplate, name)
+    receiver.Connect(serviceAddress)
+    println("Service", name, "is ready.")
 
     for {
         received, _ := receiver.Recv(0)
-        println("           Overview:", string(received))
-        receiver.Send([]byte(timestampedMessage("Overview Service")), 0)
+        response := callServiceAction(service, "Index", received)
+        receiver.Send(response, 0)
     }
 }
 
-func teamsService() {
-    context, _ := zmq.NewContext()
-    defer context.Close()
-
-    receiver, _ := context.NewSocket(zmq.REP)
-    defer receiver.Close()
-    receiver.Connect(teamsAddress)
-    println("Service Teams is ready.")
-
-    for {
-        received, _ := receiver.Recv(0)
-        println("              Teams:", string(received))
-        receiver.Send([]byte(timestampedMessage("Teams Service")), 0)
+func callServiceAction(service interface{}, methodName string, param []byte) []byte {
+    value := reflect.ValueOf(service)
+    method := value.MethodByName(methodName)
+    if !method.IsValid() {
+        log.Fatal(fmt.Errorf("callServiceAction(): missing service method %q.", methodName))
     }
+    result := method.Call([]reflect.Value{
+        reflect.ValueOf(param),
+    })
+    if len(result) != 1 {
+        log.Fatal(fmt.Errorf("callServiceAction(): method %q doesn't return 1 value.", methodName))
+    }
+    return []byte(result[0].String())
 }
-

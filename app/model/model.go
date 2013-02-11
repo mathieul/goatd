@@ -152,4 +152,3 @@ func simpleMethodCall(model Model, methodName string) interface{} {
     }
     return result[0].Interface()
 }
-
