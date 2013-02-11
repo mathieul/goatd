@@ -9,17 +9,25 @@ import (
 const (
     overviewAddress = "ipc://overview.ipc"
     teamsAddress = "ipc://teams.ipc"
-    addressPrefix  = "tcp://127.0.0.1:%d"
+    addressPrefix  = "tcp://*:%d"
     noTimeOut = -1
 )
 
-func ServeRequests(port int) {
-    launchServices()
-    runBroker(port)
+type Server struct {
+    port int
 }
 
-func runBroker(port int) {
-    clientAddress := fmt.Sprintf(addressPrefix, port)
+func NewServer(port int) *Server {
+    return &Server{port}
+}
+
+func (server Server) ListenAndReply() {
+    server.launchServices()
+    server.runBroker()
+}
+
+func (server *Server) runBroker() {
+    clientAddress := fmt.Sprintf(addressPrefix, server.port)
     context, _ := zmq.NewContext()
     defer context.Close()
 
@@ -40,9 +48,9 @@ func runBroker(port int) {
         zmq.PollItem{zmq.Socket: overviewSocket, zmq.Events: zmq.POLLIN},
         zmq.PollItem{zmq.Socket: teamsSocket,    zmq.Events: zmq.POLLIN},
     }
-    
+
     for {
-        _, _ = zmq.Poll(toPoll, noTimeOut)
+        zmq.Poll(toPoll, noTimeOut)
 
         switch {
         case toPoll[0].REvents & zmq.POLLIN != 0:
@@ -56,7 +64,7 @@ func runBroker(port int) {
             case "teams":
                 teamsSocket.SendMultipart(messages, 0)
             }
-            
+
         case toPoll[1].REvents & zmq.POLLIN != 0:
             messages, _ := toPoll[1].Socket.RecvMultipart(0)
             frontend.SendMultipart(messages, 0)
@@ -68,14 +76,14 @@ func runBroker(port int) {
     }
 }
 
-func launchServices() {
+func (server Server) launchServices() {
     go overviewService()
     go teamsService()
 }
 
 func timestampedMessage(message string) string {
     return message + "[" + time.Now().String() + "]"
-} 
+}
 
 func overviewService() {
     context, _ := zmq.NewContext()

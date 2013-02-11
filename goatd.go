@@ -7,5 +7,8 @@ import (
 
 func main() {
     go atd.GetInstance().Run()
-    tcp.ServeRequests(4242)
+    server := tcp.NewServer(4242)
+    server.registerService(new(atd.OverviewService), "overview")
+    server.registerService(new(atd.TeamsService), "teams")
+    server.ListenAndReply()
 }
