@@ -4,6 +4,7 @@ gem 'rails',      '3.2.11'
 gem 'rails-api',  '0.0.3'
 
 gem 'ffi-rzmq'
+gem 'yajl-ruby'
 
 group :assets do
   gem 'coffee-rails',    '3.2.2'
