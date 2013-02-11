@@ -124,5 +124,5 @@ func callServiceAction(service interface{}, methodName string, param []byte) []b
     if len(result) != 1 {
         log.Fatal(fmt.Errorf("callServiceAction(): method %q doesn't return 1 value.", methodName))
     }
-    return []byte(result[0].String())
+    return result[0].Interface().([]byte)
 }
