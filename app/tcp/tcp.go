@@ -5,6 +5,7 @@ import (
     "strings"
     "log"
     "reflect"
+    "encoding/json"
     zmq "github.com/alecthomas/gozmq"
 )
 
@@ -121,11 +122,28 @@ func callServiceAction(service interface{}, methodName string, param []byte) []b
         log.Print(fmt.Errorf("callServiceAction(): missing service method %q.", methodName))
         return nil
     }
-    result := method.Call([]reflect.Value{
-        reflect.ValueOf(param),
-    })
-    if len(result) != 1 {
-        log.Fatal(fmt.Errorf("callServiceAction(): method %q doesn't return 1 value.", methodName))
+    request := decodeRequestForMethod(method, param)
+    response := method.Call([]reflect.Value{request})
+    if len(response) != 1 {
+        log.Fatal(fmt.Errorf("callServiceAction(): method %q should just return 1 value.", methodName))
     }
-    return result[0].Interface().([]byte)
+    return encodeResponseForMethod(response[0])
+}
+
+func decodeRequestForMethod(method reflect.Value, encoded []byte) reflect.Value {
+    inType := method.Type().In(0)
+    request := reflect.New(inType).Interface()
+    if err := json.Unmarshal(encoded, &request); err != nil {
+        log.Print(fmt.Errorf("decodeRequestForMethod(): received invalid request."))
+        return reflect.Zero(inType)
+    }
+    pRequest := reflect.ValueOf(request)
+    return reflect.Indirect(pRequest)
+}
+
+func encodeResponseForMethod(response reflect.Value) []byte {
+    if encoded, err := json.Marshal(response.Interface()); err == nil {
+        return encoded
+    }
+    return []byte{}
 }
