@@ -9,6 +9,6 @@ func main() {
     go atd.GetInstance().Run()
     server := tcp.NewServer(4242)
     server.RegisterService(new(atd.OverviewService), "overview")
-    server.RegisterService(new(atd.TeamsService), "teams")
+    server.RegisterService(new(atd.TeamService), "team")
     server.ListenAndReply()
 }

@@ -1,22 +1,31 @@
 package atd
 
-import (
-    "time"
-)
-
 type OverviewService struct {}
 
-type OverviewIndexReq struct {
-    Message string `json:"message"`
+/*
+ * Overview.List
+ */
+
+type OverviewIndexReq struct {}
+
+type OverviewRow struct {
+    Name string `json:"name"`
+    Count int   `json:"count"`
 }
 
 type OverviewIndexRes struct {
-    Response string `json:"response"`
+    Rows []OverviewRow `json:"rows"`
 }
 
-func (service OverviewService) Index(req OverviewIndexReq) OverviewIndexRes {
-    response := "[OverviewService] " + req.Message + "[" + time.Now().String() + "]"
-    println("OverviewService received:", req.Message)
-    println("OverviewService responds:", response)
-    return OverviewIndexRes{response}
+func (service OverviewService) List(req OverviewIndexReq) OverviewIndexRes {
+    res := new(OverviewIndexRes)
+    res.Rows = []OverviewRow{
+        {"Team",     2},
+        {"Teammate", 5},
+        {"Queue",    3},
+        {"Skill",   10},
+        {"Task",    42},
+    }
+
+    return *res
 }

@@ -22,6 +22,10 @@ func GetInstance() *ATD {
     return instance
 }
 
+func store() *model.Store {
+    return GetInstance().Store()
+}
+
 /*
  * ATD
  */
