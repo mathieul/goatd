@@ -1,6 +1,5 @@
 require "ffi-rzmq"
 require "yajl"
-require "pry"
 
 TcpClientError = Class.new(StandardError)
 
@@ -54,23 +53,23 @@ class TcpClient
   end
 end
 
-if $0 == __FILE__
-  Thread.abort_on_exception = true
+# if $0 == __FILE__
+#   Thread.abort_on_exception = true
 
-  TcpClient.new("tcp://127.0.0.1:4242") do
-    services = %w[overview.list team.list team.create]
-    # services = %w[overview.list team.list]
-    request = case (service = services.sample)
-              when "overview.list", "team.list"
-                {}
-              when "team.create"
-                name = ARGV.first || "Bonjour"
-                {name: name}
-              end
-    args = service.split(".")
-    args << request
-    send_request(*args)
-    received = receive_response
-    puts "received from #{service.inspect}: #{received}"
-  end
-end
+#   TcpClient.new("tcp://127.0.0.1:4242") do
+#     services = %w[overview.list team.list team.create]
+#     # services = %w[overview.list team.list]
+#     request = case (service = services.sample)
+#               when "overview.list", "team.list"
+#                 {}
+#               when "team.create"
+#                 name = ARGV.first || "Bonjour"
+#                 {name: name}
+#               end
+#     args = service.split(".")
+#     args << request
+#     send_request(*args)
+#     received = receive_response
+#     puts "received from #{service.inspect}: #{received}"
+#   end
+# end

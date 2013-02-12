@@ -1,10 +1,10 @@
 angular.module("atd").controller("OverviewCtrl", [
-  "$scope", "Rpc",
-  ($scope, Rpc) ->
+  "$scope", "$http",
+  ($scope, $http) ->
 
-    $scope.resources = []
-    overview = Rpc("Overview", "List")
-    overview.List (result) ->
-      $scope.resources = result.Rows
+    $http
+      .get("overview", {}, headers: "Content-Type": "application/json")
+      .success (result) ->
+        $scope.resources = result.rows
 
 ])

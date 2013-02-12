@@ -1,10 +1,12 @@
 angular.module("atd").controller("TeamCtrl", [
-  "$scope", "Rpc",
-  ($scope, Rpc) ->
+  "$scope", "$http", "$window",
+  ($scope, $http, $window) ->
 
-    $scope.teams = []
-    team = Rpc("Team", "List")
-    team.List (result) ->
-      $scope.teams = result.Rows
+    $scope.message = (msg) ->
+      $window.alert(msg)
 
+    $http
+      .get("teams", {}, headers: "Content-Type": "application/json")
+      .success (result) ->
+        $scope.teams = result.teams
 ])
