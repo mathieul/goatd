@@ -29,7 +29,7 @@ class TcpClient
     message = ""
     rc = req_socket.recv_string(message)
     raise TcpClientError.new("Can't receive message") unless ok?(rc)
-    message
+    Yajl::Parser.parse(message)
   end
 
   private
