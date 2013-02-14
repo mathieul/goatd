@@ -1,12 +1,8 @@
 angular.module("atd").controller("TeamCtrl", [
-  "$scope", "$http", "$window",
-  ($scope, $http, $window) ->
+  "$scope", "$window", "Team",
+  ($scope, $window, Team) ->
 
-    $scope.message = (msg) ->
-      $window.alert(msg)
+    $scope.message = (msg) -> $window.alert(msg)
+    $scope.teams = Team.query()
 
-    $http
-      .get("teams", {}, headers: "Content-Type": "application/json")
-      .success (result) ->
-        $scope.teams = result.teams
 ])

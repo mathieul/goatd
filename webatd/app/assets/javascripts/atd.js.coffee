@@ -2,7 +2,7 @@
 # Modules
 #
 angular.module("atd", ["atdServices"])
-angular.module("atdServices", ["ng"])
+angular.module("atdServices", ["ngResource"])
 
 #
 # Application

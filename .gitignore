@@ -30,3 +30,5 @@ bin
 public/javascripts/compiled
 public/javascripts/vendor/bootstrap-*
 public/stylesheets/*.css
+
+*.ipc
