@@ -1,5 +1,8 @@
 %script(type="text/ng-template" id="teams.html")
-  %h3 Team
+  %h3.with-side-button Team
+  %a.btn.btn-small.btn-success.side-button(href ng-click="addTeam()")
+    %i.icon-plus.icon-white
+    Add a team
   %table.table.table-striped.table-hover
     %thead
       %tr
@@ -15,14 +18,4 @@
         %td
           %a(href ng-click="message('TODO: edit ' + team.name)") Edit
 
-  #my-modal.modal.hide.fade
-    .modal-header
-      %button.close(data-dismiss="modal" aria-hidden="true") &times;
-      %h3 Modal Header
-    .modal-body
-      %p One fine body...
-    .modal-footer
-      %a.btn(href data-dismiss="modal") Close
-      %a.btn.btn-primary(href) Save changes
-
-  %a.btn(href="#my-modal" role="button" data-toggle="modal") Launch modal
+  = render "modal_team"
