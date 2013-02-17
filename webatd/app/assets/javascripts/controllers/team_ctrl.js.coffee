@@ -1,19 +1,18 @@
 angular.module("atd").controller("TeamCtrl", [
-  "$scope", "$window", "Team", "BsModal",
-  ($scope, $window, Team, BsModal) ->
+  "$scope", "$route", "Team", "BsModal",
+  ($scope, $route, Team, BsModal) ->
 
-    $scope.message = (msg) -> $window.alert(msg)
     $scope.teams = Team.query()
 
-    modal = BsModal("modal-team")
-    $scope.modalTeam =
-      save: ->
-        console.log("modalTeam.save(): TODO", arguments)
-        modal.close()
-        false
+    $scope.modalTeam = BsModal "modal-team", save: (attributes) ->
+      Team.save(attributes, ->
+        console.log("saved:", attributes)
+        $route.reload()
+      )
+
     $scope.addTeam = ->
-      $scope.modalTeam.title = "Add a new team"
-      $scope.modalTeam.actionLabel = "Create"
-      modal.open()
+      $scope.modalTeam.open
+        title:  "Add a new team"
+        action: "Create"
 
 ])

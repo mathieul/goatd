@@ -3,7 +3,7 @@
     %button.close(data-dismiss="modal" aria-hidden="true") &times;
     %h3 {{modalTeam.title}}
   .modal-body
-    %form#team-form.form-horizontal(ng-submit="modalTeam.save()")
+    %form#team-form.form-horizontal
       .control-group.first.last
         %label.control-label(for="team-name") Name
         .controls
@@ -14,4 +14,4 @@
                  required)
   .modal-footer
     %a.btn(href data-dismiss="modal") Close
-    %input.btn.btn-primary(type="submit" form="team-form" value="{{modalTeam.actionLabel}}")
+    %input.btn.btn-primary(type="submit" form="team-form" value="{{modalTeam.action}}")

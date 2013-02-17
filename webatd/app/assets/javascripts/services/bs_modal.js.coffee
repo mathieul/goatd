@@ -1,16 +1,31 @@
 class ModalManager
-  constructor: (id) -> @sel = "##{id}"
+  constructor: (id, options) ->
+    @sel = "##{id}"
+    @save = options.save || (-> false)
 
-  open: (callback) ->
+  open: (options = {}) ->
+    options.title ||= "TODO: set title"
+    options.action ||= "TODO: set action"
+    this[name] = value for name, value of options
     $(@sel)
       .modal("show")
-      .one "shown", (event) ->
+      .one("shown", (event) ->
         $(event.target).find("form input[type=text]:visible:first")[0].focus()
+      )
+      .find("form")
+        .on("submit", (event) =>
+          @save(name: @name)
+          @close()
+          event.preventDefault()
+        )
 
   close: ->
-    $(@sel).modal("hide")
+    $(@sel)
+      .modal("hide")
+      .find("form")
+        .off("submit")
 
 angular.module("atdServices").factory("BsModal", ->
-    (id) ->
-      new ModalManager(id)
+    (id, options = {}) ->
+      new ModalManager(id, options)
 )
