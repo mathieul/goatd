@@ -10,9 +10,6 @@ class ModalManager
   close: ->
     $(@sel).modal("hide")
 
-  submit: ->
-    $("#{@sel} form:first").submit()
-
 angular.module("atdServices").factory("BsModal", ->
     (id) ->
       new ModalManager(id)

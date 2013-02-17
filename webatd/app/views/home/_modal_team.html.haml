@@ -3,11 +3,15 @@
     %button.close(data-dismiss="modal" aria-hidden="true") &times;
     %h3 {{modalTeam.title}}
   .modal-body
-    %form.form-horizontal(ng-submit="modalTeam.save()")
-      .control-group
+    %form#team-form.form-horizontal(ng-submit="modalTeam.save()")
+      .control-group.first.last
         %label.control-label(for="team-name") Name
         .controls
-          %input(type="text" id="team-name" placeholder="My Team" ng-model="modalTeam.name")
+          %input(type="text"
+                 id="team-name"
+                 placeholder="My Team"
+                 ng-model="modalTeam.name"
+                 required)
   .modal-footer
     %a.btn(href data-dismiss="modal") Close
-    %a.btn.btn-primary(href ng-click="modalTeam.submit(event)") {{modalTeam.actionLabel}}
+    %input.btn.btn-primary(type="submit" form="team-form" value="{{modalTeam.actionLabel}}")

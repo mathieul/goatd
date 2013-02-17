@@ -7,8 +7,6 @@ angular.module("atd").controller("TeamCtrl", [
 
     modal = BsModal("modal-team")
     $scope.modalTeam =
-      submit:
-        -> modal.submit()
       save: ->
         console.log("modalTeam.save(): TODO", arguments)
         modal.close()
