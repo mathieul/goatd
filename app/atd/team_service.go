@@ -51,3 +51,27 @@ func (service TeamService) Create(req TeamCreateReq) TeamAttributes {
 
     return *res
 }
+
+/*
+ * Team.Update
+ */
+
+type TeamUpdateableAttributes struct {
+    Name string `json:"name"`
+}
+
+type TeamUpdateReq struct {
+    Uid string
+    Team TeamUpdateableAttributes
+}
+
+type TeamUpdateRes struct {}
+
+func (service TeamService) Update(req TeamUpdateReq) TeamUpdateRes {
+    team := store().Teams.Find(req.Uid)
+    if len(req.Team.Name) > 0 {
+        team.Update("Name", req.Team.Name)
+    }
+
+    return TeamUpdateRes{}
+}

@@ -7,9 +7,9 @@ angular.module("atd").controller("TeamCtrl", [
     reloader = -> $route.reload()
     $scope.modalTeam = BsModal "modal-team", attributes: ["uid", "name"], save: (attributes) ->
       if attributes.uid?
-        Team.update(attributes.reloader)
+        Team.update(uid: attributes.uid, team: attributes, reloader)
       else
-        Team.create(attributes, reloader)
+        Team.create(team: attributes, reloader)
 
     $scope.addTeam = ->
       $scope.modalTeam.open

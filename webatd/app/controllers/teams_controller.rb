@@ -9,16 +9,20 @@ class TeamsController < ApplicationController
   end
 
   def create
-    team, name = nil, params[:name]
+    team, attributes = nil, params[:team]
     TcpClient.new(AppConfig[:atd_address]) do
-      send_request("team", "create", name: name)
+      send_request("team", "create", name: attributes[:name])
       team = receive_response
     end
     render json: team, status: :created
   end
 
   def update
-    # TODO
-    render json: {}, status: :ok
+    uid, team = params[:id], params[:team].slice(:name)
+    TcpClient.new(AppConfig[:atd_address]) do
+      send_request("team", "update", uid: uid, team: team)
+      res = receive_response
+    end
+    render json: "", status: :ok
   end
 end
