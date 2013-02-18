@@ -21,7 +21,16 @@ class TeamsController < ApplicationController
     uid, team = params[:id], params[:team].slice(:name)
     TcpClient.new(AppConfig[:atd_address]) do
       send_request("team", "update", uid: uid, team: team)
-      res = receive_response
+      receive_response
+    end
+    render json: "", status: :ok
+  end
+
+  def destroy
+    uid = params[:id]
+    TcpClient.new(AppConfig[:atd_address]) do
+      send_request("team", "destroy", uid: uid)
+      receive_response
     end
     render json: "", status: :ok
   end

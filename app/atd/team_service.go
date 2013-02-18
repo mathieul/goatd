@@ -68,10 +68,29 @@ type TeamUpdateReq struct {
 type TeamUpdateRes struct {}
 
 func (service TeamService) Update(req TeamUpdateReq) TeamUpdateRes {
-    team := store().Teams.Find(req.Uid)
-    if len(req.Team.Name) > 0 {
-        team.Update("Name", req.Team.Name)
+    if team := store().Teams.Find(req.Uid); team != nil {
+        if len(req.Team.Name) > 0 {
+            team.Update("Name", req.Team.Name)
+        }
     }
 
     return TeamUpdateRes{}
+}
+
+/*
+ * Team.Destroy
+ */
+
+type TeamDestroyReq struct {
+    Uid string
+}
+
+type TeamDestroyRes struct {}
+
+func (service TeamService) Destroy(req TeamDestroyReq) TeamDestroyRes {
+    if team := store().Teams.Find(req.Uid); team != nil {
+        team.Destroy()
+    }
+
+    return TeamDestroyRes{}
 }
