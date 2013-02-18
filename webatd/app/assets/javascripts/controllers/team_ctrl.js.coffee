@@ -2,11 +2,10 @@ angular.module("atd").controller("TeamCtrl", [
   "$scope", "$route", "Team", "BsModal",
   ($scope, $route, Team, BsModal) ->
 
-    $scope.teams = Team.query()
+    $scope.teams = Team.index()
 
-    $scope.modalTeam = BsModal "modal-team", save: (attributes) ->
-      Team.save(attributes, ->
-        console.log("saved:", attributes)
+    $scope.modalTeam = BsModal "modal-team", attributes: ["name"], save: (attributes) ->
+      Team.create(attributes, ->
         $route.reload()
       )
 

@@ -2,6 +2,7 @@ class ModalManager
   constructor: (id, options) ->
     @sel = "##{id}"
     @save = options.save || (-> false)
+    @attributes = options.attributes || []
 
   open: (options = {}) ->
     options.title ||= "TODO: set title"
@@ -14,7 +15,10 @@ class ModalManager
       )
       .find("form")
         .on("submit", (event) =>
-          @save(name: @name)
+          attributes = {}
+          for name in @attributes
+            attributes[name] = this[name]
+          @save(attributes)
           @close()
           event.preventDefault()
         )
