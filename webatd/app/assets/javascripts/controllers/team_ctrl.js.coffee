@@ -4,10 +4,12 @@ angular.module("atd").controller("TeamCtrl", [
 
     $scope.teams = Team.index()
 
-    $scope.modalTeam = BsModal "modal-team", attributes: ["name"], save: (attributes) ->
-      Team.create(attributes, ->
-        $route.reload()
-      )
+    reloader = -> $route.reload()
+    $scope.modalTeam = BsModal "modal-team", attributes: ["uid", "name"], save: (attributes) ->
+      if attributes.uid?
+        Team.update(attributes.reloader)
+      else
+        Team.create(attributes, reloader)
 
     $scope.addTeam = ->
       $scope.modalTeam.open
@@ -20,7 +22,6 @@ angular.module("atd").controller("TeamCtrl", [
         labels:
           title:  "Edit team #{team.name}"
           action: "Update"
-
-
+        values: team
 
 ])

@@ -16,4 +16,9 @@ class TeamsController < ApplicationController
     end
     render json: team, status: :created
   end
+
+  def update
+    # TODO
+    render json: {}, status: :ok
+  end
 end

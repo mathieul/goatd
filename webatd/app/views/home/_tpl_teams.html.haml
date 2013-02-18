@@ -16,6 +16,6 @@
         %td {{team.uid}}
         %td {{team.name}}
         %td
-          %a(href ng-click="message('TODO: edit ' + team.name)") Edit
+          %a(href ng-click="editTeam(team)") Edit
 
   = render "modal_team"

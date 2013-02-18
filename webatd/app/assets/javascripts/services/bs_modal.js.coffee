@@ -11,6 +11,7 @@ class ModalManager
 
   open: (options = {}) ->
     _.extend(@labels, defaultLabels, options.labels || {})
+    @[name] = value for name, value of options.values if options.values?
     $(@sel)
       .modal("show")
       .one("shown", (event) ->
