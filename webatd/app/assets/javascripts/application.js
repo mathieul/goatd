@@ -1,4 +1,7 @@
 //= require jquery-1.9.1
+//= require underscore-1.4.4
+//= require underscore.string-2.3.0
+//= require underscore.inflection-1.0.0
 //= require angular
 //= require angular-resource
 //= require bootstrap-transition
