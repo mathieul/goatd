@@ -1,7 +1,7 @@
 #modal-team.modal.hide.fade
   .modal-header
     %button.close(data-dismiss="modal" aria-hidden="true") &times;
-    %h3 {{modalTeam.title}}
+    %h3 {{modalTeam.labels.title}}
   .modal-body
     %form#team-form.form-horizontal
       .control-group.first.last
@@ -14,4 +14,4 @@
                  required)
   .modal-footer
     %a.btn(href data-dismiss="modal") Close
-    %input.btn.btn-primary(type="submit" form="team-form" value="{{modalTeam.action}}")
+    %input.btn.btn-primary(type="submit" form="team-form" value="{{modalTeam.labels.action}}")

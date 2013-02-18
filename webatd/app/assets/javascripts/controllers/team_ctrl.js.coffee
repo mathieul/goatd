@@ -11,7 +11,16 @@ angular.module("atd").controller("TeamCtrl", [
 
     $scope.addTeam = ->
       $scope.modalTeam.open
-        title:  "Add a new team"
-        action: "Create"
+        labels:
+          title:  "Add a new team"
+          action: "Create"
+
+    $scope.editTeam = (team) ->
+      $scope.modalTeam.open
+        labels:
+          title:  "Edit team #{team.name}"
+          action: "Update"
+
+
 
 ])

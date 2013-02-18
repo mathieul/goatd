@@ -1,13 +1,16 @@
+defaultLabels =
+  title: "TODO: set title"
+  action: "TODO: set action"
+
 class ModalManager
   constructor: (id, options) ->
     @sel = "##{id}"
     @save = options.save || (-> false)
     @attributes = options.attributes || []
+    @labels = {}
 
   open: (options = {}) ->
-    options.title ||= "TODO: set title"
-    options.action ||= "TODO: set action"
-    this[name] = value for name, value of options
+    _.extend(@labels, defaultLabels, options.labels || {})
     $(@sel)
       .modal("show")
       .one("shown", (event) ->
