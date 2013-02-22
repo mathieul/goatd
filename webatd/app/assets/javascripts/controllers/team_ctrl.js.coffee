@@ -24,4 +24,14 @@ angular.module("atd").controller("TeamCtrl", [
           action: "Update"
         values: team
 
+    $scope.modalConfirm = BsModal "modal-confirm", attributes: ["uid"], save: (attributes) ->
+      console.log(attributes)
+
+    $scope.deleteTeam = (team) ->
+      $scope.modalConfirm.open
+        labels:
+          action: "Delete"
+          title: "Delete Team"
+          question: "you want to delete team \"#{team.name}\""
+        values: team
 ])

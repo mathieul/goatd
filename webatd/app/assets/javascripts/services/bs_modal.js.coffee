@@ -15,7 +15,8 @@ class ModalManager
     $(@sel)
       .modal("show")
       .one("shown", (event) ->
-        $(event.target).find("form input[type=text]:visible:first")[0].focus()
+        $(event.target)
+          .find("form input[type=text]:visible:first")[0]?.focus()
       )
       .find("form")
         .on("submit", (event) =>

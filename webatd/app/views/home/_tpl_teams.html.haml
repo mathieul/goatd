@@ -17,5 +17,8 @@
         %td {{team.name}}
         %td
           %a(href ng-click="editTeam(team)") Edit
+          |
+          %a(href ng-click="deleteTeam(team)") Delete
 
   = render "modal_team"
+  = render "modal_confirm"
