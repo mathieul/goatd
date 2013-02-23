@@ -1,4 +1,4 @@
-%script(type="text/ng-template" id="teamates.html")
+%script(type="text/ng-template" id="teammates.html")
   %h3.with-side-button Teammate
   %a.btn.btn-small.btn-success.side-button(href ng-click="addTeammate()")
     %i.icon-plus.icon-white
@@ -12,7 +12,7 @@
         %th &nbsp;
     %tbody
       %tr(ng-hide="teammates.length")
-        %td(colspan="3")No teammates yet.
+        %td(colspan="4")No teammates yet.
       %tr(ng-repeat="teammate in teammates")
         %td {{teammate.team_uid}}
         %td {{teammate.uid}}

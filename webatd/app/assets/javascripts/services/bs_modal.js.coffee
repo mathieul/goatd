@@ -8,9 +8,11 @@ class ModalManager
     @save = options.save || (-> false)
     @attributes = options.attributes || []
     @labels = {}
+    @data = {}
 
   open: (options = {}) ->
     _.extend(@labels, defaultLabels, options.labels || {})
+    _.extend(@data, options.data || {})
     @[name] = value for name, value of options.values if options.values?
     $(@sel)
       .modal("show")

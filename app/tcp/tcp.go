@@ -110,7 +110,9 @@ func (server Server) runService(service interface{}, name string) {
     for {
         received, _ := receiver.RecvMultipart(0)
         action := strings.Title(string(received[1]))
+        fmt.Println("runService[", name, "]: callServiceAction[", action, "] >>>", string(received[0]))
         response := callServiceAction(service, action, received[0])
+        fmt.Println("runService[", name, "]: callServiceAction <<<", string(response))
         receiver.Send(response, 0)
     }
 }

@@ -1,11 +1,12 @@
 angular.module("atd").controller("TeammateCtrl", [
-  "$scope", "$route", "Teammate", "BsModal",
-  ($scope, $route, Teammate, BsModal) ->
+  "$scope", "$route", "Teammate", "Team", "BsModal",
+  ($scope, $route, Teammate, Team, BsModal) ->
 
+    teams = Team.index()
     $scope.teammates = Teammate.index()
 
     reloader = -> $route.reload()
-    $scope.modalTeammate = BsModal "modal-teammate", attributes: ["uid", "name"], save: (attributes) ->
+    $scope.modalTeammate = BsModal "modal-teammate", attributes: ["uid", "name", "team_uid"], save: (attributes) ->
       if attributes.uid?
         Teammate.update(uid: attributes.uid, teammate: attributes, reloader)
       else
@@ -16,6 +17,8 @@ angular.module("atd").controller("TeammateCtrl", [
         labels:
           title:  "Add a new teammate"
           action: "Create"
+        data:
+          teams: teams
 
     $scope.editTeammate = (teammate) ->
       $scope.modalTeammate.open
