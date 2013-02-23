@@ -27,14 +27,12 @@ angular.module("atd").controller("TeammateCtrl", [
           action: "Update"
         values: teammate
 
-    $scope.modalConfirm = BsModal "modal-confirm", attributes: ["uid"], save: (attributes) ->
+    $scope.modalConfirm = BsModal "modal-del-teammate", attributes: ["uid"], save: (attributes) ->
       Teammate.destroy(uid: attributes.uid, reloader)
 
     $scope.deleteTeammate = (teammate) ->
+      console.log("1- modalConfirm:", $scope.modalConfirm)
       $scope.modalConfirm.open
-        labels:
-          action: "Delete"
-          title: "Delete Teammate"
-          question: "you want to delete teammate \"#{teammate.name}\""
         values: teammate
+      console.log("2- modalConfirm:", $scope.modalConfirm)
 ])

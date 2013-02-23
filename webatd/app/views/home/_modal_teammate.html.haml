@@ -21,4 +21,19 @@
                  required)
   .modal-footer
     %a.btn(href data-dismiss="modal") Close
-    %input.btn.btn-primary(type="submit" form="teammate-form" value="{{modalTeammate.labels.action}}")
+    %input.btn.btn-primary(type="submit"
+                           form="teammate-form"
+                           value="{{modalTeammate.labels.action}}")
+
+#modal-del-teammate.modal.hide.fade
+  .modal-header
+    %button.close(data-dismiss="modal" aria-hidden="true") &times;
+    %h3 Delete Teammate
+  .modal-body
+    %form#del-teammate-form
+      %p
+        Are you sure you want to delete teammate
+        "{{modalConfirm.name}}"?
+  .modal-footer
+    %a.btn(href data-dismiss="modal") Cancel
+    %input.btn.btn-primary(type="submit" form="del-teammate-form" value="Delete")

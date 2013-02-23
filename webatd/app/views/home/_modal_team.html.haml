@@ -15,3 +15,15 @@
   .modal-footer
     %a.btn(href data-dismiss="modal") Close
     %input.btn.btn-primary(type="submit" form="team-form" value="{{modalTeam.labels.action}}")
+
+#modal-del-team.modal.hide.fade
+  .modal-header
+    %button.close(data-dismiss="modal" aria-hidden="true") &times;
+    %h3 Delete Team
+  .modal-body
+    %form#del-team-form
+      %p
+        Are you sure you want to delete "{{modalConfirm.name}}"?
+  .modal-footer
+    %a.btn(href data-dismiss="modal") Cancel
+    %input.btn.btn-primary(type="submit" form="del-team-form" value="Delete")

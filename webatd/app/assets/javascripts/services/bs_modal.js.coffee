@@ -36,7 +36,5 @@ class ModalManager
       .find("form")
         .off("submit")
 
-angular.module("atdServices").factory("BsModal", ->
-    (id, options = {}) ->
-      new ModalManager(id, options)
-)
+angular.module("atdServices")
+  .factory "BsModal", -> (id, options = {}) -> new ModalManager(id, options)
