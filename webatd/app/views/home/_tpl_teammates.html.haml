@@ -1,0 +1,25 @@
+%script(type="text/ng-template" id="teamates.html")
+  %h3.with-side-button Teammate
+  %a.btn.btn-small.btn-success.side-button(href ng-click="addTeammate()")
+    %i.icon-plus.icon-white
+    Add a teammate
+  %table.table.table-striped.table-hover
+    %thead
+      %tr
+        %th TeamUid
+        %th Uid
+        %th Name
+        %th &nbsp;
+    %tbody
+      %tr(ng-hide="teammates.length")
+        %td(colspan="3")No teammates yet.
+      %tr(ng-repeat="teammate in teammates")
+        %td {{teammate.team_uid}}
+        %td {{teammate.uid}}
+        %td {{teammate.name}}
+        %td
+          %a(href ng-click="editTeammate(teammate)") Edit
+          |
+          %a(href ng-click="deleteTeammate(teammate)") Delete
+
+  = render "modal_teammate"

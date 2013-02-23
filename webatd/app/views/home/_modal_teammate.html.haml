@@ -1,0 +1,17 @@
+#modal-teammate.modal.hide.fade
+  .modal-header
+    %button.close(data-dismiss="modal" aria-hidden="true") &times;
+    %h3 {{modalTeammate.labels.title}}
+  .modal-body
+    %form#teammate-form.form-horizontal
+      .control-group.first.last
+        %label.control-label(for="teammate-name") Name
+        .controls
+          %input(type="text"
+                 id="teammate-name"
+                 placeholder="My Teammate"
+                 ng-model="modalTeammate.name"
+                 required)
+  .modal-footer
+    %a.btn(href data-dismiss="modal") Close
+    %input.btn.btn-primary(type="submit" form="teammate-form" value="{{modalTeammate.labels.action}}")

@@ -8,6 +8,9 @@ angular.module("atd").controller("NavCtrl", [
     ,
       label: "Teams"
       path: "/teams"
+    ,
+      label: "Teammates"
+      path: "/teammates"
     ]
 
     $scope.activeIfCurrent = (path) ->

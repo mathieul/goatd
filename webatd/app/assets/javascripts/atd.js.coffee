@@ -20,6 +20,10 @@ angular.module("atd").config([
         templateUrl: "teams.html"
         controller: "TeamCtrl"
       )
+      .when("/teammates",
+        templateUrl: "teammates.html"
+        controller: "TeammateCtrl"
+      )
       .otherwise(redirectTo: "/")
 
 ])

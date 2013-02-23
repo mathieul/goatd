@@ -3,4 +3,5 @@ Webatd::Application.routes.draw do
 
   match "/overview" => "home#overview"
   resources :teams, only: [:index, :create, :update, :destroy]
+  resources :teammates, only: [:index, :create, :update, :destroy]
 end

@@ -39,13 +39,13 @@ func (service TeamService) List(req TeamIndexReq) TeamIndexRes {
  * Team.Create
  */
 type TeamCreateReq struct {
-    Name string
+    Name string `json:"name"`
 }
 
 func (service TeamService) Create(req TeamCreateReq) TeamAttributes {
     res := new(TeamAttributes)
 
-    team  := store().Teams.Create(model.A{"Name": req.Name})
+    team := store().Teams.Create(model.A{"Name": req.Name})
     res.Uid = team.Uid()
     res.Name = team.Name()
 
@@ -61,7 +61,7 @@ type TeamUpdateableAttributes struct {
 }
 
 type TeamUpdateReq struct {
-    Uid string
+    Uid string `json:"uid"`
     Team TeamUpdateableAttributes
 }
 
@@ -82,7 +82,7 @@ func (service TeamService) Update(req TeamUpdateReq) TeamUpdateRes {
  */
 
 type TeamDestroyReq struct {
-    Uid string
+    Uid string `json:"uid"`
 }
 
 type TeamDestroyRes struct {}
