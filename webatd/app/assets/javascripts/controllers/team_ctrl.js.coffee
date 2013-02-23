@@ -25,7 +25,7 @@ angular.module("atd").controller("TeamCtrl", [
         values: team
 
     $scope.modalConfirm = BsModal "modal-confirm", attributes: ["uid"], save: (attributes) ->
-      console.log(attributes)
+      Team.destroy(uid: attributes.uid, reloader)
 
     $scope.deleteTeam = (team) ->
       $scope.modalConfirm.open
