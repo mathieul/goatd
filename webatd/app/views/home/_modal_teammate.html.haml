@@ -8,9 +8,9 @@
         %label.control-label(for="teammate-team") Team
         .controls
           %select#teammate-team(ng-model="modalTeammate.team_uid")
-            %option(value="") -- Select a team --
-            %option(ng-repeat="team in modalTeammate.data.teams" value="{{team.uid}}")
-              {{team.name}}
+            %option(ng-repeat="team in modalTeammate.data.teams"
+                    ng-selected="{team.uid: modalTeammate.team_uid}"
+                    value="{{team.uid}}") {{team.name}}
       .control-group.first.last
         %label.control-label(for="teammate-name") Name
         .controls

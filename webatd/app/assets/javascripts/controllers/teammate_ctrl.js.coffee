@@ -26,6 +26,8 @@ angular.module("atd").controller("TeammateCtrl", [
           title:  "Edit teammate #{teammate.name}"
           action: "Update"
         values: teammate
+        data:
+          teams: teams
 
     $scope.modalConfirm = BsModal "modal-del-teammate", attributes: ["uid"], save: (attributes) ->
       Teammate.destroy(uid: attributes.uid, reloader)
