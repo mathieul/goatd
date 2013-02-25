@@ -37,10 +37,18 @@ angular.module("atd").controller("TeamCtrl", [
         if result.action is "save"
           Team.update(uid: result.data.uid, team: result.data, reloader)
 
-    # $scope.modalConfirm = BsModal "modal-del-team", attributes: ["uid"], save: (attributes) ->
-    #   Team.destroy(uid: attributes.uid, reloader)
-
-    # $scope.deleteTeam = (team) ->
-    #   $scope.modalConfirm.open
-    #     values: team
+    $scope.deleteTeam = (team) ->
+      messageBox = $dialog.messageBox "Delete Team",
+        "Are you sure you want to delete team \"#{team.name}\"?",
+        [
+          label: "Delete"
+          cssClass: "btn-primary"
+          result: "delete"
+        ,
+          label: "Cancel"
+          result: "cancel"
+        ]
+      messageBox.open().then (choice) ->
+        if choice is "delete"
+          Team.destroy(uid: team.uid, reloader)
 ])

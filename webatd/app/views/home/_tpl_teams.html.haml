@@ -25,7 +25,7 @@
     %button.close(data-dismiss="modal" aria-hidden="true") &times;
     %h3 {{labels.title}}
   .modal-body
-  %form#team-form.form-horizontal
+  %form#team-form.form-horizontal(ng-submit="action('save', models.team)")
     .control-group.first.last
       %label.control-label(for="team-name") Name
       .controls
@@ -35,7 +35,5 @@
                ng-model="models.team.name"
                required)
   .modal-footer
-    %a.btn(href ng-click="cancel()")
-      Close
-    %button.btn.btn-primary(ng-click="action('save', models.team)")
-      {{labels.action}}
+    %a.btn(href ng-click="cancel()") Close
+    %input.btn.btn-primary(type="submit" form="team-form" value="{{labels.action}}")

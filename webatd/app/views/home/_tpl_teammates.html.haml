@@ -14,7 +14,7 @@
       %tr(ng-hide="teammates.length")
         %td(colspan="4")No teammates yet.
       %tr(ng-repeat="teammate in teammates")
-        %td {{teammate.team_uid}}
+        %td {{teammate.team_name}}
         %td {{teammate.uid}}
         %td {{teammate.name}}
         %td
@@ -27,7 +27,7 @@
     %button.close(data-dismiss="modal" aria-hidden="true") &times;
     %h3 {{labels.title}}
   .modal-body
-  %form#teammate-form.form-horizontal
+  %form#teammate-form.form-horizontal(ng-submit="action('save', models.teammate)")
     .control-group.first
       %label.control-label(for="teammate-team") Team
       .controls
@@ -44,7 +44,7 @@
                ng-model="models.teammate.name"
                required)
   .modal-footer
-    %a.btn(href ng-click="cancel()")
-      Close
-    %button.btn.btn-primary(ng-click="action('save', models.teammate)")
-      {{labels.action}}
+    %a.btn(href ng-click="cancel()") Close
+    %input.btn.btn-primary(type="submit"
+                           form="teammate-form"
+                           value="{{labels.action}}")
