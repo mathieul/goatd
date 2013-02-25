@@ -20,4 +20,22 @@
           |
           %a(href ng-click="deleteTeam(team)") Delete
 
-  = render "modal_team"
+%script(type="text/ng-template" id="add-edit-team.html")
+  .modal-header
+    %button.close(data-dismiss="modal" aria-hidden="true") &times;
+    %h3 {{labels.title}}
+  .modal-body
+  %form#team-form.form-horizontal
+    .control-group.first.last
+      %label.control-label(for="team-name") Name
+      .controls
+        %input(type="text"
+               id="team-name"
+               placeholder="My Team"
+               ng-model="models.team.name"
+               required)
+  .modal-footer
+    %a.btn(href ng-click="cancel()")
+      Close
+    %button.btn.btn-primary(ng-click="action('save', models.team)")
+      {{labels.action}}

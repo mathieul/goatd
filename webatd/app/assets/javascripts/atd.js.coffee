@@ -1,7 +1,7 @@
 #
 # Modules
 #
-angular.module("atd", ["atdServices"])
+angular.module("atd", ["ui.bootstrap", "atdServices"])
 angular.module("atdServices", ["ngResource"])
 
 #

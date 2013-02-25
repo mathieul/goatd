@@ -4,8 +4,7 @@
 //= require underscore.inflection-1.0.0
 //= require angular
 //= require angular-resource
-//= require bootstrap-transition
-//= require bootstrap-modal
+//= require ui-bootstrap-tpls-0.1.0
 //= require ./atd
 //= require_tree ./services
 //= require_tree ./controllers

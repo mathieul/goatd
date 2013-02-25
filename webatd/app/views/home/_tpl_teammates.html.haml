@@ -22,4 +22,29 @@
           |
           %a(href ng-click="deleteTeammate(teammate)") Delete
 
-  = render "modal_teammate"
+%script(type="text/ng-template" id="add-edit-teammate.html")
+  .modal-header
+    %button.close(data-dismiss="modal" aria-hidden="true") &times;
+    %h3 {{labels.title}}
+  .modal-body
+  %form#teammate-form.form-horizontal
+    .control-group.first
+      %label.control-label(for="teammate-team") Team
+      .controls
+        %select#teammate-team(ng-model="models.teammate.team_uid")
+          %option(ng-repeat="team in models.teams"
+                  ng-selected="team.uid == models.teammate.team_uid"
+                  value="{{team.uid}}") {{team.name}}
+    .control-group.last
+      %label.control-label(for="teammate-name") Name
+      .controls
+        %input(type="text"
+               id="teammate-name"
+               placeholder="My Teammate"
+               ng-model="models.teammate.name"
+               required)
+  .modal-footer
+    %a.btn(href ng-click="cancel()")
+      Close
+    %button.btn.btn-primary(ng-click="action('save', models.teammate)")
+      {{labels.action}}
