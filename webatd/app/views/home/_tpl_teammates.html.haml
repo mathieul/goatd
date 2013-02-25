@@ -6,17 +6,17 @@
   %table.table.table-striped.table-hover
     %thead
       %tr
-        %th TeamUid
-        %th Uid
+        %th Team
         %th Name
+        %th Uid
         %th &nbsp;
     %tbody
       %tr(ng-hide="teammates.length")
         %td(colspan="4")No teammates yet.
       %tr(ng-repeat="teammate in teammates")
         %td {{teammate.team_name}}
-        %td {{teammate.uid}}
         %td {{teammate.name}}
+        %td {{teammate.uid}}
         %td
           %a(href ng-click="editTeammate(teammate)") Edit
           |
@@ -31,7 +31,8 @@
     .control-group.first
       %label.control-label(for="teammate-team") Team
       .controls
-        %select#teammate-team(ng-model="models.teammate.team_uid")
+        %select#teammate-team(ng-model="models.teammate.team_uid"
+                              ng-disabled="models.teammate")
           %option(ng-repeat="team in models.teams"
                   ng-selected="team.uid == models.teammate.team_uid"
                   value="{{team.uid}}") {{team.name}}

@@ -6,15 +6,15 @@
   %table.table.table-striped.table-hover
     %thead
       %tr
-        %th Uid
         %th Name
+        %th Uid
         %th &nbsp;
     %tbody
       %tr(ng-hide="teams.length")
         %td(colspan="3")No teams yet.
       %tr(ng-repeat="team in teams")
-        %td {{team.uid}}
         %td {{team.name}}
+        %td {{team.uid}}
         %td
           %a(href ng-click="editTeam(team)") Edit
           |

@@ -11,13 +11,21 @@ openDialog = ($dialog, options, done) ->
   dialog.open().then(done)
 
 angular.module("atd").controller("TeammateCtrl", [
-  "$scope", "$route", "$dialog", "Teammate", "Team",
-  ($scope, $route, $dialog, Teammate, Team) ->
+  "$scope", "$route", "$dialog", "$q", "Teammate", "Team",
+  ($scope, $route, $dialog, $q, Teammate, Team) ->
 
-    teams = Team.index()
-    $scope.teammates = Teammate.index()
+    deferred = [$q.defer(), $q.defer()]
+    teams = Team.index({}, -> deferred[0].resolve())
+    teammates = Teammate.index({}, -> deferred[1].resolve())
+    bothLoaded = $q.all([deferred[0].promise, deferred[1].promise])
+    bothLoaded.then ->
+        byUid = {}
+        byUid[team.uid] = team.name for team in teams
+        teammate.team_name = byUid[teammate.team_uid] for teammate in teammates
 
     reloader = -> $route.reload()
+
+    $scope.teammates = teammates
 
     $scope.addTeammate = ->
       openDialog $dialog, {
