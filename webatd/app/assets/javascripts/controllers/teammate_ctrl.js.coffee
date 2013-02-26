@@ -1,18 +1,6 @@
-openDialog = ($dialog, options, done) ->
-  options.models ||= {}
-  options.labels ||= {}
-
-  dialog = $dialog.dialog
-    templateUrl: "add-edit-teammate.html"
-    controller: "AddEditResourceCtrl"
-    modalFade: true
-    backdropFade: true
-    resolve: options
-  dialog.open().then(done)
-
 angular.module("atd").controller("TeammateCtrl", [
-  "$scope", "$route", "$dialog", "$q", "Teammate", "Team",
-  ($scope, $route, $dialog, $q, Teammate, Team) ->
+  "$scope", "$q", "ResourceHelper", "Teammate", "Team",
+  ($scope, $q, ResourceHelper, Teammate, Team) ->
 
     deferred = [$q.defer(), $q.defer()]
     teams = Team.index({}, -> deferred[0].resolve())
@@ -23,12 +11,10 @@ angular.module("atd").controller("TeammateCtrl", [
         byUid[team.uid] = team.name for team in teams
         teammate.team_name = byUid[teammate.team_uid] for teammate in teammates
 
-    reloader = -> $route.reload()
-
     $scope.teammates = teammates
 
     $scope.addTeammate = ->
-      openDialog $dialog, {
+      ResourceHelper.openDialog "add-edit-teammate.html", {
         models:
           teams: teams
         labels:
@@ -36,10 +22,10 @@ angular.module("atd").controller("TeammateCtrl", [
           action: "Create"
       } , (result) ->
         if result.action is "save"
-          Teammate.create(teammate: result.data, reloader)
+          Teammate.create({teammate: result.data}, ResourceHelper.reloader)
 
     $scope.editTeammate = (teammate) ->
-      openDialog $dialog, {
+      ResourceHelper.openDialog "add-edit-teammate.html", {
         models:
           teams: teams
           teammate: teammate
@@ -48,20 +34,12 @@ angular.module("atd").controller("TeammateCtrl", [
           action: "Update"
       } , (result) ->
         if result.action is "save"
-          Teammate.update(uid: result.data.uid, teammate: result.data, reloader)
+          Teammate.update({uid: result.data.uid, teammate: result.data}, ResourceHelper.reloader)
 
     $scope.deleteTeammate = (teammate) ->
-      messageBox = $dialog.messageBox "Delete Teammate",
+      ResourceHelper.confirmDelete "Delete Teammate",
         "Are you sure you want to delete teammate \"#{teammate.name}\"?",
-        [
-          label: "Delete"
-          cssClass: "btn-primary"
-          result: "delete"
-        ,
-          label: "Cancel"
-          result: "cancel"
-        ]
-      messageBox.open().then (choice) ->
-        if choice is "delete"
-          Teammate.destroy(uid: teammate.uid, reloader)
+        (choice) ->
+          if choice is "delete"
+            Teammate.destroy({uid: teammate.uid}, ResourceHelper.reloader)
 ])
