@@ -1,6 +1,8 @@
 %script(type="text/ng-template" id="teammates.html")
   %h3.with-side-button Teammate
-  %a.btn.btn-small.btn-success.side-button(href ng-click="addTeammate()")
+  %a.btn.btn-small.btn-success.side-button(href
+                                           ng-click="addTeammate()"
+                                           ng-disabled="teams.length == 0")
     %i.icon-plus.icon-white
     Add a teammate
   %table.table.table-striped.table-hover
@@ -32,7 +34,7 @@
       %label.control-label(for="teammate-team") Team
       .controls
         %select#teammate-team(ng-model="models.teammate.team_uid"
-                              ng-disabled="models.teammate")
+                              ng-disabled="models.teammate.uid")
           %option(ng-repeat="team in models.teams"
                   ng-selected="team.uid == models.teammate.team_uid"
                   value="{{team.uid}}") {{team.name}}

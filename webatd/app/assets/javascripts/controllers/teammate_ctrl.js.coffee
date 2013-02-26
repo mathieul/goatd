@@ -11,9 +11,11 @@ angular.module("atd").controller("TeammateCtrl", [
         byUid[team.uid] = team.name for team in teams
         teammate.team_name = byUid[teammate.team_uid] for teammate in teammates
 
+    $scope.teams = teams
     $scope.teammates = teammates
 
     $scope.addTeammate = ->
+      return if teams.length is 0
       ResourceHelper.openDialog "add-edit-teammate.html", {
         models:
           teams: teams
