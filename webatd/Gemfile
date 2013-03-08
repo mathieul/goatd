@@ -17,6 +17,7 @@ group :assets do
 end
 
 group :development do
+  gem 'coffee-rails-source-maps'
   gem 'pry-nav'
   gem 'binding_of_caller'
   gem 'better_errors'
